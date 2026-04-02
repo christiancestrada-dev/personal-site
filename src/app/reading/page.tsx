@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { loadContent, saveContent } from "@/lib/content-api";
 import { PageHeader } from "@/components/ui/page-header";
 import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
@@ -21,15 +22,20 @@ export default function ReadingPage() {
   const [newItem, setNewItem] = useState({ title: "", author: "", category: "books", tags: "", url: "", status: "queued" as ReadingItem["status"] });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editItem, setEditItem] = useState({ title: "", author: "", category: "books", tags: "", url: "", status: "queued" as ReadingItem["status"] });
+  const loadedRef = useRef(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("site-reading-extra");
-    if (saved) { try { setExtraItems(JSON.parse(saved)); } catch {} }
+    if (!loadedRef.current) {
+      loadedRef.current = true;
+      loadContent<ReadingItem[]>("reading-extra").then((data) => {
+        if (data) setExtraItems(data);
+      });
+    }
   }, []);
 
   const saveExtra = (updated: ReadingItem[]) => {
     setExtraItems(updated);
-    localStorage.setItem("site-reading-extra", JSON.stringify(updated));
+    saveContent("reading-extra", updated);
   };
 
   // Combined list: extra (user-added) first, then hardcoded

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { loadContent, saveContent } from "@/lib/content-api";
 import Image from "next/image";
 import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
@@ -11,15 +12,10 @@ import { Pencil, Trash2, Check, X, ImagePlus, Plus } from "lucide-react";
 
 // ─── Storage ─────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = "site-things";
-const SUBTITLE_KEY = "site-things-subtitle";
-const CATEGORIES_KEY = "site-things-categories";
-
-function load<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try { const r = localStorage.getItem(key); if (r) return JSON.parse(r); } catch {}
-  return fallback;
-}
+// storage keys for KV
+const THINGS_KEY = "things";
+const SUBTITLE_KV_KEY = "things-subtitle";
+const CATEGORIES_KV_KEY = "things-categories";
 
 const inputStyle: React.CSSProperties = {
   backgroundColor: "var(--site-bg)",
@@ -251,25 +247,30 @@ export default function ThingsPage() {
 
   useEffect(() => {
     setMounted(true);
-    setItems(load(STORAGE_KEY, DEFAULT_THINGS));
-    setSubtitle(load(SUBTITLE_KEY, DEFAULT_SUBTITLE));
-    setCategories(load(CATEGORIES_KEY, DEFAULT_CATEGORIES));
+    loadContent<ThingItem[]>(THINGS_KEY).then((data) => {
+      if (data) setItems(data);
+    });
+    loadContent<string>(SUBTITLE_KV_KEY).then((data) => {
+      if (data) setSubtitle(data);
+    });
+    loadContent<string[]>(CATEGORIES_KV_KEY).then((data) => {
+      if (data) setCategories(data);
+    });
   }, []);
 
   const persist = useCallback((next: ThingItem[]) => {
     setItems(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    saveContent(THINGS_KEY, next);
   }, []);
 
   const saveSubtitle = (s: string) => {
     setSubtitle(s);
-    localStorage.setItem(SUBTITLE_KEY, JSON.stringify(s));
+    saveContent(SUBTITLE_KV_KEY, s);
   };
 
   const saveCategories = (c: string[]) => {
     setCategories(c);
-    localStorage.setItem(CATEGORIES_KEY, JSON.stringify(c));
-    // If active tab was removed, reset to "all"
+    saveContent(CATEGORIES_KV_KEY, c);
     if (activeTab !== "all" && !c.includes(activeTab)) setActiveTab("all");
   };
 

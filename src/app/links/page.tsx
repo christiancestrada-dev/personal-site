@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { loadContent, saveContent } from "@/lib/content-api";
 import { PageHeader } from "@/components/ui/page-header";
 import { Tabs } from "@/components/ui/vercel-tabs";
 import { Plus, X, Lock, Unlock, ExternalLink, Trash2, Pencil } from "lucide-react";
@@ -77,32 +78,32 @@ export default function LinksPage() {
   const [newLink, setNewLink] = useState({ title: "", url: "", author: "", note: "", tag: "" });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editLink, setEditLink] = useState({ title: "", url: "", author: "", note: "", tag: "" });
+  const loadedRef = useRef(false);
 
-  // Load links and admin state from localStorage; merge with defaults
   useEffect(() => {
-    const saved = localStorage.getItem("site-links");
-    let userLinks: LinkItem[] = [];
-    if (saved) {
-      try { userLinks = JSON.parse(saved); } catch {}
+    if (!loadedRef.current) {
+      loadedRef.current = true;
+      loadContent<LinkItem[]>("links").then((saved) => {
+        let userLinks: LinkItem[] = saved || [];
+        const userTitles = new Set(userLinks.map((l) => l.title));
+        const merged = [...userLinks, ...DEFAULT_LINKS.filter((d) => !userTitles.has(d.title))];
+        setLinks(merged);
+        saveContent("links", merged);
+      });
+      const admin = localStorage.getItem("site-admin-links");
+      if (admin === "true") setIsAdmin(true);
     }
-    // Merge: user links first, then any defaults not already present (by title)
-    const userTitles = new Set(userLinks.map((l) => l.title));
-    const merged = [...userLinks, ...DEFAULT_LINKS.filter((d) => !userTitles.has(d.title))];
-    setLinks(merged);
-    localStorage.setItem("site-links", JSON.stringify(merged));
-    const admin = localStorage.getItem("site-admin");
-    if (admin === "true") setIsAdmin(true);
   }, []);
 
   const saveLinks = (updated: LinkItem[]) => {
     setLinks(updated);
-    localStorage.setItem("site-links", JSON.stringify(updated));
+    saveContent("links", updated);
   };
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsAdmin(true);
-      localStorage.setItem("site-admin", "true");
+      localStorage.setItem("site-admin-links", "true");
       setShowPasswordPrompt(false);
       setPassword("");
       setPasswordError(false);
@@ -113,7 +114,7 @@ export default function LinksPage() {
 
   const handleLogout = () => {
     setIsAdmin(false);
-    localStorage.removeItem("site-admin");
+    localStorage.removeItem("site-admin-links");
   };
 
   const addLink = () => {

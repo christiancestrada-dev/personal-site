@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { loadContent, saveContent } from "@/lib/content-api";
 import { SleepHero, FloatingSheep } from "@/components/sleep-hero";
 import { BubbleText } from "@/components/ui/bubble-text";
 import { AdminBar } from "@/components/ui/admin-bar";
@@ -52,8 +53,6 @@ const DEFAULT_CONNECT_LINKS: ConnectLink[] = [
   { href: "https://open.spotify.com", label: "Spotify" },
 ];
 
-const STORAGE_KEY = "site-home-content";
-
 interface HomeContent {
   about: string[];
   aboutMeta: string;
@@ -62,15 +61,6 @@ interface HomeContent {
   connectText: string;
   connectEmail: string;
   connectLinks: ConnectLink[];
-}
-
-function loadContent(): HomeContent {
-  if (typeof window === "undefined") return getDefaults();
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return { ...getDefaults(), ...JSON.parse(raw) };
-  } catch {}
-  return getDefaults();
 }
 
 function getDefaults(): HomeContent {
@@ -92,15 +82,28 @@ export default function Home() {
   const admin = usePageAdmin("home");
   const [content, setContent] = useState<HomeContent>(getDefaults);
   const [editing, setEditing] = useState<string | null>(null);
+  const loadedRef = useRef(false);
 
   useEffect(() => {
     setMounted(true);
-    setContent(loadContent());
+    if (!loadedRef.current) {
+      loadedRef.current = true;
+      loadContent<HomeContent>("home-content").then((data) => {
+        if (data) setContent({ ...getDefaults(), ...data });
+      });
+    }
   }, []);
 
   const save = useCallback((updated: HomeContent) => {
     setContent(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    saveContent("home-content", updated);
+  }, []);
+
+  const reloadContent = useCallback(() => {
+    loadContent<HomeContent>("home-content").then((data) => {
+      if (data) setContent({ ...getDefaults(), ...data });
+      else setContent(getDefaults());
+    });
   }, []);
 
   const inputStyle: React.CSSProperties = {
@@ -184,7 +187,7 @@ export default function Home() {
                         <input value={item.href2 || ""} onChange={(e) => { const s = [...content.status]; s[i] = { ...s[i], href2: e.target.value || undefined }; setContent({ ...content, status: s }); }} className="w-full px-3 py-1.5 rounded-md text-sm font-mono outline-none" style={inputStyle} placeholder="Link URL (optional)" />
                         <div className="flex gap-2">
                           <button onClick={() => { save(content); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "#4ade80" }}><Check size={14} /></button>
-                          <button onClick={() => { setContent(loadContent()); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-text-dim)" }}><X size={14} /></button>
+                          <button onClick={() => { reloadContent(); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-text-dim)" }}><X size={14} /></button>
                           <button onClick={() => { const s = content.status.filter((_, idx) => idx !== i); save({ ...content, status: s }); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-accent)" }}><Trash2 size={13} /></button>
                         </div>
                       </div>
@@ -249,7 +252,7 @@ export default function Home() {
                       <input value={item.href || ""} onChange={(e) => { const w = [...content.work]; w[i] = { ...w[i], href: e.target.value || undefined }; setContent({ ...content, work: w }); }} className="w-full px-3 py-1.5 rounded-md text-sm font-mono outline-none" style={inputStyle} placeholder="URL (optional)" />
                       <div className="flex gap-2">
                         <button onClick={() => { save(content); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "#4ade80" }}><Check size={14} /></button>
-                        <button onClick={() => { setContent(loadContent()); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-text-dim)" }}><X size={14} /></button>
+                        <button onClick={() => { reloadContent(); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-text-dim)" }}><X size={14} /></button>
                         <button onClick={() => { const w = content.work.filter((_, idx) => idx !== i); save({ ...content, work: w }); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-accent)" }}><Trash2 size={13} /></button>
                       </div>
                     </div>
@@ -311,7 +314,7 @@ export default function Home() {
                 <input value={content.connectEmail} onChange={(e) => setContent({ ...content, connectEmail: e.target.value })} className="w-full px-3 py-1.5 rounded-md text-sm font-mono outline-none" style={inputStyle} placeholder="Email" />
                 <div className="flex gap-2">
                   <button onClick={() => { save(content); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "#4ade80" }}><Check size={14} /></button>
-                  <button onClick={() => { setContent(loadContent()); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-text-dim)" }}><X size={14} /></button>
+                  <button onClick={() => { reloadContent(); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-text-dim)" }}><X size={14} /></button>
                 </div>
               </div>
             )}
@@ -337,7 +340,7 @@ export default function Home() {
                   <input value={link.href} onChange={(e) => { const l = [...content.connectLinks]; l[i] = { ...l[i], href: e.target.value }; setContent({ ...content, connectLinks: l }); }} className="w-full px-3 py-1.5 rounded-md text-sm font-mono outline-none" style={inputStyle} placeholder="URL" />
                   <div className="flex gap-2">
                     <button onClick={() => { save(content); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "#4ade80" }}><Check size={14} /></button>
-                    <button onClick={() => { setContent(loadContent()); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-text-dim)" }}><X size={14} /></button>
+                    <button onClick={() => { reloadContent(); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-text-dim)" }}><X size={14} /></button>
                     <button onClick={() => { const l = content.connectLinks.filter((_, idx) => idx !== i); save({ ...content, connectLinks: l }); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-accent)" }}><Trash2 size={13} /></button>
                   </div>
                 </div>

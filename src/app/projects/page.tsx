@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { loadContent, saveContent } from "@/lib/content-api";
 import { PageHeader } from "@/components/ui/page-header";
 import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
@@ -21,15 +22,20 @@ export default function ProjectsPage() {
   const [newItem, setNewItem] = useState({ title: "", description: "", url: "", tag: "" });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editItem, setEditItem] = useState({ title: "", description: "", url: "", tag: "" });
+  const loadedRef = useRef(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("site-projects");
-    if (saved) { try { setProjects(JSON.parse(saved)); } catch {} }
+    if (!loadedRef.current) {
+      loadedRef.current = true;
+      loadContent<ProjectItem[]>("projects").then((data) => {
+        if (data) setProjects(data);
+      });
+    }
   }, []);
 
   const save = (updated: ProjectItem[]) => {
     setProjects(updated);
-    localStorage.setItem("site-projects", JSON.stringify(updated));
+    saveContent("projects", updated);
   };
 
   const addProject = () => {

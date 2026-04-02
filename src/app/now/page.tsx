@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { loadContent, saveContent } from "@/lib/content-api";
 import { PageHeader } from "@/components/ui/page-header";
 import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
@@ -23,17 +24,19 @@ export default function NowPage() {
   const [newText, setNewText] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
+  const loadedRef = useRef(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("site-now");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setItems(parsed.items || []);
-        if (parsed.lastUpdated) setLastUpdated(parsed.lastUpdated);
-      } catch {}
-    } else {
-      setItems(DEFAULT_ITEMS);
+    if (!loadedRef.current) {
+      loadedRef.current = true;
+      loadContent<{ items: NowItem[]; lastUpdated: string }>("now").then((data) => {
+        if (data) {
+          setItems(data.items || []);
+          if (data.lastUpdated) setLastUpdated(data.lastUpdated);
+        } else {
+          setItems(DEFAULT_ITEMS);
+        }
+      });
     }
   }, []);
 
@@ -41,7 +44,7 @@ export default function NowPage() {
     const d = date || lastUpdated;
     setItems(updated);
     setLastUpdated(d);
-    localStorage.setItem("site-now", JSON.stringify({ items: updated, lastUpdated: d }));
+    saveContent("now", { items: updated, lastUpdated: d });
   };
 
   const addItem = () => {
