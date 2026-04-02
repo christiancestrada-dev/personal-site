@@ -1,0 +1,148 @@
+export interface ReadingItem {
+  title: string;
+  author: string;
+  category: string;
+  tags: string[];
+  url?: string;
+  status: "read" | "reading" | "queued";
+  progress?: { current: number; total: number };
+}
+
+export const READING_LIST: ReadingItem[] = [
+  {
+    title: "Why We Sleep",
+    author: "Matthew Walker",
+    category: "books",
+    tags: ["sleep", "neuroscience"],
+    url: "https://www.amazon.com/dp/1501144324",
+    status: "read",
+  },
+  {
+    title: "The Sleep Solution",
+    author: "Dr. Chris Winter",
+    category: "books",
+    tags: ["sleep", "clinical"],
+    url: "https://www.amazon.com/dp/0399583610",
+    status: "reading",
+    progress: { current: 142, total: 320 },
+  },
+  {
+    title: "Principles of Neural Science",
+    author: "Kandel et al.",
+    category: "books",
+    tags: ["neuroscience", "textbook"],
+    url: "https://www.amazon.com/dp/1259642232",
+    status: "read",
+  },
+  {
+    title: "Sleep-Dependent Memory Consolidation",
+    author: "Diekelmann & Born, 2010",
+    category: "papers",
+    tags: ["sleep", "memory", "consolidation"],
+    url: "https://doi.org/10.1038/nrn2762",
+    status: "read",
+  },
+  {
+    title: "The Organization of Sleep",
+    author: "Carskadon & Dement",
+    category: "papers",
+    tags: ["sleep", "architecture"],
+    status: "read",
+  },
+  {
+    title: "Breath",
+    author: "James Nestor",
+    category: "books",
+    tags: ["health", "breathing"],
+    url: "https://www.amazon.com/dp/0735213615",
+    status: "read",
+  },
+  {
+    title: "The Body Keeps the Score",
+    author: "Bessel van der Kolk",
+    category: "books",
+    tags: ["neuroscience", "trauma", "health"],
+    url: "https://www.amazon.com/dp/0143127748",
+    status: "queued",
+  },
+  {
+    title: "Sapiens",
+    author: "Yuval Noah Harari",
+    category: "books",
+    tags: ["philosophy", "history"],
+    url: "https://www.amazon.com/dp/0062316117",
+    status: "read",
+  },
+  {
+    title: "Man's Search for Meaning",
+    author: "Viktor Frankl",
+    category: "books",
+    tags: ["philosophy", "psychology"],
+    url: "https://www.amazon.com/dp/0807014273",
+    status: "read",
+  },
+  {
+    title: "The Moral Landscape",
+    author: "Sam Harris",
+    category: "books",
+    tags: ["philosophy", "ethics"],
+    url: "https://www.amazon.com/dp/143917122X",
+    status: "queued",
+  },
+  {
+    title: "Circadian Rhythms",
+    author: "Russell G. Foster & Leon Kreitzman",
+    category: "books",
+    tags: ["circadian", "sleep"],
+    url: "https://www.amazon.com/dp/0199589445",
+    status: "reading",
+  },
+  {
+    title: "Research with AI",
+    author: "Claude Blattman",
+    category: "websites",
+    tags: ["research", "AI"],
+    url: "https://claudeblattman.com/",
+    status: "read",
+  },
+  {
+    title: "Sleep Optimization",
+    author: "Huberman Lab",
+    category: "videos",
+    tags: ["sleep", "neuroscience"],
+    url: "https://www.youtube.com/watch?v=h2aWYjSA1Jc",
+    status: "read",
+  },
+  {
+    title: "The Matt Walker Podcast",
+    author: "Matt Walker",
+    category: "videos",
+    tags: ["sleep", "neuroscience"],
+    url: "https://www.youtube.com/@MattWalkerPodcast",
+    status: "reading",
+  },
+  {
+    title: "How Memory Works",
+    author: "Artem Kirsanov",
+    category: "videos",
+    tags: ["neuroscience", "memory", "consolidation"],
+    url: "https://www.youtube.com/@ArtemKirsanov",
+    status: "read",
+  },
+  {
+    title: "Circadian Biology",
+    author: "Bio Clock Studio · UCSD",
+    category: "videos",
+    tags: ["circadian", "sleep", "neuroscience"],
+    url: "https://www.youtube.com/@BioClockStudio",
+    status: "read",
+  },
+  {
+    title: "Matthew Walker on Sleep",
+    author: "Joe Rogan Experience",
+    category: "videos",
+    tags: ["sleep", "neuroscience"],
+    url: "https://www.youtube.com/watch?v=pwaWilO_Pig",
+    status: "read",
+  },
+];
