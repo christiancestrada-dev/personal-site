@@ -6,11 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "publish": "git add data/ && git commit -m 'Update site content' && vercel --yes --prod --scope christiancestrada-devs-projects"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
-    "@vercel/kv": "^3.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",

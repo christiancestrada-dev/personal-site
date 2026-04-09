@@ -84,11 +84,11 @@ export default function LinksPage() {
     if (!loadedRef.current) {
       loadedRef.current = true;
       loadContent<LinkItem[]>("links").then((saved) => {
-        let userLinks: LinkItem[] = saved || [];
-        const userTitles = new Set(userLinks.map((l) => l.title));
-        const merged = [...userLinks, ...DEFAULT_LINKS.filter((d) => !userTitles.has(d.title))];
-        setLinks(merged);
-        saveContent("links", merged);
+        if (saved && saved.length > 0) {
+          setLinks(saved);
+        } else {
+          setLinks(DEFAULT_LINKS);
+        }
       });
       const admin = localStorage.getItem("site-admin-links");
       if (admin === "true") setIsAdmin(true);
