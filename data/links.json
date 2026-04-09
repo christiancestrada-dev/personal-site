@@ -1,9 +1,54 @@
 [
   {
+    "title": "King Lear",
+    "url": "https://en.wikipedia.org/wiki/King_Lear",
+    "author": "Shakespeare",
+    "note": "\"O you mighty gods! / This world I do renounce, and in your sights / Shake patiently my great affliction off.\" Gloucester's prayer before his \"fall\" might be the most honest moment I've read in a while. Here's a man who's lost everything: his eyes, his son, and his place in the world, and he's not screaming or cursing, he's just asking if it's okay to stop. What gets me is that Shakespeare never treats that impulse as shameful. Four hundred years before we had language for mental health, he wrote a scene that basically says: I see your pain, and I'm not going to pretend it isn't real.",
+    "date": "2026-04-09"
+  },
+  {
+    "title": "OpenClaw",
+    "url": "https://openclaw.ai/",
+    "note": "I've been playing around with OpenClaw recently. I have it manage my schedule and studying, so it updates me (from my phone) whenever I wake up, etc. Bought a server so it can run 24/7, but my honest review is that its not too worth the money. API tokens cost too much money and the skill wall to optimize is quite high. I've cut down significantly, but it still costs me ~$20 a month.",
+    "date": "2026-04-01"
+  },
+  {
+    "title": "Anthropic courses",
+    "url": "https://anthropic.skilljar.com/",
+    "note": "Really great resources",
+    "date": "2026-03-28"
+  },
+  {
+    "title": "The Biology of Rocky the Eridian",
+    "url": "https://www.youtube.com/watch?v=ZU7XbIBiNZo",
+    "date": "2026-03-22",
+    "note": "gonna watch this movie because of this video 😂. According to my friend, the book is pretty great. Always a fan of hard sf & speculative evolution,\n\nEdit: fantastic movie; definitely deserved the hype"
+  },
+  {
+    "title": "Bitch: a history",
+    "url": "https://aeon.co/essays/what-the-evolution-of-bitch-says-about-gender-and-power?utm_source=Aeon+Newsletter&utm_campaign=5a95ab49dd-EMAIL_CAMPAIGN_2026_03_20&utm_medium=email&utm_term=0_-62b901ec41-838299761",
+    "date": "2026-03-21",
+    "author": "Karen Stollznow",
+    "note": "The bit about guys at old universities calling whoever made the tea \"the bitch\", and even complimenting him for doing it well shows the word was never really about one thing. It (and language, generally) has always been about who's doing what, and whether the people around them think that's a cool thing to be doing or not."
+  },
+  {
+    "title": "I spoke to AI agent Claude",
+    "url": "https://www.youtube.com/watch?v=h3AtWdeu_G0",
+    "author": "Bernie Sanders",
+    "note": "Unsettling to watching a politician steer the AI from a position in under eight minutes. The tool being discussed as a threat is simultaneously demonstrating its own persuadability. If a Senator can do this on camera, what could less visible actors do to public opinion (over millions of conversations)?\n\nAI has been proven to be biased, and as we trust chatbots more and more, I wonder how these biases will play into politics.",
+    "date": "2026-03-20"
+  },
+  {
+    "title": "Building Evo 2: A Frontier DNA Language Model",
+    "url": "https://www.youtube.com/watch?v=o_w-E--u7GQ&t=1s",
+    "date": "2026-03-20",
+    "note": "super cool work and company"
+  },
+  {
     "title": "The Ones Who Walk Away from Omelas",
     "url": "https://shsdavisapes.pbworks.com/w/file/fetch/73817925/Omelas.pdf",
     "author": "Ursula K. Le Guin",
-    "note": "Le Guin's \"The Ones Who Walk Away from Omelas\" presents a child who has been kicked, abandoned, and imprisoned by humans. While recklessly neglected and intentionally brutalized by the people of Omelas, the author includes that \"[The child] is afraid of the mops. [The child] finds them horrible.\" It is afraid of two mere inanimate mops in the corner of the room.\n\nThe child is afraid of the mops because they are useless. Mops are cleaning tools: designed to remove dirt and restore, yet they stand uselessly in the corner of the same room where the child sits in \"damp\u2026cellar dirt\". They are not frightening because they hurt the child, but because they could clean but do not. The mops are, in this reading, a figure for the people of Omelas themselves, who: \"would like to do something for the child,\" but never do. They, like the mops, neglect their duty.\n\nWhat makes the child's situation so unbearable is not only the suffering itself, but that its suffering could be immediately remediated, yet nothing happens. Le Guin presents the sin of omission and neglect. Just as the child is fearful of these self-defeating mops, readers should be fearful of the self-defeating people of Omelas. The people of Omelas have a moral duty to protect the innocent, as they possess the knowledge and power to prevent the child's agony. Despite not doing any direct harmful action, by choosing to live their lives while the child suffers, they become as useless as a mop that will not clean, and just as frightening.",
+    "note": "Le Guin's \"The Ones Who Walk Away from Omelas\" presents a child who has been kicked, abandoned, and imprisoned by humans. While recklessly neglected and intentionally brutalized by the people of Omelas, the author includes that \"[The child] is afraid of the mops. [The child] finds them horrible.\" It is afraid of two mere inanimate mops in the corner of the room.\n\nThe child is afraid of the mops because they are useless. Mops are cleaning tools: designed to remove dirt and restore, yet they stand uselessly in the corner of the same room where the child sits in \"damp…cellar dirt\". They are not frightening because they hurt the child, but because they could clean but do not. The mops are, in this reading, a figure for the people of Omelas themselves, who: \"would like to do something for the child,\" but never do. They, like the mops, neglect their duty.\n\nWhat makes the child's situation so unbearable is not only the suffering itself, but that its suffering could be immediately remediated, yet nothing happens. Le Guin presents the sin of omission and neglect. Just as the child is fearful of these self-defeating mops, readers should be fearful of the self-defeating people of Omelas. The people of Omelas have a moral duty to protect the innocent, as they possess the knowledge and power to prevent the child's agony. Despite not doing any direct harmful action, by choosing to live their lives while the child suffers, they become as useless as a mop that will not clean, and just as frightening.",
     "tag": "literature",
     "date": "2026-03-18"
   },
@@ -11,7 +56,7 @@
     "title": "Lift Not the Painted Veil",
     "url": "https://www.poetryfoundation.org/poems/45134/lift-not-the-painted-veil-which-those-who-live",
     "author": "Percy Bysshe Shelley",
-    "note": "A sonnet about the futility of seeking truth behind appearances \u2014 and the loneliness of those who try.",
+    "note": "probably my current favorite poem",
     "tag": "poetry",
     "date": "2026-03-16"
   },
@@ -20,30 +65,28 @@
     "url": "https://www.newyorker.com/magazine/1995/09/25/bullet-in-the-brain",
     "author": "Tobias Wolff",
     "note": "A man's entire life distilled into the fraction of a second. One of the great American short stories.",
-    "tag": "literature",
+    "tag": "short stories",
     "date": "2026-03-14"
   },
   {
     "title": "Do Not Go Gentle into That Good Night",
     "url": "https://www.youtube.com/watch?v=1mRec3VbH3w",
     "author": "Dylan Thomas",
-    "note": "One of the most powerful villanelles ever written. A son's plea to his dying father to resist death with everything he has.",
     "tag": "poetry",
     "date": "2026-03-12"
   },
   {
     "title": "How Does Your Memory Work?",
     "url": "https://www.youtube.com/watch?v=TUoJc0NPajQ",
-    "author": "Ted-Ed",
-    "note": "An accessible look at how memories are formed, stored, and retrieved \u2014 and why sleep is essential to the process.",
+    "author": " BBC Earth Science",
     "tag": "neuroscience",
     "date": "2026-03-10"
   },
   {
     "title": "The Art of Stillness",
     "url": "https://www.youtube.com/watch?v=aUBawr1hUwo",
-    "author": "Pico Iyer \u00b7 TED",
-    "note": "A beautiful meditation on the value of doing nothing \u2014 and how stillness is where we find clarity.",
+    "author": "Pico Iyer · TED",
+    "note": "A beautiful meditation on how stillness is where we find clarity. Fascinating.",
     "tag": "philosophy",
     "date": "2026-03-08"
   }

@@ -1,36 +1,116 @@
 {
   "about": [
-    "Hey, I'm Christian; welcome! I'm fascinated by neuroscience and sleep (and, more urgently, what happens when you don't) and have done some really cool research in these fields, as well as various related ventures and social projects.",
-    "Outside of that: I play drums, coach/play tennis, and have strong opinions about Star Wars. I currently live in a house with nine of the smartest people I know, and you might catch me talking to literally anyone on the train. (I've been told I seem like \"a very offline person,\" which is maybe the nicest thing anyone has ever said to me.)"
+    "Hey, I'm Christian; welcome! I'm fascinated by neuroscience and sleep (and, more urgently, what happens when you don't). I have done some cool research in these fields, as well as various related ventures and social projects.",
+    "Outside of that: I play drums, coach/play tennis, and go to an international boarding school. I currently live in a house from the 1800s with nine of the smartest and most accomplished people I know, and if I'm not at school, you might catch me on the train talking to literally anyone. (I've been told I seem like \"a very offline person,\" which is maybe the nicest thing anyone has ever said to me.)"
   ],
-  "aboutMeta": "Boston \u00b7 Philadelphia \u00b7 Phillips Academy, Andover",
+  "aboutMeta": "Boston · Philadelphia · Phillips Academy, Andover",
   "status": [
-    { "label": "studying", "value": "Religion, Literature & the Arts (philosophy of crime class)" },
-    { "label": "reading", "value": "The Sleep Solution \u2014 Dr. Chris Winter (who I helped bring to speak at my school)" },
-    { "label": "listening", "value": "flipturn; ", "href2Label": "1980s Horror Film", "href2": "https://open.spotify.com/playlist/5H9G83mqVwXCfddtFrLvEF" }
+    {
+      "label": "studying",
+      "value": "Religion, Literature & the Arts (philosophy/ethics of crime class)"
+    },
+    {
+      "label": "reading",
+      "value": "The Sleep Solution by Dr. Chris Winter (who I helped bring to speak at my school)"
+    },
+    {
+      "label": "listening",
+      "value": "Flipturn, Paramore, and West 22nd"
+    }
   ],
   "work": [
-    { "where": "Arcascope", "role": "Developer", "date": "2026\u2013Present", "href": "https://arcascope.com/" },
-    { "where": "CHOP & UPenn Mitchell Sleep Lab", "role": "Author", "date": "2025\u2013Present" },
-    { "where": "UPenn SNaP Sleep Lab", "role": "Researcher", "date": "2025\u2013Present" },
-    { "where": "Slow Wave Sleep Lab \u00b7 UPenn", "role": "Researcher", "date": "2025\u2013Present" },
-    { "where": "St. Luke's Health Network", "role": "Physician Observer", "date": "2024\u2013Present" },
-    { "where": "Temple University REACH Lab", "role": "Student Research Intern", "date": "2024" },
-    { "where": "Papers Research Organization", "role": "Co-Founder", "date": "2023\u2013Present", "href": "https://andoverpapers.org/" },
-    { "where": "Men's Mental Health \u00b7 Andover", "role": "Co-President", "date": "2024\u2013Present" },
-    { "where": "EcoAction \u00b7 Andover", "role": "Co-President", "date": "2023\u2013Present", "href": "https://www.instagram.com/agreenerblue/" },
-    { "where": "Health Advocacy and Equity League", "role": "Board Member", "date": "2024\u20132025" },
-    { "where": "The Phillipian", "role": "Staff Writer", "date": "2023\u20132024", "href": "https://phillipian.net/author/cestrada/" },
-    { "where": "Private", "role": "Tennis Coach", "date": "2022\u2013Present" },
-    { "where": "Church & Andover Band", "role": "Drummer", "date": "Always" }
+    {
+      "role": "Developer",
+      "where": "Arcascope",
+      "href": "https://arcascope.com/",
+      "date": "2026-Present"
+    },
+    {
+      "role": "Author",
+      "where": "CHOP & Penn Mitchell Sleep Lab",
+      "date": "2025-Present"
+    },
+    {
+      "role": "Researcher",
+      "where": "Penn SNaP Sleep Lab",
+      "date": "2025-Present"
+    },
+    {
+      "role": "Researcher",
+      "where": "Penn Slow Wave Sleep Lab",
+      "date": "2025-Present"
+    },
+    {
+      "role": "Physician Observer",
+      "where": "St. Luke's Health Network",
+      "date": "2024, 2025"
+    },
+    {
+      "role": "Student Research Intern",
+      "where": "Temple University REACH Lab",
+      "date": "2024"
+    },
+    {
+      "role": "Co-Founder",
+      "where": "Papers Research Organization",
+      "href": "https://andoverpapers.org/",
+      "date": "2023-Present"
+    },
+    {
+      "role": "Co-President",
+      "where": "Men's Mental Health · Andover",
+      "date": "2024-Present"
+    },
+    {
+      "role": "Co-President",
+      "where": "EcoAction · Andover",
+      "href": "https://www.instagram.com/agreenerblue/",
+      "date": "2023-Present"
+    },
+    {
+      "role": "Board Member",
+      "where": "Health Advocacy and Equity League",
+      "date": "2023-2024"
+    },
+    {
+      "role": "Staff Writer",
+      "where": "The Phillipian",
+      "href": "https://phillipian.net/author/cestrada/",
+      "date": "2023-2024"
+    },
+    {
+      "role": "Tennis Coach",
+      "where": "Private",
+      "date": "2022-Present"
+    },
+    {
+      "role": "Drummer",
+      "where": "Church & Andover Band",
+      "date": "Always :)"
+    }
   ],
   "connectText": "Feel free to email me about anything at ",
   "connectEmail": "christian.c.estrada@gmail.com",
   "connectLinks": [
-    { "href": "mailto:christian.c.estrada@gmail.com", "label": "Email" },
-    { "href": "https://www.instagram.com/christian._.e/", "label": "Instagram" },
-    { "href": "https://linkedin.com/in/christiancestrada", "label": "LinkedIn" },
-    { "href": "https://substack.com", "label": "Substack" },
-    { "href": "https://open.spotify.com", "label": "Spotify" }
+    {
+      "href": "mailto:christian.c.estrada@gmail.com",
+      "label": "Email"
+    },
+    {
+      "href": "https://www.instagram.com/christian._.e/",
+      "label": "Instagram"
+    },
+    {
+      "href": "https://linkedin.com/in/christiancestrada",
+      "label": "LinkedIn"
+    },
+    {
+      "href": "https://substack.com",
+      "label": "Substack"
+    },
+    {
+      "href": "https://open.spotify.com",
+      "label": "Spotify"
+    }
   ]
 }
