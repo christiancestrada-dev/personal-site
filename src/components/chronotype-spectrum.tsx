@@ -359,10 +359,10 @@ function ChronotypeInfo() {
             It&apos;s largely genetic (the PER3 gene is a major driver) and shifts across your life: teenagers skew owl, then drift earlier with age. Only ~25% of people are true larks or owls.
           </p>
           <p>
-            <strong style={{ color: "var(--site-text)" }}>Social jet lag</strong> is the mismatch between your biological clock and your social schedule. An extreme owl forced to wake at 7am experiences jet lag equivalent to flying 3-4 time zones — every day.
+            <strong style={{ color: "var(--site-text)" }}>Social jet lag</strong> is the mismatch between your biological clock and your social schedule. An extreme owl forced to wake at 7am experiences the equivalent of flying 3-4 time zones, every single day.
           </p>
           <p>
-            <strong style={{ color: "var(--site-text)" }}>DLMO</strong> (dim-light melatonin onset) is the gold-standard phase marker. It&apos;s what Arcascope estimates from wearable data.
+            <strong style={{ color: "var(--site-text)" }}>DLMO</strong> (dim-light melatonin onset) is the gold-standard phase marker, the moment your brain starts secreting melatonin under dim conditions. It reliably predicts your natural sleep onset.
           </p>
           <div className="pt-1" style={{ borderTop: "1px solid var(--site-border)", color: "var(--site-text-dim)", fontSize: "9px" }}>
             Roenneberg et al., Sleep Med Rev 2007 &middot; MCTQ questionnaire

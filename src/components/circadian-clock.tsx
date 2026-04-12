@@ -14,25 +14,25 @@ function getCircadianState(hour: number, minute: number): CircadianState {
 
   if (t >= 22 || t < 1) return {
     phase: "N1 / N2 onset",
-    detail: "adenosine peak — sleep pressure high",
+    detail: "adenosine peak, sleep pressure high",
     color: "#525252",
     breathingRate: 14,
   };
   if (t >= 1 && t < 3) return {
     phase: "slow-wave sleep",
-    detail: "deep NREM — memory consolidation",
+    detail: "deep NREM, memory consolidation",
     color: "#60a5ff",
     breathingRate: 10,
   };
   if (t >= 3 && t < 5) return {
     phase: "REM",
-    detail: "dreaming — hippocampal replay",
+    detail: "dreaming, hippocampal replay",
     color: "#9b8fce",
     breathingRate: 16,
   };
   if (t >= 5 && t < 7) return {
     phase: "circadian wake signal",
-    detail: "cortisol rising — pre-dawn arousal",
+    detail: "cortisol rising, pre-dawn arousal",
     color: "#e89b5a",
     breathingRate: 14,
   };
@@ -50,7 +50,7 @@ function getCircadianState(hour: number, minute: number): CircadianState {
   };
   if (t >= 13 && t < 15) return {
     phase: "post-prandial dip",
-    detail: "circadian trough — microsleeps likely",
+    detail: "circadian trough, microsleeps likely",
     color: "#7a9fc4",
     breathingRate: 14,
   };
@@ -68,7 +68,7 @@ function getCircadianState(hour: number, minute: number): CircadianState {
   };
   return {
     phase: "wind-down",
-    detail: "adenosine accumulating — sleep debt building",
+    detail: "adenosine accumulating, sleep debt building",
     color: "#525252",
     breathingRate: 13,
   };

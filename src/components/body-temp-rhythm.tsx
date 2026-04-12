@@ -106,22 +106,22 @@ export function BodyTempRhythm() {
   let phaseLabel: string;
   let phaseColor: string;
   if (t >= 2 && t < 6) {
-    phaseLabel = "CBT nadir — deepest sleep, max REM propensity";
+    phaseLabel = "CBT nadir, deepest sleep and max REM propensity";
     phaseColor = "#4a8adc";
   } else if (t >= 6 && t < 10) {
-    phaseLabel = "rising — cortisol surge, waking up";
+    phaseLabel = "rising, cortisol surge waking you up";
     phaseColor = "#EF9F27";
   } else if (t >= 10 && t < 15) {
-    phaseLabel = "ascending — peak cognitive performance";
+    phaseLabel = "ascending, peak cognitive performance window";
     phaseColor = "#5dcaa5";
   } else if (t >= 15 && t < 19) {
-    phaseLabel = "peak — motor performance, reaction time best";
+    phaseLabel = "peak, motor performance and reaction time at their best";
     phaseColor = "#5dcaa5";
   } else if (t >= 19 && t < 22) {
-    phaseLabel = "descending — melatonin onset, sleep gate opening";
+    phaseLabel = "descending, melatonin onset and the sleep gate opening";
     phaseColor = "#9b8fce";
   } else {
-    phaseLabel = "low — sleep onset favorable";
+    phaseLabel = "low, favorable window for sleep onset";
     phaseColor = "#4a8adc";
   }
 

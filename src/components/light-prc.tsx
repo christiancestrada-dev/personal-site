@@ -31,24 +31,18 @@ function prcShift(h: number): number {
   // Normalize to circadian time (CBT nadir = 0)
   const ct = ((h - 4.5) % 24 + 24) % 24; // hours since nadir
 
-  // Before nadir (evening/early night): delay (negative values)
-  // After nadir (late night/early morning): advance (positive values)
-  // Midday: near zero
+  // Smooth continuous PRC using sum of Gaussians
+  // Delay lobe (before nadir): centered at ct = -2 (i.e., ct = 22)
+  const t1 = ct >= 12 ? ct - 24 : ct;
+  const delay = -2.5 * Math.exp(-0.5 * ((t1 + 2) / 1.8) ** 2);
 
-  if (ct >= 20 || ct < 0.5) {
-    // Just before nadir: large delay
-    const t = ct >= 20 ? ct - 24 : ct;
-    return -2.5 * Math.exp(-0.5 * ((t + 2) / 1.5) ** 2);
-  } else if (ct < 6) {
-    // After nadir: advance
-    return 2.8 * Math.exp(-0.5 * ((ct - 3) / 2) ** 2);
-  } else if (ct < 10) {
-    // Transition to dead zone
-    return 0.5 * Math.exp(-0.5 * ((ct - 6) / 1.5) ** 2);
-  } else {
-    // Dead zone (midday–evening)
-    return 0;
-  }
+  // Advance lobe (after nadir): centered at ct = 3
+  const advance = 2.8 * Math.exp(-0.5 * ((ct - 3) / 2.2) ** 2);
+
+  // Small residual bump in transition zone
+  const transition = 0.3 * Math.exp(-0.5 * ((ct - 7) / 1.5) ** 2);
+
+  return delay + advance + transition;
 }
 
 // Map clock hour to x
@@ -167,7 +161,7 @@ export function LightPRC() {
 
   let currentAdvice: string;
   if (Math.abs(currentShift) < 0.3) {
-    currentAdvice = "dead zone — light has minimal clock-shifting effect now";
+    currentAdvice = "dead zone, light has minimal clock-shifting effect right now";
   } else if (currentShift > 0) {
     currentAdvice = `light now would advance your clock by ~${currentShift.toFixed(1)}h (shift earlier)`;
   } else {

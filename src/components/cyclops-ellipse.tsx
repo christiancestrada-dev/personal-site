@@ -56,8 +56,20 @@ function Step0({ w, h }: { w: number; h: number }) {
   const xScale = (t: number) => (t / 23) * gW + ox;
   const yScale = (v: number) => (-v * 0.45 + 0.5) * gH + oy;
 
-  const pathA = times.map((t) => `${t === 0 ? "M" : "L"}${xScale(t).toFixed(1)} ${yScale(geneA[t]).toFixed(1)}`).join(" ");
-  const pathB = times.map((t) => `${t === 0 ? "M" : "L"}${xScale(t).toFixed(1)} ${yScale(geneB[t]).toFixed(1)}`).join(" ");
+  // High-resolution smooth curves (240 points instead of 24)
+  const SMOOTH_STEPS = 240;
+  const buildSmooth = (fn: (t: number) => number) => {
+    const pts: string[] = [];
+    for (let i = 0; i <= SMOOTH_STEPS; i++) {
+      const t = (i / SMOOTH_STEPS) * 23;
+      const x = xScale(t);
+      const y = yScale(fn(t));
+      pts.push(`${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`);
+    }
+    return pts.join(" ");
+  };
+  const pathA = buildSmooth((t) => Math.cos((2 * Math.PI * t) / 24));
+  const pathB = buildSmooth((t) => Math.sin((2 * Math.PI * t) / 24));
 
   return (
     <svg viewBox={`0 0 ${w} ${h}`} width="100%" style={{ display: "block" }}>
@@ -454,13 +466,13 @@ function CyclopsInfo() {
           }}
         >
           <p>
-            <strong style={{ color: "var(--site-text)" }}>CYCLOPS</strong> (Cyclic Ordering by Periodic Structure) is a method that recovers circadian phase from a single tissue sample — no time-series needed.
+            <strong style={{ color: "var(--site-text)" }}>CYCLOPS</strong> (Cyclic Ordering by Periodic Structure) recovers circadian phase from a single tissue sample. No time-series needed.
           </p>
           <p>
             It works because clock genes oscillate at the same frequency but with different phase offsets. When plotted pairwise, samples form an ellipse; the angle on that ellipse corresponds to internal time.
           </p>
           <p>
-            A neural network fits this ellipse across thousands of genes simultaneously, assigning each sample a phase — effectively reading the body&apos;s clock from one snapshot.
+            A neural network fits this ellipse across thousands of genes simultaneously, assigning each sample a phase. Effectively reading the body&apos;s clock from one snapshot.
           </p>
           <div className="pt-1" style={{ borderTop: "1px solid var(--site-border)", color: "var(--site-text-dim)", fontSize: "9px" }}>
             Anafi et al., PNAS 2017 · Used in circadian medicine &amp; gene expression studies

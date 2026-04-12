@@ -320,7 +320,7 @@ function HypnogramInfo() {
           }}
         >
           <p>
-            A hypnogram maps your sleep stages across the night. It looks like a city skyline — each &ldquo;step&rdquo; is a different depth of sleep.
+            A hypnogram maps your sleep stages across the night. It looks like a city skyline, where each &ldquo;step&rdquo; is a different depth of sleep.
           </p>
           <p>
             You cycle through <span style={{ color: "#7a9fc4" }}>N1</span> (light),{" "}

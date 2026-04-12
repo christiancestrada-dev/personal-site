@@ -316,14 +316,14 @@ function InfoTooltip() {
         >
           <p>
             Your sleepiness comes from two competing forces.{" "}
-            <span style={{ color: "#60a5ff" }}>S-drive</span> is adenosine building up the longer you stay awake — after ~16 hours it peaks and your body demands sleep.{" "}
+            <span style={{ color: "#60a5ff" }}>S-drive</span> is adenosine building up the longer you stay awake. After roughly 16 hours it peaks and your body demands sleep.{" "}
             <span style={{ color: "#9b8fce" }}>C-drive</span> is your circadian clock fighting to keep you alert, peaking around 4pm.
           </p>
           <p>
             <span style={{ color: "#ddeeff" }}>Sleep pressure</span> = high adenosine + low circadian alerting.
             It peaks between <strong style={{ color: "var(--site-text)" }}>2–4am</strong> and dips again around{" "}
             <strong style={{ color: "var(--site-text)" }}>1–3pm</strong> (afternoon slump).
-            Caffeine masks this by blocking adenosine receptors — it hides the debt without reducing it.
+            Caffeine masks this by blocking adenosine receptors. It hides the debt without reducing it.
           </p>
           <div className="pt-1" style={{ borderTop: "1px solid var(--site-border)", color: "var(--site-text-dim)", fontSize: "9px" }}>
             Based on Borbély&apos;s Two-Process Model of Sleep Regulation (1982)

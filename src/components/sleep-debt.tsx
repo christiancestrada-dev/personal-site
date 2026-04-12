@@ -499,7 +499,7 @@ function SleepDebtInfo() {
           }}
         >
           <p>
-            Sleep debt is roughly <strong style={{ color: "var(--site-text)" }}>additive</strong>. Missing 2 hours a night for 5 days builds 10 hours of debt &mdash; cognitively similar to staying awake for 24+ hours straight.
+            Sleep debt is roughly <strong style={{ color: "var(--site-text)" }}>additive</strong>. Missing 2 hours a night for 5 days builds 10 hours of debt, cognitively similar to staying awake for 24+ hours straight.
           </p>
           <p>
             Sleeping in on weekends helps, but recovery is only about <strong style={{ color: "var(--site-text)" }}>60% efficient</strong>. Sleeping 10 hours (2 extra) recovers ~1.2 hours of debt, not 2. The &ldquo;college student&rdquo; pattern shows this: despite weekend catch-up, debt never fully clears.
