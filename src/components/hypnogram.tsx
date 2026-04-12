@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Info } from "lucide-react";
 
 // ─── Sleep stage definitions ────────────────────────────────────────────────
@@ -235,16 +236,16 @@ export function Hypnogram() {
             ))}
 
             {/* The hypnogram stepped line */}
-            <path d={pathD} fill="none" stroke="#60a5ff" strokeWidth="2" strokeLinejoin="round" />
+            <motion.path d={pathD} fill="none" stroke="#60a5ff" strokeWidth="2" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 2, ease: "easeInOut" }} />
 
             {/* Fill under curve */}
-            <path d={pathD + ` L ${W} ${stageToY(0)} L 0 ${stageToY(0)} Z`} fill="url(#hypno-fill)" />
+            <motion.path d={pathD + ` L ${W} ${stageToY(0)} L 0 ${stageToY(0)} Z`} fill="url(#hypno-fill)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.8 }} />
 
             {/* Current time marker */}
             {markerX !== null && markerY !== null && (
               <>
-                <line x1={markerX} y1={0} x2={markerX} y2={H} stroke="var(--site-accent)" strokeWidth="1" strokeDasharray="3,3" opacity="0.6" />
-                <circle cx={markerX} cy={markerY} r="4" fill="var(--site-accent)" />
+                <motion.line x1={markerX} y1={0} x2={markerX} y2={H} stroke="var(--site-accent)" strokeWidth="1" strokeDasharray="3,3" initial={{ opacity: 0 }} animate={{ opacity: 0.6 }} transition={{ duration: 0.4, delay: 1.8 }} />
+                <motion.circle cx={markerX} cy={markerY} r="4" fill="var(--site-accent)" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3, delay: 2 }} />
                 <circle cx={markerX} cy={markerY} r="7" fill="none" stroke="var(--site-accent)" strokeWidth="1" opacity="0.4">
                   <animate attributeName="r" values="6;10;6" dur="2s" repeatCount="indefinite" />
                   <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />

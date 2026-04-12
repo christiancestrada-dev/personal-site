@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Info } from "lucide-react";
 
 // ─── Two-Process Model of Sleep Regulation (Borbély, 1982) ───────────────────
@@ -165,38 +166,38 @@ export function MelatoninGraph() {
 
           <g clipPath="url(#graph-clip)">
             {/* Sleep zone (11pm–midnight band) */}
-            <rect x={sleepX1} y="0" width={W - sleepX1} height={H} style={{ fill: "var(--site-bg-card)" }} opacity="0.6" />
+            <motion.rect x={sleepX1} y="0" width={W - sleepX1} height={H} style={{ fill: "var(--site-bg-card)" }} initial={{ opacity: 0 }} animate={{ opacity: 0.6 }} transition={{ duration: 0.6 }} />
             {/* Also 0am–7am zone */}
-            <rect x="0" y="0" width={(WAKE_H / 24) * W} height={H} style={{ fill: "var(--site-bg-card)" }} opacity="0.6" />
+            <motion.rect x="0" y="0" width={(WAKE_H / 24) * W} height={H} style={{ fill: "var(--site-bg-card)" }} initial={{ opacity: 0 }} animate={{ opacity: 0.6 }} transition={{ duration: 0.6 }} />
 
             {/* Midday dip reference line at 1pm */}
-            <line x1={(13/24)*W} y1="0" x2={(13/24)*W} y2={H} stroke="#1a1a1a" strokeWidth="0.8" strokeDasharray="3,4" />
+            <motion.line x1={(13/24)*W} y1="0" x2={(13/24)*W} y2={H} stroke="#1a1a1a" strokeWidth="0.8" strokeDasharray="3,4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.3 }} />
 
             {/* S-drive area + line */}
-            <path d={areaS} fill="url(#grad-s)" />
-            <path d={pathS} fill="none" stroke="#60a5ff" strokeWidth="1.5" strokeLinejoin="round" />
+            <motion.path d={areaS} fill="url(#grad-s)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.2 }} />
+            <motion.path d={pathS} fill="none" stroke="#60a5ff" strokeWidth="1.5" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.4, ease: "easeInOut" }} />
 
             {/* C-drive line (circadian alerting) */}
-            <path d={pathC} fill="none" stroke="#9b8fce" strokeWidth="1.5" strokeLinejoin="round" strokeDasharray="5,3" />
+            <motion.path d={pathC} fill="none" stroke="#9b8fce" strokeWidth="1.5" strokeLinejoin="round" strokeDasharray="5,3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.4, ease: "easeInOut", delay: 0.2 }} />
 
             {/* Combined sleep pressure area + line */}
-            <path d={areaSP} fill="url(#grad-sp)" />
-            <path d={pathSP} fill="none" stroke="#ddeeff" strokeWidth="2" strokeLinejoin="round" />
+            <motion.path d={areaSP} fill="url(#grad-sp)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.5 }} />
+            <motion.path d={pathSP} fill="none" stroke="#ddeeff" strokeWidth="2" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.4, ease: "easeInOut", delay: 0.4 }} />
 
             {/* Current time vertical line */}
-            <line x1={dotX} y1="0" x2={dotX} y2={H} stroke="#525252" strokeWidth="0.8" strokeDasharray="2,3" />
+            <motion.line x1={dotX} y1="0" x2={dotX} y2={H} stroke="#525252" strokeWidth="0.8" strokeDasharray="2,3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 1.2 }} />
 
             {/* Dots on each curve at current time */}
             {/* S-drive dot */}
-            <circle cx={dotX} cy={toDotY(dotYs)} r="3.5" fill="#60a5ff" />
+            <motion.circle cx={dotX} cy={toDotY(dotYs)} r="3.5" fill="#60a5ff" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3, delay: 1.3 }} />
             <circle cx={dotX} cy={toDotY(dotYs)} r="6" fill="none" stroke="#60a5ff" strokeWidth="0.8" opacity="0.4">
               <animate attributeName="r" values="5;9;5" dur="3s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite" />
             </circle>
             {/* C-drive dot */}
-            <circle cx={dotX} cy={toDotY(dotYc)} r="3" fill="#9b8fce" />
+            <motion.circle cx={dotX} cy={toDotY(dotYc)} r="3" fill="#9b8fce" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3, delay: 1.4 }} />
             {/* Sleep pressure dot */}
-            <circle cx={dotX} cy={toDotY(dotYp)} r="4" fill="#ddeeff" />
+            <motion.circle cx={dotX} cy={toDotY(dotYp)} r="4" fill="#ddeeff" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3, delay: 1.5 }} />
             <circle cx={dotX} cy={toDotY(dotYp)} r="7" fill="none" stroke="#ddeeff" strokeWidth="0.8" opacity="0.3">
               <animate attributeName="r" values="6;11;6" dur="2.5s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="0.3;0;0.3" dur="2.5s" repeatCount="indefinite" />
