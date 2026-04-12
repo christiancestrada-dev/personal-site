@@ -37,7 +37,7 @@ export default function AboutSitePage() {
             {["Next.js", "React", "TypeScript", "Tailwind CSS", "Vercel", "Framer Motion"].map((tech) => (
               <span
                 key={tech}
-                className="px-2.5 py-1 rounded text-[11px] font-mono"
+                className="px-2.5 py-1 rounded text-[11px]"
                 style={{ backgroundColor: "var(--site-bg-card)", color: "var(--site-text-secondary)", border: "1px solid var(--site-border)" }}
               >
                 {tech}

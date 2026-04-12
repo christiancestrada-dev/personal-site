@@ -24,12 +24,12 @@ export default function WritingPage() {
                   <span className="font-bold text-sm" style={{ color: "var(--site-text-bright)" }}>
                     {item.title}
                   </span>
-                  <span className="text-[10px] font-mono shrink-0 tabular-nums" style={{ color: "var(--site-text-dim)" }}>
+                  <span className="text-[10px] shrink-0 tabular-nums" style={{ color: "var(--site-text-dim)" }}>
                     {item.date}
                   </span>
                 </div>
                 {item.publication && (
-                  <p className="text-[11px] font-mono mb-1" style={{ color: "var(--site-text-muted)" }}>
+                  <p className="text-[11px] mb-1" style={{ color: "var(--site-text-muted)" }}>
                     {item.publication}
                   </p>
                 )}
@@ -61,7 +61,7 @@ export default function WritingPage() {
                       <p className="text-xs font-medium truncate" style={{ color: "var(--site-text-bright)" }}>
                         Read the essay
                       </p>
-                      <p className="text-[10px] font-mono mt-0.5" style={{ color: "var(--site-text-muted)" }}>
+                      <p className="text-[10px] mt-0.5" style={{ color: "var(--site-text-muted)" }}>
                         PDF
                       </p>
                     </div>

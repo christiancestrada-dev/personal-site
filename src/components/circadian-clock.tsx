@@ -101,7 +101,7 @@ export function CircadianClock() {
   const breathPeriod = 60 / state.breathingRate;
 
   return (
-    <div className="flex items-center gap-3 font-mono text-xs">
+    <div className="flex items-center gap-3 text-xs">
       {/* Breathing dot */}
       <span
         className="inline-block w-2 h-2 rounded-full"
@@ -131,7 +131,7 @@ export function CircadianDetail() {
   const state = getCircadianState(time.getHours(), time.getMinutes());
 
   return (
-    <span className="font-mono text-xs" style={{ color: "var(--site-text-muted)" }}>
+    <span className="text-xs" style={{ color: "var(--site-text-muted)" }}>
       {state.detail}
     </span>
   );

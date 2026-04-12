@@ -130,7 +130,7 @@ function PhaseBadge({ stage }: { stage: NavStage }) {
           animation: `breathe ${stage.label === "N3" ? "8s" : stage.label === "REM" ? "2s" : "4s"} ease-in-out infinite`,
         }}
       />
-      <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: stage.color }}>
+      <span className="text-[10px] uppercase tracking-wider" style={{ color: stage.color }}>
         {stage.label}
       </span>
     </div>

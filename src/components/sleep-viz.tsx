@@ -130,7 +130,7 @@ export function MelatoninGraph() {
   const sleepX2 = W; // 23–24h
 
   return (
-    <div className="space-y-3 font-mono">
+    <div className="space-y-3">
 
       {/* Stage badge row */}
       <div className="flex items-center gap-3 flex-wrap">
@@ -297,7 +297,7 @@ function InfoTooltip() {
       <button
         onClick={() => setOpen(!open)}
         onMouseEnter={() => setOpen(true)}
-        className="flex items-center gap-1.5 text-[10px] font-mono transition-colors"
+        className="flex items-center gap-1.5 text-[10px] transition-colors"
         style={{ color: "var(--site-text-dim)" }}
       >
         <Info size={13} />

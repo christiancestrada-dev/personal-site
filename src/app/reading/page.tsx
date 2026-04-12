@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { loadContent, saveContent } from "@/lib/content-api";
 import { PageHeader } from "@/components/ui/page-header";
 import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
 import { Tabs } from "@/components/ui/vercel-tabs";
 import { READING_LIST, type ReadingItem } from "@/lib/reading-data";
+import { Bookshelf, BookDetail, ViewToggle, type ViewMode } from "@/components/bookshelf";
 import { Pencil, Trash2 } from "lucide-react";
 
 const STATUS_COLORS: Record<ReadingItem["status"], string> = {
@@ -22,6 +23,8 @@ export default function ReadingPage() {
   const [newItem, setNewItem] = useState({ title: "", author: "", category: "books", tags: "", url: "", status: "queued" as ReadingItem["status"] });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editItem, setEditItem] = useState({ title: "", author: "", category: "books", tags: "", url: "", status: "queued" as ReadingItem["status"] });
+  const [view, setView] = useState<ViewMode>("shelf");
+  const [selectedBook, setSelectedBook] = useState<number | null>(null);
   const loadedRef = useRef(false);
 
   useEffect(() => {
@@ -30,7 +33,15 @@ export default function ReadingPage() {
       loadContent<ReadingItem[]>("reading-extra").then((data) => {
         if (data) setExtraItems(data);
       });
+      const savedView = localStorage.getItem("reading-view") as ViewMode | null;
+      if (savedView === "list" || savedView === "shelf") setView(savedView);
     }
+  }, []);
+
+  const handleViewChange = useCallback((v: ViewMode) => {
+    setView(v);
+    localStorage.setItem("reading-view", v);
+    setSelectedBook(null);
   }, []);
 
   const saveExtra = (updated: ReadingItem[]) => {
@@ -42,19 +53,8 @@ export default function ReadingPage() {
   const allItems = [...extraItems, ...READING_LIST];
 
   const [activeCategory, setActiveCategory] = useState("all");
-  const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
 
   const CATEGORIES = ["all", ...Array.from(new Set(allItems.map((item) => item.category)))];
-  const ALL_TAGS = Array.from(new Set(allItems.flatMap((item) => item.tags)));
-
-  const toggleTag = (tag: string) => {
-    setActiveTags((prev) => {
-      const next = new Set(prev);
-      if (next.has(tag)) next.delete(tag);
-      else next.add(tag);
-      return next;
-    });
-  };
 
   const filtered = allItems.filter((item) => {
     if (activeCategory !== "all" && item.category !== activeCategory) return false;
@@ -106,12 +106,17 @@ export default function ReadingPage() {
     border: "1px solid var(--site-border)",
   };
 
+  const handleCloseDetail = useCallback(() => setSelectedBook(null), []);
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--site-bg)", color: "var(--site-text)" }}>
-      <main className="mx-auto max-w-xl px-6 py-24 space-y-8">
+      <main className={`mx-auto ${view === "shelf" ? "max-w-full" : "max-w-xl"} px-6 py-24 space-y-8 transition-all duration-300`}>
         <div className="flex items-start justify-between">
           <PageHeader title="Reading List" subtitle="Books, papers, and articles that have shaped my thinking" />
-          <AdminBar {...admin} onAdd={() => setShowAddForm(true)} />
+          <div className="flex items-center gap-2 mt-1">
+            <ViewToggle view={view} onChange={handleViewChange} />
+            <AdminBar {...admin} onAdd={() => setShowAddForm(true)} />
+          </div>
         </div>
 
         {/* Add form */}
@@ -146,88 +151,101 @@ export default function ReadingPage() {
           <Tabs
             tabs={CATEGORIES.map((cat) => ({ id: cat, label: cat }))}
             activeTab={activeCategory}
-            onTabChange={(id) => setActiveCategory(id)}
+            onTabChange={(id) => { setActiveCategory(id); setSelectedBook(null); }}
           />
         </div>
 
+        {/* Bookshelf view */}
+        {view === "shelf" ? (
+          <Bookshelf
+            items={filtered}
+            selectedIndex={selectedBook}
+            onSelect={setSelectedBook}
+          />
+        ) : (
+          /* List view */
+          <div className="space-y-0">
+            {filtered.map((item, i) => {
+              const extraIdx = extraItems.indexOf(item);
+              const isEditable = extraIdx !== -1;
+              const isEditing = isEditable && editingIndex === extraIdx;
 
-        {/* List */}
-        <div className="space-y-0">
-          {filtered.map((item, i) => {
-            // Check if this is a user-added item (editable)
-            const extraIdx = extraItems.indexOf(item);
-            const isEditable = extraIdx !== -1;
-            const isEditing = isEditable && editingIndex === extraIdx;
+              if (isEditing && admin.isAdmin) {
+                return (
+                  <div key={i} className="py-3 rounded-lg p-4 space-y-2" style={{ backgroundColor: "var(--site-bg-card-alpha)", border: "1px solid var(--site-border)" }}>
+                    <input type="text" value={editItem.title} onChange={(e) => setEditItem({ ...editItem, title: e.target.value })} placeholder="Title" className="w-full px-3 py-2 rounded-md text-sm outline-none" style={inputStyle} autoFocus />
+                    <input type="text" value={editItem.author} onChange={(e) => setEditItem({ ...editItem, author: e.target.value })} placeholder="Author" className="w-full px-3 py-2 rounded-md text-sm outline-none" style={inputStyle} />
+                    <input type="text" value={editItem.url} onChange={(e) => setEditItem({ ...editItem, url: e.target.value })} placeholder="URL (optional)" className="w-full px-3 py-2 rounded-md text-sm font-mono outline-none" style={inputStyle} />
+                    <div className="flex gap-2">
+                      <select value={editItem.category} onChange={(e) => setEditItem({ ...editItem, category: e.target.value })} className="px-3 py-2 rounded-md text-sm outline-none" style={inputStyle}>
+                        <option value="books">Books</option>
+                        <option value="papers">Papers</option>
+                        <option value="videos">Videos</option>
+                        <option value="websites">Websites</option>
+                      </select>
+                      <select value={editItem.status} onChange={(e) => setEditItem({ ...editItem, status: e.target.value as ReadingItem["status"] })} className="px-3 py-2 rounded-md text-sm outline-none" style={inputStyle}>
+                        <option value="queued">Queued</option>
+                        <option value="reading">Reading</option>
+                        <option value="read">Read</option>
+                      </select>
+                    </div>
+                    <input type="text" value={editItem.tags} onChange={(e) => setEditItem({ ...editItem, tags: e.target.value })} placeholder="Tags (comma separated)" className="w-full px-3 py-2 rounded-md text-sm outline-none" style={inputStyle} />
+                    <div className="flex gap-2">
+                      <button onClick={saveEdit} className="px-4 py-2 rounded-md text-xs font-medium" style={{ backgroundColor: "var(--site-accent)", color: "#fff" }}>Save</button>
+                      <button onClick={() => setEditingIndex(null)} className="px-4 py-2 rounded-md text-xs font-medium" style={{ color: "var(--site-text-secondary)", border: "1px solid var(--site-border)" }}>Cancel</button>
+                    </div>
+                  </div>
+                );
+              }
 
-            if (isEditing && admin.isAdmin) {
               return (
-                <div key={i} className="py-3 rounded-lg p-4 space-y-2" style={{ backgroundColor: "var(--site-bg-card-alpha)", border: "1px solid var(--site-border)" }}>
-                  <input type="text" value={editItem.title} onChange={(e) => setEditItem({ ...editItem, title: e.target.value })} placeholder="Title" className="w-full px-3 py-2 rounded-md text-sm outline-none" style={inputStyle} autoFocus />
-                  <input type="text" value={editItem.author} onChange={(e) => setEditItem({ ...editItem, author: e.target.value })} placeholder="Author" className="w-full px-3 py-2 rounded-md text-sm outline-none" style={inputStyle} />
-                  <input type="text" value={editItem.url} onChange={(e) => setEditItem({ ...editItem, url: e.target.value })} placeholder="URL (optional)" className="w-full px-3 py-2 rounded-md text-sm font-mono outline-none" style={inputStyle} />
-                  <div className="flex gap-2">
-                    <select value={editItem.category} onChange={(e) => setEditItem({ ...editItem, category: e.target.value })} className="px-3 py-2 rounded-md text-sm outline-none" style={inputStyle}>
-                      <option value="books">Books</option>
-                      <option value="papers">Papers</option>
-                      <option value="videos">Videos</option>
-                      <option value="websites">Websites</option>
-                    </select>
-                    <select value={editItem.status} onChange={(e) => setEditItem({ ...editItem, status: e.target.value as ReadingItem["status"] })} className="px-3 py-2 rounded-md text-sm outline-none" style={inputStyle}>
-                      <option value="queued">Queued</option>
-                      <option value="reading">Reading</option>
-                      <option value="read">Read</option>
-                    </select>
-                  </div>
-                  <input type="text" value={editItem.tags} onChange={(e) => setEditItem({ ...editItem, tags: e.target.value })} placeholder="Tags (comma separated)" className="w-full px-3 py-2 rounded-md text-sm outline-none" style={inputStyle} />
-                  <div className="flex gap-2">
-                    <button onClick={saveEdit} className="px-4 py-2 rounded-md text-xs font-medium" style={{ backgroundColor: "var(--site-accent)", color: "#fff" }}>Save</button>
-                    <button onClick={() => setEditingIndex(null)} className="px-4 py-2 rounded-md text-xs font-medium" style={{ color: "var(--site-text-secondary)", border: "1px solid var(--site-border)" }}>Cancel</button>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div key={i} className="py-4 flex gap-4" style={{ borderBottom: "1px solid var(--site-border-subtle)" }}>
-                <span className="mt-1.5 shrink-0 w-2 h-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[item.status] }} title={item.status} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2 flex-wrap">
-                    {item.url ? (
-                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="font-bold text-sm hover:underline" style={{ color: "var(--site-text-bright)" }}>{item.title}</a>
-                    ) : (
-                      <span className="font-bold text-sm" style={{ color: "var(--site-text-bright)" }}>{item.title}</span>
-                    )}
-                    <span className="text-xs" style={{ color: "var(--site-text-secondary)" }}>{item.author}</span>
-                  </div>
-                  {item.progress && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--site-bg-card)", maxWidth: 120 }}>
-                        <div className="h-full rounded-full transition-all" style={{ width: `${(item.progress.current / item.progress.total) * 100}%`, backgroundColor: "#fbbf24" }} />
+                <div key={i} className="py-4 flex gap-4" style={{ borderBottom: "1px solid var(--site-border-subtle)" }}>
+                  <span className="mt-1.5 shrink-0 w-2 h-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[item.status] }} title={item.status} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      {item.url ? (
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="font-bold text-sm hover:underline" style={{ color: "var(--site-text-bright)" }}>{item.title}</a>
+                      ) : (
+                        <span className="font-bold text-sm" style={{ color: "var(--site-text-bright)" }}>{item.title}</span>
+                      )}
+                      <span className="text-xs" style={{ color: "var(--site-text-secondary)" }}>{item.author}</span>
+                    </div>
+                    {item.progress && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--site-bg-card)", maxWidth: 120 }}>
+                          <div className="h-full rounded-full transition-all" style={{ width: `${(item.progress.current / item.progress.total) * 100}%`, backgroundColor: "#fbbf24" }} />
+                        </div>
+                        <span className="text-[10px] tabular-nums" style={{ color: "var(--site-text-secondary)" }}>pg {item.progress.current}/{item.progress.total}</span>
                       </div>
-                      <span className="text-[10px] font-mono tabular-nums" style={{ color: "var(--site-text-secondary)" }}>pg {item.progress.current}/{item.progress.total}</span>
+                    )}
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {item.tags.map((tag) => (
+                        <span key={tag} className="px-1.5 py-0.5 rounded text-[9px]" style={{ backgroundColor: "var(--site-bg-card)", color: "var(--site-text-muted)" }}>{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                  {admin.isAdmin && isEditable && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <button onClick={() => startEdit(extraIdx)} className="p-1.5 rounded-md transition-colors" style={{ color: "var(--site-text-dim)" }} title="Edit"><Pencil size={13} /></button>
+                      <button onClick={() => removeExtra(extraIdx)} className="p-1.5 rounded-md transition-colors" style={{ color: "var(--site-text-dim)" }} title="Remove"><Trash2 size={13} /></button>
                     </div>
                   )}
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {item.tags.map((tag) => (
-                      <span key={tag} className="px-1.5 py-0.5 rounded text-[9px] font-mono" style={{ backgroundColor: "var(--site-bg-card)", color: "var(--site-text-muted)" }}>{tag}</span>
-                    ))}
-                  </div>
                 </div>
-                {admin.isAdmin && isEditable && (
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <button onClick={() => startEdit(extraIdx)} className="p-1.5 rounded-md transition-colors" style={{ color: "var(--site-text-dim)" }} title="Edit"><Pencil size={13} /></button>
-                    <button onClick={() => removeExtra(extraIdx)} className="p-1.5 rounded-md transition-colors" style={{ color: "var(--site-text-dim)" }} title="Remove"><Trash2 size={13} /></button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
 
-          {filtered.length === 0 && (
-            <p className="py-8 text-center text-sm" style={{ color: "var(--site-text-muted)" }}>No items match your filters</p>
-          )}
-        </div>
+            {filtered.length === 0 && (
+              <p className="py-8 text-center text-sm" style={{ color: "var(--site-text-muted)" }}>No items match your filters</p>
+            )}
+          </div>
+        )}
       </main>
+
+      {/* Book detail modal */}
+      <BookDetail
+        item={selectedBook !== null ? filtered[selectedBook] ?? null : null}
+        onClose={handleCloseDetail}
+      />
     </div>
   );
 }

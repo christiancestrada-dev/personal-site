@@ -308,6 +308,7 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
           width: desktopWidth,
           backgroundColor: "var(--site-bg-sidebar)",
           borderRight: "1px solid var(--site-border)",
+          borderImage: "linear-gradient(to bottom, var(--site-border), rgba(219,112,147,0.15), var(--site-border)) 1",
         }}
       >
         {/* Subtle grid texture — behind content, fades on nav hover */}
@@ -315,6 +316,15 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
           variant="grid" size={32} fill="var(--site-border)" mask="fade-bottom"
           className="pointer-events-none transition-opacity duration-300"
           style={{ opacity: navHovered ? 0 : "var(--site-grid-opacity)", zIndex: 0 }}
+        />
+        {/* Very subtle pink gradient on right edge */}
+        <div
+          className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+          style={{
+            background: "linear-gradient(to right, transparent 60%, rgba(219,112,147,0.04) 100%)",
+            opacity: navHovered ? 0 : 1,
+            zIndex: 1,
+          }}
         />
         <div className="relative z-10 flex flex-col h-full" onMouseEnter={() => setNavHovered(true)} onMouseLeave={() => setNavHovered(false)}>
           {sidebarContent(false)}

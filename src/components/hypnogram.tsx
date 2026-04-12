@@ -186,7 +186,7 @@ export function Hypnogram() {
   ];
 
   return (
-    <div className="space-y-3 font-mono">
+    <div className="space-y-3">
       {/* Current stage badge */}
       <div className="flex items-center gap-3">
         <span
@@ -302,7 +302,7 @@ function HypnogramInfo() {
       <button
         onClick={() => setOpen(!open)}
         onMouseEnter={() => setOpen(true)}
-        className="flex items-center gap-1.5 text-[10px] font-mono transition-colors"
+        className="flex items-center gap-1.5 text-[10px] transition-colors"
         style={{ color: "var(--site-text-dim)" }}
       >
         <Info size={13} />

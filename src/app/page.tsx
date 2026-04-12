@@ -124,7 +124,7 @@ export default function Home() {
         <main className="relative max-w-6xl px-8 pt-6 pb-24 space-y-20 mx-auto" style={{ zIndex: 3, backgroundColor: "color-mix(in srgb, var(--site-bg) 85%, transparent)" }}>
 
           {/* Name */}
-          <h1 className="font-black uppercase" style={{ color: "var(--site-text-bright)", fontSize: "clamp(3rem, 7vw, 5.5rem)", lineHeight: 1.1, letterSpacing: "-0.02em", fontFamily: "var(--font-inter), ui-sans-serif, system-ui, sans-serif" }}>
+          <h1 className="font-black uppercase" style={{ color: "var(--site-text-bright)", fontSize: "clamp(3rem, 7vw, 5.5rem)", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
             <BubbleText text="Christian" /><br />
             <BubbleText text="Estrada" />
           </h1>
@@ -194,7 +194,7 @@ export default function Home() {
                     ) : (
                       <div
                         className="rounded-lg p-4 group"
-                        style={{ backgroundColor: "var(--site-bg-card)", border: "1px solid var(--site-border)" }}
+                        style={{ backgroundColor: "var(--site-bg-card)", border: "1px solid var(--site-border)", borderTop: "1px solid rgba(219,112,147,0.12)" }}
                       >
                         <div className="flex items-start justify-between">
                           <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--site-text-muted)" }}>
@@ -270,7 +270,7 @@ export default function Home() {
                           <BubbleText text={item.where} />
                         )}
                       </span>
-                      <span className="shrink-0 text-sm font-mono tabular-nums" style={{ color: "var(--site-text-muted)", minWidth: "6.5rem", textAlign: "right" }}>
+                      <span className="shrink-0 text-sm tabular-nums" style={{ color: "var(--site-text-muted)", minWidth: "6.5rem", textAlign: "right" }}>
                         <BubbleText text={item.date} />
                       </span>
                       {admin.isAdmin && (
@@ -362,7 +362,7 @@ export default function Home() {
           </section>
 
           {/* Footer */}
-          <footer className="pt-8 text-xs font-mono" style={{ borderTop: "1px solid var(--site-border)", color: "var(--site-text-muted)" }}>
+          <footer className="pt-8 text-xs" style={{ borderTop: "1px solid var(--site-border)", borderImage: "linear-gradient(to right, var(--site-border), rgba(219,112,147,0.18), var(--site-border)) 1", color: "var(--site-text-muted)" }}>
             <BubbleText text="Christian Estrada · © 2026" />
           </footer>
         </main>

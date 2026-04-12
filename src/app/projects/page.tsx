@@ -138,9 +138,9 @@ export default function ProjectsPage() {
                     <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--site-text-prose)" }}>{project.description}</p>
                   )}
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] font-mono" style={{ color: "var(--site-text-dim)" }}>{project.date}</span>
+                    <span className="text-[10px]" style={{ color: "var(--site-text-dim)" }}>{project.date}</span>
                     {project.tag && (
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono" style={{ backgroundColor: "var(--site-bg-card)", color: "var(--site-text-muted)" }}>{project.tag}</span>
+                      <span className="px-1.5 py-0.5 rounded text-[9px]" style={{ backgroundColor: "var(--site-bg-card)", color: "var(--site-text-muted)" }}>{project.tag}</span>
                     )}
                   </div>
                 </div>

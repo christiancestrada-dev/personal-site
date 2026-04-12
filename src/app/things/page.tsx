@@ -74,7 +74,7 @@ function ImageDropZone({ image, onImage }: { image?: string; onImage: (data: str
       ) : (
         <div className="w-full h-full flex flex-col items-center justify-center gap-2">
           <ImagePlus size={24} style={{ color: "var(--site-text-muted)" }} />
-          <span className="text-[10px] font-mono" style={{ color: "var(--site-text-muted)" }}>Drop image or click</span>
+          <span className="text-[10px]" style={{ color: "var(--site-text-muted)" }}>Drop image or click</span>
         </div>
       )}
     </div>
@@ -199,7 +199,7 @@ function DetailModal({ item, onClose, isAdmin, onEdit, onDelete }: {
               <Image src={item.image} alt={item.title} fill className="object-cover" />
             )
           ) : (
-            <div className="w-full h-full flex items-center justify-center"><span className="text-sm font-mono" style={{ color: "var(--site-text-muted)" }}>No image</span></div>
+            <div className="w-full h-full flex items-center justify-center"><span className="text-sm" style={{ color: "var(--site-text-muted)" }}>No image</span></div>
           )}
         </div>
         <div className="md:w-1/2 p-8 flex flex-col justify-between gap-6">
@@ -397,7 +397,7 @@ export default function ThingsPage() {
                       )
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-[10px] font-mono" style={{ color: "var(--site-text-muted)" }}>{item.title}</span>
+                        <span className="text-[10px]" style={{ color: "var(--site-text-muted)" }}>{item.title}</span>
                       </div>
                     )}
                   </div>

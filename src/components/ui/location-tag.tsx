@@ -44,7 +44,7 @@ export function LocationTag({ city = "Boston", timezone = "America/New_York" }: 
 
       {/* City — slides out on hover */}
       <span
-        className="text-[10px] font-mono transition-all duration-300 absolute left-8 whitespace-nowrap"
+        className="text-[10px] transition-all duration-300 absolute left-8 whitespace-nowrap"
         style={{
           transform: isHovered ? "translateY(-130%)" : "translateY(0)",
           opacity: isHovered ? 0 : 1,
@@ -56,7 +56,7 @@ export function LocationTag({ city = "Boston", timezone = "America/New_York" }: 
 
       {/* Time — slides in on hover */}
       <span
-        className="text-[10px] font-mono transition-all duration-300 absolute left-8 whitespace-nowrap"
+        className="text-[10px] transition-all duration-300 absolute left-8 whitespace-nowrap"
         style={{
           transform: isHovered ? "translateY(0)" : "translateY(130%)",
           opacity: isHovered ? 1 : 0,
@@ -67,7 +67,7 @@ export function LocationTag({ city = "Boston", timezone = "America/New_York" }: 
       </span>
 
       {/* Spacer to keep width stable */}
-      <span className="text-[10px] font-mono invisible">{city.length > 8 ? city : "00:00:00"}</span>
+      <span className="text-[10px] invisible">{city.length > 8 ? city : "00:00:00"}</span>
     </button>
   )
 }

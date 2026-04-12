@@ -90,6 +90,13 @@ export const READING_LIST: ReadingItem[] = [
     status: "queued",
   },
   {
+    title: "From Mistakes to Meaning",
+    author: "Michael Lynton & Joshua L. Steiner",
+    category: "books",
+    tags: ["leadership", "growth", "memoir"],
+    status: "queued",
+  },
+  {
     title: "Circadian Rhythms",
     author: "Russell G. Foster & Leon Kreitzman",
     category: "books",

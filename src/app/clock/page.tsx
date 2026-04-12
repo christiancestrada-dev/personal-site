@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { MelatoninGraph } from "@/components/sleep-viz";
 import { Hypnogram } from "@/components/hypnogram";
+import { CyclopsEllipse } from "@/components/cyclops-ellipse";
 import { PageHeader } from "@/components/ui/page-header";
 
 export default function ClockPage() {
@@ -24,6 +25,12 @@ export default function ClockPage() {
         <section>
           <SectionLabel>Hypnogram</SectionLabel>
           {mounted && <Hypnogram />}
+        </section>
+
+        {/* CYCLOPS Ellipse */}
+        <section>
+          <SectionLabel>How CYCLOPS Reads the Clock</SectionLabel>
+          {mounted && <CyclopsEllipse />}
         </section>
       </main>
     </div>

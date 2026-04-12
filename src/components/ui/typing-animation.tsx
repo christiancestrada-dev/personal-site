@@ -39,7 +39,7 @@ export function TypingAnimation({
   }, [duration, i, started, text]);
 
   return (
-    <span className={cn("font-mono", className)}>
+    <span className={cn("", className)}>
       {displayedText}
       {i < text.length && (
         <span className="animate-pulse text-[#ff6b60]">▋</span>

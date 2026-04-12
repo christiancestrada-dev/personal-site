@@ -37,7 +37,7 @@ export default function ContactPage() {
             className="rounded-lg p-5"
             style={{ backgroundColor: "var(--site-bg-card-alpha)", border: "1px solid var(--site-border)" }}
           >
-            <p className="text-sm font-mono mb-4" style={{ color: "var(--site-text)" }}>
+            <p className="text-sm mb-4" style={{ color: "var(--site-text)" }}>
               {EMAIL}
             </p>
             <div className="flex gap-3">

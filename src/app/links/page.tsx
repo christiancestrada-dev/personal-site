@@ -421,12 +421,12 @@ export default function LinksPage() {
                     </p>
                   )}
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] font-mono" style={{ color: "var(--site-text-dim)" }}>
+                    <span className="text-[10px]" style={{ color: "var(--site-text-dim)" }}>
                       {link.date}
                     </span>
                     {link.tag && (
                       <span
-                        className="px-1.5 py-0.5 rounded text-[9px] font-mono"
+                        className="px-1.5 py-0.5 rounded text-[9px]"
                         style={{ backgroundColor: "var(--site-bg-card)", color: "var(--site-text-muted)" }}
                       >
                         {link.tag}

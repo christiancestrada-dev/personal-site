@@ -166,7 +166,7 @@ function SheepSVG({ num, golden = false }: { num: number; golden?: boolean }) {
         textAnchor="middle"
         fill={counterFill}
         fontSize="12"
-        fontFamily="ui-monospace, monospace"
+        fontFamily="var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif"
         fontWeight="bold"
       >
         {golden ? "\u2605" : num}
@@ -281,7 +281,7 @@ export function FloatingSheep() {
       {/* ── Sheep pop counter ── */}
       {popCount > 0 && (
         <div
-          className="absolute top-4 left-4 z-30 font-mono text-[10px] px-2 py-1 rounded pointer-events-auto"
+          className="absolute top-4 left-4 z-30 text-[10px] px-2 py-1 rounded pointer-events-auto"
           style={{ backgroundColor: "rgba(0,0,0,0.8)", border: "1px solid var(--site-border)", color: "var(--site-text-muted)" }}
         >
           {popCount} popped{!goldenUnlocked && ` · ${GOLDEN_THRESHOLD - popCount} to go`}
@@ -292,7 +292,7 @@ export function FloatingSheep() {
       <AnimatePresence>
         {showGoldenMsg && (
           <motion.div
-            className="absolute top-16 left-1/2 z-50 font-mono text-xs px-4 py-2 rounded-md"
+            className="absolute top-16 left-1/2 z-50 text-xs px-4 py-2 rounded-md"
             style={{ backgroundColor: "rgba(251,191,36,0.15)", border: "1px solid #fbbf24", color: "#fbbf24", transform: "translateX(-50%)" }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -359,7 +359,7 @@ export function SleepHero() {
 
   return (
     <div
-      className="relative w-full font-mono"
+      className="relative w-full"
       style={{
         minHeight: "70vh",
         background: "var(--site-hero-bg, #000000)",
@@ -395,7 +395,7 @@ export function SleepHero() {
           <AnimatePresence>
             {showMoonTip && (
               <motion.div
-                className="absolute top-full mt-2 right-0 px-3 py-2 rounded-md font-mono text-[10px] whitespace-nowrap z-50"
+                className="absolute top-full mt-2 right-0 px-3 py-2 rounded-md text-[10px] whitespace-nowrap z-50"
                 style={{ backgroundColor: "rgba(0,0,0,0.95)", border: "1px solid var(--site-border)", color: "var(--site-text)" }}
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -485,7 +485,7 @@ export function SleepHero() {
                 width: 18,
                 height: 18,
                 fontSize: "10px",
-                fontFamily: "ui-monospace, monospace",
+                fontFamily: "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif",
                 fontStyle: "normal",
                 fontWeight: 600,
                 backgroundColor: showQuoteInfo ? "var(--site-accent)" : "var(--site-nav-active)",

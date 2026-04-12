@@ -1,154 +1,232 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { loadContent, saveContent } from "@/lib/content-api";
+import Image from "next/image";
 import { PageHeader } from "@/components/ui/page-header";
-import { AdminBar } from "@/components/ui/admin-bar";
-import { usePageAdmin } from "@/lib/use-page-admin";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { MasonryGallery, type GalleryItem } from "@/components/ui/masonry-gallery";
 
-interface NowItem {
-  text: string;
-}
+const NOW_ITEMS = [
+  {
+    text: "Lawning - a colloquial verb used to describe the act of relaxing, socializing, or studying on Andover's central outdoor spaces—specifically the Great Lawn—during warm spring days.",
+    photo: "/now/photo-7.jpg",
+    alt: "Lawning",
+  },
+  {
+    text: "Currently at school!",
+    photo: "/now/photo-8.jpg",
+    alt: "Andover campus at sunset",
+  },
+  {
+    text: "Optimizing my computer wallpaper (yes, my computer wallpaper) — coded a Tetris AI that finds the best possible move, a binary clock, sand timer, pomodoro timer, notes, and a planner that auto-syncs to my calendar and classes whenever I get an email. The AI also tracks my activity to improve as I study longer. Plus aesthetic wallpapers to tie it all together.",
+    photo: "/now/photo-desktop.jpg",
+    alt: "My desktop",
+  },
+];
 
-const DEFAULT_ITEMS: NowItem[] = [
-  { text: "Currently on break — enjoying good food and time with family." },
-  { text: "I was recently selected as an MLK Scholar, which supports a year-long independent research project through my school. My work investigates sleep health disparities — specifically, how race shapes sleep outcomes and how poor sleep in turn reinforces racial health inequities, with a focus on shift workers." },
+const GALLERY_ITEMS: GalleryItem[] = [
+  {
+    id: "steiner",
+    src: "/now/photo-1.jpg",
+    caption: "Josh Steiner, senior advisor at Bloomberg, and former chief of staff of the US treasury",
+  },
+  {
+    id: "hernandez",
+    src: "/now/photo-2.jpg",
+    caption: "Jose Hernandez, astronaut",
+  },
+  {
+    id: "winter",
+    src: "/now/photo-3.jpg",
+    caption: "Dr Chris Winter, sleep specialist and podcaster",
+  },
+  {
+    id: "papers-1",
+    src: "/now/photo-4.jpg",
+    caption: "Papers (my research club)",
+  },
+  {
+    id: "papers-2",
+    src: "/now/photo-5.jpg",
+    caption: "Papers (my research club)",
+  },
+  {
+    id: "papers-3",
+    src: "/now/photo-6.jpg",
+    caption: "Papers (my research club)",
+  },
+  {
+    id: "sister",
+    src: "/now/photo-sister.jpg",
+    caption: "My sister and I",
+  },
+  {
+    id: "dad",
+    src: "/now/photo-dad.jpg",
+    caption: "Dad!",
+  },
+  {
+    id: "golf",
+    src: "/now/golf.mp4",
+    caption: "Golfing in the dorm's frontyard",
+    type: "video",
+  },
+  {
+    id: "snow",
+    src: "/now/photo-snow.jpg",
+    caption: "Winter snowstorm activities. Did have to shovel a foot and a half of snow in the morning...",
+  },
+  {
+    id: "twice",
+    src: "/now/photo-twice.jpg",
+    caption: "Sidequesting: TWICE kpop concert at TD Garden (got free tickets)",
+  },
+  {
+    id: "kasparov",
+    src: "/now/photo-kasparov.jpg",
+    caption: "Garry Kasparov, Chess world champion 1984-2005, and political activist",
+  },
+  {
+    id: "valentines",
+    src: "/now/valentines.mp4",
+    caption: "Valentines day performance",
+    type: "video" as const,
+  },
+  {
+    id: "eclipse",
+    src: "/now/photo-eclipse.jpg",
+    caption: "Tracking the solar eclipse",
+  },
+  {
+    id: "spring-performance",
+    src: "/now/spring-performance.mp4",
+    caption: "Spring performance",
+    type: "video" as const,
+  },
+  {
+    id: "movein",
+    src: "/now/photo-movein.jpg",
+    caption: "Move in",
+  },
+  {
+    id: "olympics",
+    src: "/now/photo-olympics.jpg",
+    caption: "Rainy day cluster olympics",
+  },
+  {
+    id: "sleepover",
+    src: "/now/photo-sleepover.jpg",
+    caption: "Me sleeping over at my friend's dorm (slept on the inflatable couch for three weeks)",
+  },
+  {
+    id: "chicago",
+    src: "/now/photo-chicago.jpg",
+    caption: "Chicago dying the river green St. Patrick's Day",
+  },
+  {
+    id: "sleeping",
+    src: "/now/photo-sleeping.jpg",
+    caption: "Me sleeping!",
+  },
+  {
+    id: "greencup",
+    src: "/now/photo-greencup.jpg",
+    caption: "Painting the green cup for the green cup challenge",
+  },
+  {
+    id: "pennstation",
+    src: "/now/photo-pennstation.jpg",
+    caption: "Penn Med Station",
+  },
+  {
+    id: "knoll",
+    src: "/now/knoll.mp4",
+    caption: "Night on the knoll performance",
+    type: "video" as const,
+  },
+  {
+    id: "cooking",
+    src: "/now/photo-cooking.jpg",
+    caption: "Cooking (quite badly) Bolivian Silpancho",
+  },
+  {
+    id: "church",
+    src: "/now/photo-church.jpg",
+    caption: "My church before adding drums to mass",
+  },
+  {
+    id: "gravy",
+    src: "/now/photo-gravy.jpg",
+    caption: "Gravy, one of my students",
+  },
+  {
+    id: "reading-station",
+    src: "/now/photo-reading-station.jpg",
+    caption: "Reading station, quick snack before going back to the lab",
+  },
+  {
+    id: "matriculation",
+    src: "/now/photo-matriculation.jpg",
+    caption: "My sister's matriculation to high school!",
+  },
+  {
+    id: "campfire",
+    src: "/now/photo-campfire.jpg",
+    caption: "Fall campfire with the dorm",
+  },
+  {
+    id: "asm",
+    src: "/now/photo-asm.jpg",
+    caption: "Speaking in front of the school about the importance of sleep at All School Meeting",
+  },
+  {
+    id: "snowstorm-walk",
+    src: "/now/snowstorm-walk.mp4",
+    caption: "Snowstorm had me walking backwards",
+    type: "video" as const,
+  },
 ];
 
 export default function NowPage() {
-  const admin = usePageAdmin("now");
-  const [items, setItems] = useState<NowItem[]>([]);
-  const [lastUpdated, setLastUpdated] = useState("March 2026");
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newText, setNewText] = useState("");
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editText, setEditText] = useState("");
-  const loadedRef = useRef(false);
-
-  useEffect(() => {
-    if (!loadedRef.current) {
-      loadedRef.current = true;
-      loadContent<{ items: NowItem[]; lastUpdated: string }>("now").then((data) => {
-        if (data) {
-          setItems(data.items || []);
-          if (data.lastUpdated) setLastUpdated(data.lastUpdated);
-        } else {
-          setItems(DEFAULT_ITEMS);
-        }
-      });
-    }
-  }, []);
-
-  const save = (updated: NowItem[], date?: string) => {
-    const d = date || lastUpdated;
-    setItems(updated);
-    setLastUpdated(d);
-    saveContent("now", { items: updated, lastUpdated: d });
-  };
-
-  const addItem = () => {
-    if (!newText.trim()) return;
-    const now = new Date();
-    const dateStr = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-    save([...items, { text: newText.trim() }], dateStr);
-    setNewText("");
-    setShowAddForm(false);
-  };
-
-  const removeItem = (i: number) => {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-    save(items.filter((_, idx) => idx !== i), dateStr);
-  };
-
-  const startEdit = (i: number) => {
-    setEditingIndex(i);
-    setEditText(items[i].text);
-  };
-
-  const saveEdit = () => {
-    if (editingIndex === null || !editText.trim()) return;
-    const updated = [...items];
-    updated[editingIndex] = { text: editText.trim() };
-    const now = new Date();
-    const dateStr = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-    save(updated, dateStr);
-    setEditingIndex(null);
-  };
-
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--site-bg)", color: "var(--site-text)" }}>
-      <main className="mx-auto max-w-xl px-6 py-24 space-y-12">
-        <div className="flex items-start justify-between">
-          <PageHeader title="Now" subtitle="What I'm up to this week" />
-          <AdminBar {...admin} onAdd={() => setShowAddForm(true)} />
+      <main className="mx-auto max-w-3xl px-6 py-24 space-y-24">
+        <PageHeader title="Now" subtitle="What I'm up to this week" />
+
+        {/* Now items with photos */}
+        <div className="space-y-16">
+          {NOW_ITEMS.map((item, i) => (
+            <div
+              key={i}
+              className={`flex flex-col ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"} gap-8 items-center`}
+            >
+              <div className="flex-1">
+                <p className="text-sm leading-relaxed" style={{ color: "var(--site-text-prose)" }}>
+                  {item.text}
+                </p>
+              </div>
+              <div className="w-full md:w-64 shrink-0">
+                <div className="overflow-hidden rounded-lg">
+                  <Image
+                    src={item.photo}
+                    alt={item.alt}
+                    width={600}
+                    height={400}
+                    className="w-full h-auto object-cover rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Add form */}
-        {showAddForm && admin.isAdmin && (
-          <div className="rounded-lg p-5 space-y-3" style={{ backgroundColor: "var(--site-bg-card-alpha)", border: "1px solid var(--site-border)" }}>
-            <textarea
-              value={newText}
-              onChange={(e) => setNewText(e.target.value)}
-              placeholder="What are you up to?"
-              rows={3}
-              className="w-full px-3 py-2 rounded-md text-sm outline-none resize-none"
-              style={{ backgroundColor: "var(--site-bg)", color: "var(--site-text)", border: "1px solid var(--site-border)" }}
-              autoFocus
-            />
-            <div className="flex gap-2">
-              <button onClick={addItem} className="px-4 py-2 rounded-md text-xs font-medium" style={{ backgroundColor: "var(--site-accent)", color: "#fff" }}>Add</button>
-              <button onClick={() => setShowAddForm(false)} className="px-4 py-2 rounded-md text-xs font-medium" style={{ color: "var(--site-text-secondary)", border: "1px solid var(--site-border)" }}>Cancel</button>
-            </div>
-          </div>
-        )}
-
-        <ul className="space-y-4">
-          {items.map((item, i) => {
-            if (editingIndex === i && admin.isAdmin) {
-              return (
-                <li key={i} className="rounded-lg p-4 space-y-2" style={{ backgroundColor: "var(--site-bg-card-alpha)", border: "1px solid var(--site-border)" }}>
-                  <textarea
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 rounded-md text-sm outline-none resize-none"
-                    style={{ backgroundColor: "var(--site-bg)", color: "var(--site-text)", border: "1px solid var(--site-border)" }}
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
-                    <button onClick={saveEdit} className="px-4 py-2 rounded-md text-xs font-medium" style={{ backgroundColor: "var(--site-accent)", color: "#fff" }}>Save</button>
-                    <button onClick={() => setEditingIndex(null)} className="px-4 py-2 rounded-md text-xs font-medium" style={{ color: "var(--site-text-secondary)", border: "1px solid var(--site-border)" }}>Cancel</button>
-                  </div>
-                </li>
-              );
-            }
-            return (
-              <li key={i} className="flex gap-3 text-sm leading-relaxed" style={{ color: "var(--site-text-prose)" }}>
-                <span style={{ color: "var(--site-accent)" }}>·</span>
-                <span className="flex-1">{item.text}</span>
-                {admin.isAdmin && (
-                  <div className="flex items-start gap-1 shrink-0">
-                    <button onClick={() => startEdit(i)} className="p-1 rounded-md transition-colors" style={{ color: "var(--site-text-dim)" }} title="Edit"><Pencil size={12} /></button>
-                    <button onClick={() => removeItem(i)} className="p-1 rounded-md transition-colors" style={{ color: "var(--site-text-dim)" }} title="Remove"><Trash2 size={12} /></button>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-
-        {items.length === 0 && (
-          <p className="py-12 text-center text-sm" style={{ color: "var(--site-text-muted)" }}>
-            {admin.isAdmin ? "Click + to add an update" : "Coming soon"}
-          </p>
-        )}
-
-        <p className="text-[10px] font-mono" style={{ color: "var(--site-text-dim)" }}>
-          Last updated: {lastUpdated}
-        </p>
       </main>
+
+      {/* Photo Gallery — full width */}
+      <section className="w-full px-12 pb-24 space-y-8">
+        <h2 className="text-lg font-medium text-center" style={{ color: "var(--site-text-bright)" }}>
+          Photo Gallery
+        </h2>
+        <MasonryGallery images={GALLERY_ITEMS} columns={3} gap={4} />
+      </section>
     </div>
   );
 }
