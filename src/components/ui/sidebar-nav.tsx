@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   { href: "/writing", label: "Writing", icon: PenLine, shortcut: "4" },
   { href: "/links", label: "Links", icon: LinkIcon, shortcut: "5" },
   { href: "/things", label: "Things", icon: Gift, shortcut: "6" },
-  { href: "/clock", label: "Clock", icon: Clock, shortcut: "7" },
+  { href: "/clock", label: "Visualizations", icon: Clock, shortcut: "7" },
   { href: "/about-site", label: "About This Site", icon: Info, shortcut: "8" },
 ];
 

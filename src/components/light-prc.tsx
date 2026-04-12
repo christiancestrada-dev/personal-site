@@ -8,7 +8,7 @@ import { Info } from "lucide-react";
 //
 // The PRC describes how light at different times of day shifts the circadian
 // clock. It's the foundation of jet lag treatment, shift work adaptation,
-// and the science behind Arcascope and JetShift.
+// and the science behind light-based circadian interventions.
 //
 // Key principle:
 //   - Light BEFORE the CBT nadir (~4:30am) → DELAYS the clock (shifts later)
@@ -414,7 +414,7 @@ function PRCInfo() {
             <strong style={{ color: "var(--site-text)" }}>evening</strong> and avoiding early morning light.
           </p>
           <p>
-            The critical boundary is your CBT nadir (~4:30am home time). Light before it delays; light after advances. This is what JetShift and Arcascope calculate for you.
+            The critical boundary is your CBT nadir (~4:30am home time). Light before it delays; light after advances. Timed light exposure is the single most effective tool for shifting your clock.
           </p>
           <div className="pt-1" style={{ borderTop: "1px solid var(--site-border)", color: "var(--site-text-dim)", fontSize: "9px" }}>
             Khalsa et al., J Physiol 2003 &middot; St Hilaire et al., PNAS 2012

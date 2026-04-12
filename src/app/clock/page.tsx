@@ -18,7 +18,7 @@ export default function ClockPage() {
     <div className="min-h-screen" style={{ backgroundColor: "var(--site-bg)", color: "var(--site-text)" }}>
       <main className="mx-auto max-w-5xl px-6 py-24">
         <div className="mb-16">
-          <PageHeader title="Clock" subtitle="Sleep and circadian graphs" />
+          <PageHeader title="Visualizations" subtitle="Sleep and circadian graphs" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-16">
@@ -59,7 +59,7 @@ export default function ClockPage() {
           </section>
 
           {/* CYCLOPS Ellipse */}
-          <section className="md:col-span-2">
+          <section>
             <SectionLabel>How CYCLOPS Reads the Clock</SectionLabel>
             {mounted && <CyclopsEllipse />}
           </section>
