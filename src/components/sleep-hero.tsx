@@ -104,16 +104,8 @@ const STARS = [
 
 // ─── Orbital arcs ────────────────────────────────────────────────────────────
 function OrbitalArcs({ isDark }: { isDark: boolean }) {
-  const [running, setRunning] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setRunning(true), 7200);
-    return () => clearTimeout(t);
-  }, []);
-
-  const lineColor     = isDark ? "rgba(200,220,255,0.22)" : "rgba(50,80,120,0.12)";
-  const lineColorDraw = isDark ? "rgba(200,220,255,0.55)" : "rgba(50,80,120,0.32)";
-  const dotColor      = isDark ? "rgba(200,220,255,0.95)" : "rgba(50,80,120,0.6)";
+  const lineColor = isDark ? "rgba(200,220,255,0.25)" : "rgba(50,80,120,0.14)";
+  const dotColor  = isDark ? "rgba(200,220,255,0.95)" : "rgba(50,80,120,0.6)";
 
   const o1 = "M 1390,-200 a 900,900 0 1,1 -1800,0 a 900,900 0 1,1 1800,0";
   const o2 = "M 1720,1500 a 1000,1000 0 1,1 -2000,0 a 1000,1000 0 1,1 2000,0";
@@ -142,37 +134,24 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <path id="hero-m2" d={m2} />
       </defs>
 
-      {running ? (
-        <>
-          {/* Solid arc — gap synchronized with star */}
-          <path d={o1} fill="none" stroke={lineColor} strokeWidth="0.9" strokeDasharray={`${C1 - gap} ${gap}`}>
-            <animate attributeName="stroke-dashoffset" from={String(gapFrom)} to={String(gapTo)} dur="55s" repeatCount="indefinite" />
-          </path>
-          {/* Dashed arc — marching ants */}
-          <path d={o2} fill="none" stroke={lineColor} strokeWidth="0.9" strokeDasharray="7 5">
-            <animate attributeName="stroke-dashoffset" from="12" to="0" dur="0.8s" repeatCount="indefinite" />
-          </path>
-        </>
-      ) : (
-        <>
-          {/* Solid arc — draws in over 7s */}
-          <motion.path
-            d={o1} fill="none" stroke={lineColorDraw} strokeWidth="1.5"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ pathLength: { duration: 7, ease: "linear" }, opacity: { duration: 0.3 } }}
-          />
-          {/* Dashed arc — draws in offset by 0.5s */}
-          <motion.path
-            d={o2} fill="none" stroke={lineColorDraw} strokeWidth="1.5"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ pathLength: { duration: 7, delay: 0.5, ease: "linear" }, opacity: { duration: 0.3, delay: 0.5 } }}
-          />
-        </>
-      )}
+      {/* ── Solid arc: draw in as solid, then switch to gap + run ── */}
+      {/* opacity="0" prevents SSR flash; SMIL immediately overrides it */}
+      <path d={o1} fill="none" stroke={lineColor} strokeWidth="1.0" opacity="0">
+        <set attributeName="stroke-dasharray" to={`${C1} ${C1}`} />
+        <set attributeName="stroke-dashoffset" to={String(C1)} />
+        <animate attributeName="opacity" from="0" to="1" dur="0.4s" fill="freeze" />
+        <animate
+          id="arc1-draw"
+          attributeName="stroke-dashoffset"
+          from={String(C1)} to="0"
+          dur="7s" fill="freeze"
+          calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"
+        />
+        <animate attributeName="stroke-dasharray" to={`${C1 - gap} ${gap}`} dur="0.001s" fill="freeze" begin="arc1-draw.end" />
+        <animate attributeName="stroke-dashoffset" from={String(gapFrom)} to={String(gapTo)} dur="55s" repeatCount="indefinite" begin="arc1-draw.end" />
+      </path>
 
-      {/* Orbital star 1 */}
+      {/* ── Orbital star 1 ── */}
       <g>
         <animateMotion dur="55s" repeatCount="indefinite" rotate="auto">
           <mpath href="#hero-m1" />
@@ -180,7 +159,13 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <path d={star} fill={dotColor} />
       </g>
 
-      {/* Orbital star 2 */}
+      {/* ── Dashed arc: fades in immediately with dashes, then marching ants ── */}
+      <path d={o2} fill="none" stroke={lineColor} strokeWidth="1.0" strokeDasharray="7 5" opacity="0">
+        <animate attributeName="opacity" from="0" to="1" dur="1s" fill="freeze" begin="0.5s" />
+        <animate attributeName="stroke-dashoffset" from="12" to="0" dur="0.8s" repeatCount="indefinite" begin="0.5s" />
+      </path>
+
+      {/* ── Orbital star 2 ── */}
       <g>
         <animateMotion dur="70s" repeatCount="indefinite" rotate="auto">
           <mpath href="#hero-m2" />
@@ -473,15 +458,15 @@ export function SleepHero() {
 
       {/* ── Stars (dark mode) ── */}
       {isDark && (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           {STARS.map((s, i) => (
             <motion.circle
               key={i}
-              cx={`${s.x}%`} cy={`${s.y}%`} r={s.r}
-              fill="#d4d4d4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0.5, 1.0, 0.5] }}
-              transition={{ duration: 2.2 + s.d, repeat: Infinity, delay: s.d * 0.25 + 0.4, ease: "easeInOut" }}
+              cx={s.x * 10} cy={s.y * 6} r={s.r * 2.2}
+              fill="white"
+              initial={{ opacity: 0.3 }}
+              animate={{ opacity: [0.3, 0.95, 0.3] }}
+              transition={{ duration: 2 + s.d, repeat: Infinity, delay: s.d * 0.15, ease: "easeInOut" }}
             />
           ))}
         </svg>
