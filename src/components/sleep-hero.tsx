@@ -77,50 +77,54 @@ function getLunarPhase(): { name: string; emoji: string; age: number } {
 
 // ─── Stars ───────────────────────────────────────────────────────────────────
 const STARS = [
-  { x:  5, y: 12, r: 1.1, d: 0.0 }, { x: 12, y:  5, r: 0.8, d: 0.6 },
-  { x: 22, y: 18, r: 1.3, d: 1.2 }, { x: 31, y:  7, r: 0.9, d: 0.3 },
-  { x: 40, y: 22, r: 1.2, d: 1.9 }, { x: 48, y:  3, r: 1.5, d: 0.8 },
-  { x: 56, y: 14, r: 0.7, d: 0.1 }, { x: 64, y: 24, r: 1.0, d: 2.2 },
-  { x: 72, y:  8, r: 1.4, d: 0.5 }, { x: 81, y: 19, r: 0.8, d: 1.4 },
-  { x: 88, y:  9, r: 1.1, d: 1.0 }, { x: 94, y: 26, r: 0.9, d: 0.4 },
-  { x: 17, y: 28, r: 0.7, d: 1.1 }, { x: 46, y: 27, r: 1.0, d: 2.5 },
-  { x: 60, y: 30, r: 0.8, d: 0.7 }, { x: 77, y: 28, r: 1.2, d: 1.6 },
-  { x:  3, y: 20, r: 0.6, d: 0.9 }, { x: 93, y: 13, r: 1.0, d: 1.3 },
+  // top band y 2–9%
+  { x:  3, y:  3, r: 1.3, d: 0.0 }, { x:  9, y:  7, r: 1.0, d: 0.6 },
+  { x: 15, y:  2, r: 1.5, d: 1.2 }, { x: 22, y:  6, r: 1.1, d: 0.3 },
+  { x: 28, y:  4, r: 1.6, d: 1.9 }, { x: 35, y:  8, r: 0.9, d: 0.8 },
+  { x: 41, y:  3, r: 1.4, d: 0.1 }, { x: 47, y:  7, r: 1.2, d: 2.2 },
+  { x: 54, y:  2, r: 1.7, d: 0.5 }, { x: 61, y:  5, r: 1.0, d: 1.4 },
+  { x: 67, y:  8, r: 1.3, d: 1.0 }, { x: 74, y:  3, r: 1.1, d: 0.4 },
+  { x: 80, y:  6, r: 1.5, d: 1.1 }, { x: 86, y:  2, r: 0.9, d: 2.5 },
+  { x: 92, y:  7, r: 1.2, d: 0.7 }, { x: 97, y:  4, r: 1.4, d: 1.6 },
+  // middle band y 13–24%
+  { x:  6, y: 14, r: 1.1, d: 0.2 }, { x: 13, y: 20, r: 1.4, d: 1.5 },
+  { x: 20, y: 13, r: 0.9, d: 0.7 }, { x: 27, y: 22, r: 1.6, d: 1.8 },
+  { x: 33, y: 16, r: 1.2, d: 0.4 }, { x: 40, y: 23, r: 1.0, d: 2.1 },
+  { x: 46, y: 13, r: 1.5, d: 1.3 }, { x: 53, y: 21, r: 1.1, d: 0.6 },
+  { x: 59, y: 15, r: 1.3, d: 1.9 }, { x: 66, y: 22, r: 0.9, d: 0.3 },
+  { x: 72, y: 14, r: 1.6, d: 1.7 }, { x: 79, y: 20, r: 1.2, d: 0.9 },
+  { x: 85, y: 15, r: 1.0, d: 2.4 }, { x: 91, y: 23, r: 1.4, d: 0.5 },
+  { x: 96, y: 18, r: 1.1, d: 1.2 },
+  // lower band y 29–40%
+  { x:  4, y: 31, r: 0.9, d: 0.5 }, { x: 11, y: 36, r: 1.3, d: 1.2 },
+  { x: 19, y: 29, r: 1.1, d: 0.9 }, { x: 38, y: 34, r: 1.0, d: 2.0 },
+  { x: 57, y: 30, r: 1.2, d: 0.2 }, { x: 75, y: 37, r: 1.4, d: 1.6 },
+  { x: 87, y: 32, r: 0.9, d: 0.8 }, { x: 95, y: 39, r: 1.1, d: 1.4 },
 ];
 
 // ─── Orbital arcs ────────────────────────────────────────────────────────────
-// Arc 1: solid, center (490,-200) r=900. Arc 2: dashed, center (720,1500) r=1000.
-//
-// Motion paths (m1, m2) start at the stars' visible positions so they appear
-// immediately on load — no negative begin offset needed.
-//   Arc1 visible entry: CW 110° → (182, 646); opposite point: (798, -1046)
-//   Arc2 visible entry: CW 297° → (1170, 607); opposite point: (270, 2393)
-//
-// Gap formula (stroke-dashoffset):
-//   With dasharray=[C-gap, gap], gap_center = (C - gap/2 - d) mod C
-//   For gap at p1 at t=0: d0 = C - gap/2 - p1
-//   Star moves CW so d decreases → to = d0 - C over one period.
-//
-// Stars are 4-pointed bezier shapes elongated along X (path tangent via rotate="auto").
 function OrbitalArcs({ isDark }: { isDark: boolean }) {
-  const lineColor = isDark ? "rgba(200,220,255,0.13)" : "rgba(50,80,120,0.07)";
-  const dotColor  = isDark ? "rgba(200,220,255,0.82)" : "rgba(50,80,120,0.5)";
+  const [running, setRunning] = useState(false);
 
-  // Visible arcs (drawn)
+  useEffect(() => {
+    const t = setTimeout(() => setRunning(true), 2600);
+    return () => clearTimeout(t);
+  }, []);
+
+  const lineColor = isDark ? "rgba(200,220,255,0.22)" : "rgba(50,80,120,0.12)";
+  const dotColor  = isDark ? "rgba(200,220,255,0.95)" : "rgba(50,80,120,0.6)";
+
   const o1 = "M 1390,-200 a 900,900 0 1,1 -1800,0 a 900,900 0 1,1 1800,0";
   const o2 = "M 1720,1500 a 1000,1000 0 1,1 -2000,0 a 1000,1000 0 1,1 2000,0";
-  // Motion paths — start at the in-viewport position so stars appear on load
   const m1 = "M 182,646 a 900,900 0 1,1 616,-1692 a 900,900 0 1,1 -616,1692";
   const m2 = "M 1170,607 a 1000,1000 0 1,1 -900,1786 a 1000,1000 0 1,1 900,-1786";
 
-  // Solid arc gap — p1 is the position of (182,646) on o1 ≈ 30.5% × C1
   const C1 = 5654.9;
   const gap = 32;
-  const p1 = (16.8 / 55) * C1; // ≈ 1727.4 (same fractional position on o1)
-  const gapFrom = C1 - gap / 2 - p1; // ≈ 3911.5
-  const gapTo   = gapFrom - C1;      // ≈ -1743.4
+  const p1 = (16.8 / 55) * C1;
+  const gapFrom = C1 - gap / 2 - p1;
+  const gapTo   = gapFrom - C1;
 
-  // 4-pointed star elongated along X (path tangent). rotate="auto" aligns long axis to path.
   const star   = "M 0,-6 C 2,-1.5, 2,-1.5, 10,0 C 2,1.5, 2,1.5, 0,6 C -2,1.5, -2,1.5, -10,0 C -2,-1.5, -2,-1.5, 0,-6 Z";
   const starSm = "M 0,-5.5 C 1.8,-1.3, 1.8,-1.3, 9,0 C 1.8,1.3, 1.8,1.3, 0,5.5 C -1.8,1.3, -1.8,1.3, -9,0 C -1.8,-1.3, -1.8,-1.3, 0,-5.5 Z";
 
@@ -137,12 +141,37 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <path id="hero-m2" d={m2} />
       </defs>
 
-      {/* Solid arc — gap synchronized with star */}
-      <path d={o1} fill="none" stroke={lineColor} strokeWidth="0.9" strokeDasharray={`${C1 - gap} ${gap}`}>
-        <animate attributeName="stroke-dashoffset" from={String(gapFrom)} to={String(gapTo)} dur="55s" repeatCount="indefinite" />
-      </path>
+      {running ? (
+        <>
+          {/* Solid arc — gap synchronized with star */}
+          <path d={o1} fill="none" stroke={lineColor} strokeWidth="0.9" strokeDasharray={`${C1 - gap} ${gap}`}>
+            <animate attributeName="stroke-dashoffset" from={String(gapFrom)} to={String(gapTo)} dur="55s" repeatCount="indefinite" />
+          </path>
+          {/* Dashed arc — marching ants */}
+          <path d={o2} fill="none" stroke={lineColor} strokeWidth="0.9" strokeDasharray="7 5">
+            <animate attributeName="stroke-dashoffset" from="12" to="0" dur="0.8s" repeatCount="indefinite" />
+          </path>
+        </>
+      ) : (
+        <>
+          {/* Solid arc — draws in */}
+          <motion.path
+            d={o1} fill="none" stroke={lineColor} strokeWidth="0.9"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ pathLength: { duration: 2.2, ease: [0.4, 0, 0.2, 1] }, opacity: { duration: 0.4 } }}
+          />
+          {/* Dashed arc — draws in with slight delay */}
+          <motion.path
+            d={o2} fill="none" stroke={lineColor} strokeWidth="0.9"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ pathLength: { duration: 2.2, delay: 0.35, ease: [0.4, 0, 0.2, 1] }, opacity: { duration: 0.4, delay: 0.35 } }}
+          />
+        </>
+      )}
 
-      {/* Star 1 — starts visible immediately, long axis follows path tangent */}
+      {/* Orbital star 1 */}
       <g>
         <animateMotion dur="55s" repeatCount="indefinite" rotate="auto">
           <mpath href="#hero-m1" />
@@ -150,12 +179,7 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <path d={star} fill={dotColor} />
       </g>
 
-      {/* Dashed arc — marching ants */}
-      <path d={o2} fill="none" stroke={lineColor} strokeWidth="0.9" strokeDasharray="7 5">
-        <animate attributeName="stroke-dashoffset" from="12" to="0" dur="0.8s" repeatCount="indefinite" />
-      </path>
-
-      {/* Star 2 — starts visible immediately, long axis follows path tangent */}
+      {/* Orbital star 2 */}
       <g>
         <animateMotion dur="70s" repeatCount="indefinite" rotate="auto">
           <mpath href="#hero-m2" />
@@ -454,9 +478,9 @@ export function SleepHero() {
               key={i}
               cx={`${s.x}%`} cy={`${s.y}%`} r={s.r}
               fill="#d4d4d4"
-              initial={{ opacity: 0.15 }}
-              animate={{ opacity: [0.15, 0.8, 0.15] }}
-              transition={{ duration: 3 + s.d, repeat: Infinity, delay: s.d, ease: "easeInOut" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.5, 1.0, 0.5] }}
+              transition={{ duration: 2.2 + s.d, repeat: Infinity, delay: s.d * 0.25 + 0.4, ease: "easeInOut" }}
             />
           ))}
         </svg>
