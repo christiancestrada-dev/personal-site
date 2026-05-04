@@ -107,12 +107,13 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setRunning(true), 2600);
+    const t = setTimeout(() => setRunning(true), 7200);
     return () => clearTimeout(t);
   }, []);
 
-  const lineColor = isDark ? "rgba(200,220,255,0.22)" : "rgba(50,80,120,0.12)";
-  const dotColor  = isDark ? "rgba(200,220,255,0.95)" : "rgba(50,80,120,0.6)";
+  const lineColor     = isDark ? "rgba(200,220,255,0.22)" : "rgba(50,80,120,0.12)";
+  const lineColorDraw = isDark ? "rgba(200,220,255,0.55)" : "rgba(50,80,120,0.32)";
+  const dotColor      = isDark ? "rgba(200,220,255,0.95)" : "rgba(50,80,120,0.6)";
 
   const o1 = "M 1390,-200 a 900,900 0 1,1 -1800,0 a 900,900 0 1,1 1800,0";
   const o2 = "M 1720,1500 a 1000,1000 0 1,1 -2000,0 a 1000,1000 0 1,1 2000,0";
@@ -154,19 +155,19 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         </>
       ) : (
         <>
-          {/* Solid arc — draws in */}
+          {/* Solid arc — draws in over 7s */}
           <motion.path
-            d={o1} fill="none" stroke={lineColor} strokeWidth="0.9"
+            d={o1} fill="none" stroke={lineColorDraw} strokeWidth="1.5"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ pathLength: { duration: 2.2, ease: [0.4, 0, 0.2, 1] }, opacity: { duration: 0.4 } }}
+            transition={{ pathLength: { duration: 7, ease: "linear" }, opacity: { duration: 0.3 } }}
           />
-          {/* Dashed arc — draws in with slight delay */}
+          {/* Dashed arc — draws in offset by 0.5s */}
           <motion.path
-            d={o2} fill="none" stroke={lineColor} strokeWidth="0.9"
+            d={o2} fill="none" stroke={lineColorDraw} strokeWidth="1.5"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ pathLength: { duration: 2.2, delay: 0.35, ease: [0.4, 0, 0.2, 1] }, opacity: { duration: 0.4, delay: 0.35 } }}
+            transition={{ pathLength: { duration: 7, delay: 0.5, ease: "linear" }, opacity: { duration: 0.3, delay: 0.5 } }}
           />
         </>
       )}
