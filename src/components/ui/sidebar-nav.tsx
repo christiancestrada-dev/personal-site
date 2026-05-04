@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Home, Zap, BookOpen, PenLine, Gift, Clock, Mail, Calendar, Menu, X, ChevronLeft, ChevronRight, Sun, Moon, Monitor, LinkIcon, Info } from "lucide-react";
+import { Home, Zap, BookOpen, Gift, Clock, Mail, Calendar, Menu, X, ChevronLeft, ChevronRight, Sun, Moon, Monitor, LinkIcon, Info } from "lucide-react";
 import { AnimatedText } from "@/components/ui/animated-text";
 import { BGPattern } from "@/components/ui/bg-pattern";
 import { Signature } from "@/components/ui/signature";
@@ -14,11 +14,10 @@ const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home, shortcut: "1" },
   { href: "/now", label: "Now", icon: Zap, shortcut: "2" },
   { href: "/reading", label: "Reading", icon: BookOpen, shortcut: "3" },
-  { href: "/writing", label: "Writing", icon: PenLine, shortcut: "4" },
-  { href: "/links", label: "Links", icon: LinkIcon, shortcut: "5" },
-  { href: "/things", label: "Things", icon: Gift, shortcut: "6" },
-  { href: "/clock", label: "Visualizations", icon: Clock, shortcut: "7" },
-  { href: "/about-site", label: "About This Site", icon: Info, shortcut: "8" },
+  { href: "/links", label: "Links", icon: LinkIcon, shortcut: "4" },
+  { href: "/things", label: "Things", icon: Gift, shortcut: "5" },
+  { href: "/clock", label: "Visualizations", icon: Clock, shortcut: "6" },
+  { href: "/about-site", label: "About This Site", icon: Info, shortcut: "7" },
 ];
 
 // ─── Theme Toggle ───────────────────────────────────────────────────────────

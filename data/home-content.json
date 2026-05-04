@@ -1,7 +1,7 @@
 {
   "about": [
     "Hey, I'm Christian; welcome! I'm fascinated by neuroscience and sleep (and, more urgently, what happens when you don't). I have done some cool research in these fields, as well as various related ventures and social projects.",
-    "Outside of that: I play drums, coach/play tennis, and go to an international boarding school. I currently live in a house from the 1800s with nine of the smartest and most accomplished people I know, and if I'm not at school, you might catch me on the train talking to literally anyone. (I've been told I seem like \"a very offline person,\" which is maybe the nicest thing anyone has ever said to me.)"
+    "Outside of that: I play drums, coach/play tennis, and go to an international boarding school. I currently live in a house from the 1800s, and if I'm not at school, you might catch me on my train commute talking to strangers. (I've been told I seem like \"a very offline person,\" which is maybe the nicest thing anyone has ever said to me.)"
   ],
   "aboutMeta": "Boston · Philadelphia · Phillips Academy, Andover",
   "status": [
@@ -26,6 +26,11 @@
       "date": "2026-Present"
     },
     {
+      "role": "Developer",
+      "where": "Somni Sleep Aid",
+      "date": "2026–Present"
+    },
+    {
       "role": "Author",
       "where": "CHOP & Penn Mitchell Sleep Lab",
       "date": "2025-Present"
@@ -39,6 +44,16 @@
       "role": "Researcher",
       "where": "Penn Slow Wave Sleep Lab",
       "date": "2025-Present"
+    },
+    {
+      "role": "Director",
+      "where": "Student Wellness Research and Assessment · Andover",
+      "date": "2026–Present"
+    },
+    {
+      "role": "MLK Scholar",
+      "where": "Sleep Disparities in Shift Workers",
+      "date": "2026–2027"
     },
     {
       "role": "Physician Observer",

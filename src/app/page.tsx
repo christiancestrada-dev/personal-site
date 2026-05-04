@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { loadContent, saveContent } from "@/lib/content-api";
 import { SleepHero, FloatingSheep } from "@/components/sleep-hero";
 import { BubbleText } from "@/components/ui/bubble-text";
+import { Signature } from "@/components/ui/signature";
 import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
 import { Pencil, Check, X, Plus, Trash2, GripVertical } from "lucide-react";
@@ -13,24 +14,20 @@ import React from "react";
 
 const DEFAULT_ABOUT = [
   `Hey, I'm Christian; welcome! I'm fascinated by neuroscience and sleep (and, more urgently, what happens when you don't) and have done some really cool research in these fields, as well as various related ventures and social projects.`,
-  `Outside of that: I play drums, coach/play tennis, and have strong opinions about Star Wars. I currently live in a house with nine of the smartest people I know, and you might catch me talking to literally anyone on the train. (I've been told I seem like "a very offline person," which is maybe the nicest thing anyone has ever said to me.)`,
+  `Outside of that: I play drums, coach/play tennis, and have strong opinions about Star Wars. You might catch me talking to literally anyone on the train. (I've been told I seem like "a very offline person," which is maybe the nicest thing anyone has ever said to me.)`,
 ];
 
 const DEFAULT_ABOUT_META = "Boston · Philadelphia · Phillips Academy, Andover";
 
-interface StatusEntry { label: string; value: string; href?: string; href2?: string; href2Label?: string }
-const DEFAULT_STATUS: StatusEntry[] = [
-  { label: "studying", value: "Religion, Literature & the Arts (philosophy of crime class)" },
-  { label: "reading", value: "The Sleep Solution — Dr. Chris Winter (who I helped bring to speak at my school)" },
-  { label: "listening", value: "flipturn; ", href2Label: "1980s Horror Film", href2: "https://open.spotify.com/playlist/5H9G83mqVwXCfddtFrLvEF" },
-];
-
 interface WorkEntry { role: string; where: string; date: string; href?: string }
 const DEFAULT_WORK: WorkEntry[] = [
   { where: "Arcascope", role: "Developer", date: "2026\u2013Present", href: "https://arcascope.com/" },
+  { where: "Somni Sleep Aid", role: "Developer", date: "2026\u2013Present" },
   { where: "CHOP & UPenn Mitchell Sleep Lab", role: "Author", date: "2025\u2013Present" },
   { where: "UPenn SNaP Sleep Lab", role: "Researcher", date: "2025\u2013Present" },
   { where: "Slow Wave Sleep Lab \u00b7 UPenn", role: "Researcher", date: "2025\u2013Present" },
+  { where: "Student Wellness Research and Assessment \u00b7 Andover", role: "Director", date: "2026\u2013Present" },
+  { where: "Sleep Disparities in Shift Workers", role: "MLK Scholar", date: "2026\u20132027" },
   { where: "St. Luke's Health Network", role: "Physician Observer", date: "2024\u2013Present" },
   { where: "Temple University REACH Lab", role: "Student Research Intern", date: "2024" },
   { where: "Papers Research Organization", role: "Co-Founder", date: "2023\u2013Present", href: "https://andoverpapers.org/" },
@@ -56,7 +53,6 @@ const DEFAULT_CONNECT_LINKS: ConnectLink[] = [
 interface HomeContent {
   about: string[];
   aboutMeta: string;
-  status: StatusEntry[];
   work: WorkEntry[];
   connectText: string;
   connectEmail: string;
@@ -67,7 +63,6 @@ function getDefaults(): HomeContent {
   return {
     about: DEFAULT_ABOUT,
     aboutMeta: DEFAULT_ABOUT_META,
-    status: DEFAULT_STATUS,
     work: DEFAULT_WORK,
     connectText: DEFAULT_CONNECT_TEXT,
     connectEmail: DEFAULT_CONNECT_EMAIL,
@@ -121,7 +116,7 @@ export default function Home() {
         <div>{mounted && <SleepHero />}</div>
 
         {/* ── Main content ── */}
-        <main className="relative max-w-6xl px-8 pt-6 pb-24 space-y-20 mx-auto" style={{ zIndex: 3, backgroundColor: "color-mix(in srgb, var(--site-bg) 85%, transparent)" }}>
+        <main className="relative max-w-6xl px-4 sm:px-8 pt-6 pb-24 space-y-20 mx-auto" style={{ zIndex: 3, backgroundColor: "color-mix(in srgb, var(--site-bg) 85%, transparent)" }}>
 
           {/* Name */}
           <h1 className="font-black uppercase" style={{ color: "var(--site-text-bright)", fontSize: "clamp(3rem, 7vw, 5.5rem)", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
@@ -129,9 +124,8 @@ export default function Home() {
             <BubbleText text="Estrada" />
           </h1>
 
-          {/* About + Current — two-column layout */}
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-16 -mt-10">
-            {/* About — left column */}
+          {/* About */}
+          <div className="-mt-10">
             <section>
               <div className="flex items-start justify-between">
                 <SectionLabel>About</SectionLabel>
@@ -173,69 +167,6 @@ export default function Home() {
               </div>
             </section>
 
-            {/* Current — right column as cards */}
-            <section>
-              <SectionLabel>Current</SectionLabel>
-              <div className="space-y-3">
-                {content.status.map((item, i) => (
-                  <div key={i}>
-                    {admin.isAdmin && editing === `status-${i}` ? (
-                      <div className="space-y-2 rounded-lg p-4" style={{ backgroundColor: "var(--site-bg-card)", border: "1px solid var(--site-border)" }}>
-                        <input value={item.label} onChange={(e) => { const s = [...content.status]; s[i] = { ...s[i], label: e.target.value }; setContent({ ...content, status: s }); }} className="w-full px-3 py-1.5 rounded-md text-sm outline-none" style={inputStyle} placeholder="Label" />
-                        <input value={item.value} onChange={(e) => { const s = [...content.status]; s[i] = { ...s[i], value: e.target.value }; setContent({ ...content, status: s }); }} className="w-full px-3 py-1.5 rounded-md text-sm outline-none" style={inputStyle} placeholder="Value" />
-                        <input value={item.href2Label || ""} onChange={(e) => { const s = [...content.status]; s[i] = { ...s[i], href2Label: e.target.value || undefined }; setContent({ ...content, status: s }); }} className="w-full px-3 py-1.5 rounded-md text-sm outline-none" style={inputStyle} placeholder="Link label (optional)" />
-                        <input value={item.href2 || ""} onChange={(e) => { const s = [...content.status]; s[i] = { ...s[i], href2: e.target.value || undefined }; setContent({ ...content, status: s }); }} className="w-full px-3 py-1.5 rounded-md text-sm font-mono outline-none" style={inputStyle} placeholder="Link URL (optional)" />
-                        <div className="flex gap-2">
-                          <button onClick={() => { save(content); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "#4ade80" }}><Check size={14} /></button>
-                          <button onClick={() => { reloadContent(); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-text-dim)" }}><X size={14} /></button>
-                          <button onClick={() => { const s = content.status.filter((_, idx) => idx !== i); save({ ...content, status: s }); setEditing(null); }} className="p-1.5 rounded-md" style={{ color: "var(--site-accent)" }}><Trash2 size={13} /></button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        className="rounded-lg p-4 group"
-                        style={{ backgroundColor: "var(--site-bg-card)", border: "1px solid var(--site-border)", borderTop: "1px solid rgba(219,112,147,0.12)" }}
-                      >
-                        <div className="flex items-start justify-between">
-                          <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--site-text-muted)" }}>
-                            <BubbleText text={item.label} />
-                          </p>
-                          {admin.isAdmin && (
-                            <button onClick={() => setEditing(`status-${i}`)} className="p-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--site-text-dim)" }}><Pencil size={11} /></button>
-                          )}
-                        </div>
-                        <p className="text-sm leading-relaxed" style={{ color: "var(--site-text-serif)" }}>
-                          {item.href ? (
-                            <a href={item.href} target="_blank" rel="noopener noreferrer" className="hover:underline" style={{ color: "var(--site-accent)" }}><BubbleText text={`${item.value} →`} /></a>
-                          ) : (
-                            <BubbleText text={item.value} />
-                          )}
-                          {item.href2 && item.href2Label && (
-                            <>
-                              {" "}
-                              <a href={item.href2} target="_blank" rel="noopener noreferrer" className="hover:underline" style={{ color: "var(--site-text-serif)" }}><BubbleText text={item.href2Label} /></a>
-                            </>
-                          )}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              {admin.isAdmin && (
-                <button
-                  onClick={() => {
-                    const s = [...content.status, { label: "", value: "" }];
-                    setContent({ ...content, status: s });
-                    setEditing(`status-${s.length - 1}`);
-                  }}
-                  className="flex items-center gap-1 text-xs py-1.5 px-2 mt-3 rounded-md transition-colors"
-                  style={{ color: "var(--site-text-dim)", border: "1px dashed var(--site-border)" }}
-                >
-                  <Plus size={12} /> Add status
-                </button>
-              )}
-            </section>
           </div>
 
           {/* Work */}
@@ -257,25 +188,48 @@ export default function Home() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex justify-between items-baseline gap-4 py-3 group" style={{ borderBottom: "1px solid var(--site-border-subtle)", fontSize: "0.95rem" }}>
-                      <span className="font-medium shrink-0" style={{ color: "var(--site-text-bright)" }}>
-                        <BubbleText text={item.role} />
-                      </span>
-                      <span className="flex-1 text-right text-sm" style={{ color: "var(--site-text-muted)" }}>
-                        {item.href ? (
-                          <a href={item.href} target="_blank" rel="noopener noreferrer" className="hover:opacity-75 transition-opacity">
-                            <BubbleText text={`${item.where} \u2192`} />
-                          </a>
-                        ) : (
-                          <BubbleText text={item.where} />
+                    <div className="py-3 group" style={{ borderBottom: "1px solid var(--site-border-subtle)" }}>
+                      {/* Mobile layout */}
+                      <div className="sm:hidden" style={{ fontSize: "0.95rem" }}>
+                        <div className="flex justify-between items-baseline gap-2">
+                          <span className="font-medium" style={{ color: "var(--site-text-bright)" }}>
+                            <BubbleText text={item.role} />
+                          </span>
+                          <span className="text-xs tabular-nums shrink-0" style={{ color: "var(--site-text-muted)" }}>
+                            <BubbleText text={item.date} />
+                          </span>
+                        </div>
+                        <span className="text-sm" style={{ color: "var(--site-text-muted)" }}>
+                          {item.href ? (
+                            <a href={item.href} target="_blank" rel="noopener noreferrer" className="hover:opacity-75 transition-opacity">
+                              <BubbleText text={`${item.where} \u2192`} />
+                            </a>
+                          ) : (
+                            <BubbleText text={item.where} />
+                          )}
+                        </span>
+                      </div>
+                      {/* Desktop layout */}
+                      <div className="hidden sm:flex justify-between items-baseline gap-4" style={{ fontSize: "0.95rem" }}>
+                        <span className="font-medium shrink-0" style={{ color: "var(--site-text-bright)" }}>
+                          <BubbleText text={item.role} />
+                        </span>
+                        <span className="flex-1 text-right text-sm" style={{ color: "var(--site-text-muted)" }}>
+                          {item.href ? (
+                            <a href={item.href} target="_blank" rel="noopener noreferrer" className="hover:opacity-75 transition-opacity">
+                              <BubbleText text={`${item.where} \u2192`} />
+                            </a>
+                          ) : (
+                            <BubbleText text={item.where} />
+                          )}
+                        </span>
+                        <span className="shrink-0 text-sm tabular-nums" style={{ color: "var(--site-text-muted)", minWidth: "6.5rem", textAlign: "right" }}>
+                          <BubbleText text={item.date} />
+                        </span>
+                        {admin.isAdmin && (
+                          <button onClick={() => setEditing(`work-${i}`)} className="p-1 rounded-md shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--site-text-dim)" }}><Pencil size={12} /></button>
                         )}
-                      </span>
-                      <span className="shrink-0 text-sm tabular-nums" style={{ color: "var(--site-text-muted)", minWidth: "6.5rem", textAlign: "right" }}>
-                        <BubbleText text={item.date} />
-                      </span>
-                      {admin.isAdmin && (
-                        <button onClick={() => setEditing(`work-${i}`)} className="p-1 rounded-md shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--site-text-dim)" }}><Pencil size={12} /></button>
-                      )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -362,8 +316,9 @@ export default function Home() {
           </section>
 
           {/* Footer */}
-          <footer className="pt-8 text-xs" style={{ borderTop: "1px solid var(--site-border)", borderImage: "linear-gradient(to right, var(--site-border), rgba(219,112,147,0.18), var(--site-border)) 1", color: "var(--site-text-muted)" }}>
-            <BubbleText text="Christian Estrada · © 2026" />
+          <footer className="pt-8 flex items-center gap-4" style={{ borderTop: "1px solid var(--site-border)", borderImage: "linear-gradient(to right, var(--site-border), rgba(219,112,147,0.18), var(--site-border)) 1" }}>
+            <Signature width={120} height={40} color="var(--site-text-muted)" />
+            <span className="text-xs" style={{ color: "var(--site-text-muted)" }}>© 2026</span>
           </footer>
         </main>
       </div>

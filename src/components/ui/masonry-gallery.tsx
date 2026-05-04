@@ -3,12 +3,15 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import ImageLoader from "@/components/ui/image-loading";
 
 export interface GalleryItem {
   src: string;
   caption: string;
   id: string;
   type?: "image" | "video";
+  w?: number;
+  h?: number;
 }
 
 interface MasonryGalleryProps {
@@ -72,10 +75,17 @@ export function MasonryGallery({
                 playsInline
               />
             ) : (
-              <img
+              <ImageLoader
                 src={item.src}
                 alt={item.caption}
-                className="w-full h-auto object-cover"
+                aspectWidth={item.w ?? 800}
+                aspectHeight={item.h ?? 600}
+                gridSize={36}
+                cellGap={4}
+                cellColor="#0f0f0f"
+                blinkSpeed={1600}
+                transitionDuration={500}
+                fadeOutDuration={400}
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent pointer-events-none" />

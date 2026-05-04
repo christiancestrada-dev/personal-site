@@ -88,6 +88,84 @@ const STARS = [
   { x:  3, y: 20, r: 0.6, d: 0.9 }, { x: 93, y: 13, r: 1.0, d: 1.3 },
 ];
 
+// ─── Orbital arcs ────────────────────────────────────────────────────────────
+// Arc 1: solid, center (490,-200) r=900. Arc 2: dashed, center (720,1500) r=1000.
+//
+// Motion paths (m1, m2) start at the stars' visible positions so they appear
+// immediately on load — no negative begin offset needed.
+//   Arc1 visible entry: CW 110° → (182, 646); opposite point: (798, -1046)
+//   Arc2 visible entry: CW 297° → (1170, 607); opposite point: (270, 2393)
+//
+// Gap formula (stroke-dashoffset):
+//   With dasharray=[C-gap, gap], gap_center = (C - gap/2 - d) mod C
+//   For gap at p1 at t=0: d0 = C - gap/2 - p1
+//   Star moves CW so d decreases → to = d0 - C over one period.
+//
+// Stars are 4-pointed bezier shapes elongated along X (path tangent via rotate="auto").
+function OrbitalArcs({ isDark }: { isDark: boolean }) {
+  const lineColor = isDark ? "rgba(200,220,255,0.13)" : "rgba(50,80,120,0.07)";
+  const dotColor  = isDark ? "rgba(200,220,255,0.82)" : "rgba(50,80,120,0.5)";
+
+  // Visible arcs (drawn)
+  const o1 = "M 1390,-200 a 900,900 0 1,1 -1800,0 a 900,900 0 1,1 1800,0";
+  const o2 = "M 1720,1500 a 1000,1000 0 1,1 -2000,0 a 1000,1000 0 1,1 2000,0";
+  // Motion paths — start at the in-viewport position so stars appear on load
+  const m1 = "M 182,646 a 900,900 0 1,1 616,-1692 a 900,900 0 1,1 -616,1692";
+  const m2 = "M 1170,607 a 1000,1000 0 1,1 -900,1786 a 1000,1000 0 1,1 900,-1786";
+
+  // Solid arc gap — p1 is the position of (182,646) on o1 ≈ 30.5% × C1
+  const C1 = 5654.9;
+  const gap = 32;
+  const p1 = (16.8 / 55) * C1; // ≈ 1727.4 (same fractional position on o1)
+  const gapFrom = C1 - gap / 2 - p1; // ≈ 3911.5
+  const gapTo   = gapFrom - C1;      // ≈ -1743.4
+
+  // 4-pointed star elongated along X (path tangent). rotate="auto" aligns long axis to path.
+  const star   = "M 0,-6 C 2,-1.5, 2,-1.5, 10,0 C 2,1.5, 2,1.5, 0,6 C -2,1.5, -2,1.5, -10,0 C -2,-1.5, -2,-1.5, 0,-6 Z";
+  const starSm = "M 0,-5.5 C 1.8,-1.3, 1.8,-1.3, 9,0 C 1.8,1.3, 1.8,1.3, 0,5.5 C -1.8,1.3, -1.8,1.3, -9,0 C -1.8,-1.3, -1.8,-1.3, 0,-5.5 Z";
+
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      viewBox="0 0 1440 700"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      style={{ zIndex: 0 }}
+    >
+      <defs>
+        <path id="hero-m1" d={m1} />
+        <path id="hero-m2" d={m2} />
+      </defs>
+
+      {/* Solid arc — gap synchronized with star */}
+      <path d={o1} fill="none" stroke={lineColor} strokeWidth="0.9" strokeDasharray={`${C1 - gap} ${gap}`}>
+        <animate attributeName="stroke-dashoffset" from={String(gapFrom)} to={String(gapTo)} dur="55s" repeatCount="indefinite" />
+      </path>
+
+      {/* Star 1 — starts visible immediately, long axis follows path tangent */}
+      <g>
+        <animateMotion dur="55s" repeatCount="indefinite" rotate="auto">
+          <mpath href="#hero-m1" />
+        </animateMotion>
+        <path d={star} fill={dotColor} />
+      </g>
+
+      {/* Dashed arc — marching ants */}
+      <path d={o2} fill="none" stroke={lineColor} strokeWidth="0.9" strokeDasharray="7 5">
+        <animate attributeName="stroke-dashoffset" from="12" to="0" dur="0.8s" repeatCount="indefinite" />
+      </path>
+
+      {/* Star 2 — starts visible immediately, long axis follows path tangent */}
+      <g>
+        <animateMotion dur="70s" repeatCount="indefinite" rotate="auto">
+          <mpath href="#hero-m2" />
+        </animateMotion>
+        <path d={starSm} fill={dotColor} />
+      </g>
+    </svg>
+  );
+}
+
 // ─── Circadian color ─────────────────────────────────────────────────────────
 function getCircadianColor(): string {
   const h = new Date().getHours();
@@ -365,6 +443,9 @@ export function SleepHero() {
         background: "var(--site-hero-bg, #000000)",
       }}
     >
+      {/* ── Orbital arcs ── */}
+      <OrbitalArcs isDark={isDark} />
+
       {/* ── Stars (dark mode) ── */}
       {isDark && (
         <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
@@ -395,7 +476,7 @@ export function SleepHero() {
           <AnimatePresence>
             {showMoonTip && (
               <motion.div
-                className="absolute top-full mt-2 right-0 px-3 py-2 rounded-md text-[10px] whitespace-nowrap z-50"
+                className="absolute top-full mt-2 right-0 px-3 py-2 rounded-md text-[10px] z-50 max-w-[min(200px,calc(100vw-4rem))]"
                 style={{ backgroundColor: "rgba(0,0,0,0.95)", border: "1px solid var(--site-border)", color: "var(--site-text)" }}
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -454,7 +535,7 @@ export function SleepHero() {
             })()}
           </h1>
           <p className="text-sm leading-relaxed" style={{ color: "var(--site-text-secondary)" }}>
-            My name is Christian. Welcome to christian-estrada.com. Feel free to use the hotkey numbers to go between tabs on the lefthand side.
+            My name is Christian. Welcome to christian-estrada.com. I&apos;m running an experiment where I&apos;m trying to put the &ldquo;personal&rdquo; in personal website. I want this website to represent who I am and what I am inspired by. Feel free to use the numbers on your computer as hotkeys to navigate between pages.
           </p>
         </div>
       </div>
@@ -509,11 +590,10 @@ export function SleepHero() {
                 transition={{ duration: 0.3 }}
               >
                 <p style={{ color: "var(--site-text-muted)", fontSize: "0.85rem", lineHeight: 1.75 }}>
-                  Sleep only comes when you stop trying. The harder you reach for it,
-                  the further it gets. The sheep just keep floating.
+                  Counting sheep can actually stimulate the brain and keep you awake.
                 </p>
                 <p style={{ color: "var(--site-text-prose)", fontSize: "0.9rem", lineHeight: 1.75 }}>
-                  So stop counting, and dream on!
+                  Let the sheep float. Don&apos;t count them.
                 </p>
               </motion.div>
             )}

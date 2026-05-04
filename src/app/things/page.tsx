@@ -190,7 +190,7 @@ function DetailModal({ item, onClose, isAdmin, onEdit, onDelete }: {
     <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       <motion.div className="relative z-10 w-full max-w-4xl rounded-xl overflow-hidden flex flex-col md:flex-row" style={{ backgroundColor: "var(--site-bg-card)", border: "1px solid var(--site-border)" }} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2 }}>
-        <div className="md:w-1/2 aspect-square relative shrink-0" style={{ backgroundColor: "#111" }}>
+        <div className="md:w-1/2 aspect-square relative shrink-0 max-h-56 md:max-h-none" style={{ backgroundColor: "#111" }}>
           {item.image ? (
             isBase64 ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -365,7 +365,7 @@ export default function ThingsPage() {
 
       {/* Grid */}
       <div className="px-6 pt-6 pb-16">
-        <div className="grid grid-cols-3 gap-[2px]">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-[2px]">
           {filtered.map((item, filteredIdx) => {
             const idx = realIndex(filteredIdx);
             const isBase64 = item.image?.startsWith("data:");
