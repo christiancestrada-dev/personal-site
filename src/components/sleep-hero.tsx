@@ -153,7 +153,7 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
       </path>
 
       {/* ── Orbital stars on arc 1 — one every 7s ── */}
-      {Array.from({ length: Math.floor(55 / 7) }, (_, i) => -(i * 7)).map((offset, i) => (
+      {Array.from({ length: Math.floor(55 / 21) }, (_, i) => -(i * 21)).map((offset, i) => (
         <g key={`s1-${i}`}>
           <animateMotion dur="55s" repeatCount="indefinite" rotate="auto" begin={`${offset}s`}>
             <mpath href="#hero-m1" />
@@ -169,7 +169,7 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
       </path>
 
       {/* ── Orbital stars on arc 2 — one every 7s ── */}
-      {Array.from({ length: Math.floor(70 / 7) }, (_, i) => -(i * 7)).map((offset, i) => (
+      {Array.from({ length: Math.floor(70 / 21) }, (_, i) => -(i * 21)).map((offset, i) => (
         <g key={`s2-${i}`}>
           <animateMotion dur="70s" repeatCount="indefinite" rotate="auto" begin={`${offset}s`}>
             <mpath href="#hero-m2" />
