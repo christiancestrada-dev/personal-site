@@ -105,7 +105,7 @@ const STARS = [
 // ─── Orbital arcs ────────────────────────────────────────────────────────────
 function OrbitalArcs({ isDark }: { isDark: boolean }) {
   const lineColor = isDark ? "rgba(200,220,255,0.25)" : "rgba(50,80,120,0.14)";
-  const dotColor  = isDark ? "rgba(200,220,255,0.95)" : "rgba(50,80,120,0.6)";
+  const dotColor  = isDark ? "#c8dcff" : "rgba(35,60,110,0.9)";
 
   const o1 = "M 1390,-200 a 900,900 0 1,1 -1800,0 a 900,900 0 1,1 1800,0";
   const o2 = "M 1720,1500 a 1000,1000 0 1,1 -2000,0 a 1000,1000 0 1,1 2000,0";
@@ -118,8 +118,9 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
   const gapFrom = C1 - gap / 2 - p1;
   const gapTo   = gapFrom - C1;
 
-  const star   = "M 0,-6 C 2,-1.5, 2,-1.5, 10,0 C 2,1.5, 2,1.5, 0,6 C -2,1.5, -2,1.5, -10,0 C -2,-1.5, -2,-1.5, 0,-6 Z";
-  const starSm = "M 0,-5.5 C 1.8,-1.3, 1.8,-1.3, 9,0 C 1.8,1.3, 1.8,1.3, 0,5.5 C -1.8,1.3, -1.8,1.3, -9,0 C -1.8,-1.3, -1.8,-1.3, 0,-5.5 Z";
+  // Simple diamond shapes — rotate="auto" aligns long axis to path tangent
+  const star   = "M 0,-11 L 18,0 L 0,11 L -18,0 Z";
+  const starSm = "M 0,-10 L 16,0 L 0,10 L -16,0 Z";
 
   return (
     <svg
@@ -458,15 +459,15 @@ export function SleepHero() {
 
       {/* ── Stars (dark mode) ── */}
       {isDark && (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
           {STARS.map((s, i) => (
             <motion.circle
               key={i}
-              cx={s.x * 10} cy={s.y * 6} r={s.r * 2.2}
-              fill="white"
-              initial={{ opacity: 0.3 }}
-              animate={{ opacity: [0.3, 0.95, 0.3] }}
-              transition={{ duration: 2 + s.d, repeat: Infinity, delay: s.d * 0.15, ease: "easeInOut" }}
+              cx={`${s.x}%`} cy={`${s.y}%`} r={s.r}
+              fill="#d4d4d4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.5, 1.0, 0.5] }}
+              transition={{ duration: 2.2 + s.d, repeat: Infinity, delay: s.d * 0.25 + 0.4, ease: "easeInOut" }}
             />
           ))}
         </svg>
