@@ -152,8 +152,8 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <animate attributeName="stroke-dashoffset" from={String(gapFrom)} to={String(gapTo)} dur="55s" repeatCount="indefinite" begin="arc1-draw.end" />
       </path>
 
-      {/* ── Orbital stars on arc 1 — 3 diamonds, evenly spaced (55s ÷ 3 ≈ 18.3s) ── */}
-      {[0, -18.33, -36.67].map((offset, i) => (
+      {/* ── Orbital stars on arc 1 — one every 7s ── */}
+      {Array.from({ length: Math.floor(55 / 7) }, (_, i) => -(i * 7)).map((offset, i) => (
         <g key={`s1-${i}`}>
           <animateMotion dur="55s" repeatCount="indefinite" rotate="auto" begin={`${offset}s`}>
             <mpath href="#hero-m1" />
@@ -168,8 +168,8 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <animate attributeName="stroke-dashoffset" from="12" to="0" dur="0.8s" repeatCount="indefinite" begin="0.5s" />
       </path>
 
-      {/* ── Orbital stars on arc 2 — 3 diamonds, evenly spaced (70s ÷ 3 ≈ 23.3s) ── */}
-      {[0, -23.33, -46.67].map((offset, i) => (
+      {/* ── Orbital stars on arc 2 — one every 7s ── */}
+      {Array.from({ length: Math.floor(70 / 7) }, (_, i) => -(i * 7)).map((offset, i) => (
         <g key={`s2-${i}`}>
           <animateMotion dur="70s" repeatCount="indefinite" rotate="auto" begin={`${offset}s`}>
             <mpath href="#hero-m2" />
