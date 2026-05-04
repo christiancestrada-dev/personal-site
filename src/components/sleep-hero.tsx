@@ -152,13 +152,15 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <animate attributeName="stroke-dashoffset" from={String(gapFrom)} to={String(gapTo)} dur="55s" repeatCount="indefinite" begin="arc1-draw.end" />
       </path>
 
-      {/* ── Orbital star 1 ── */}
-      <g>
-        <animateMotion dur="55s" repeatCount="indefinite" rotate="auto">
-          <mpath href="#hero-m1" />
-        </animateMotion>
-        <path d={star} fill={dotColor} />
-      </g>
+      {/* ── Orbital stars on arc 1 — 3 diamonds, evenly spaced (55s ÷ 3 ≈ 18.3s) ── */}
+      {[0, -18.33, -36.67].map((offset, i) => (
+        <g key={`s1-${i}`}>
+          <animateMotion dur="55s" repeatCount="indefinite" rotate="auto" begin={`${offset}s`}>
+            <mpath href="#hero-m1" />
+          </animateMotion>
+          <path d={star} fill={dotColor} />
+        </g>
+      ))}
 
       {/* ── Dashed arc: fades in immediately with dashes, then marching ants ── */}
       <path d={o2} fill="none" stroke={lineColor} strokeWidth="1.0" strokeDasharray="7 5" opacity="0">
@@ -166,13 +168,15 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <animate attributeName="stroke-dashoffset" from="12" to="0" dur="0.8s" repeatCount="indefinite" begin="0.5s" />
       </path>
 
-      {/* ── Orbital star 2 ── */}
-      <g>
-        <animateMotion dur="70s" repeatCount="indefinite" rotate="auto">
-          <mpath href="#hero-m2" />
-        </animateMotion>
-        <path d={starSm} fill={dotColor} />
-      </g>
+      {/* ── Orbital stars on arc 2 — 3 diamonds, evenly spaced (70s ÷ 3 ≈ 23.3s) ── */}
+      {[0, -23.33, -46.67].map((offset, i) => (
+        <g key={`s2-${i}`}>
+          <animateMotion dur="70s" repeatCount="indefinite" rotate="auto" begin={`${offset}s`}>
+            <mpath href="#hero-m2" />
+          </animateMotion>
+          <path d={starSm} fill={dotColor} />
+        </g>
+      ))}
     </svg>
   );
 }
