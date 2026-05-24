@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { CircadianClock } from "@/components/circadian-clock";
-import { FlipDotCanvas } from "@/components/ui/flipdot-canvas";
 
 // ─── Annotated clock with arrow pointing to phase text ──────────────────────
 function AnnotatedClock() {
@@ -449,9 +448,6 @@ export function SleepHero() {
         background: "var(--site-hero-bg, #000000)",
       }}
     >
-      {/* ── Flipdot cursor canvas ── */}
-      <FlipDotCanvas />
-
       {/* ── Orbital arcs ── */}
       <OrbitalArcs isDark={isDark} />
 
