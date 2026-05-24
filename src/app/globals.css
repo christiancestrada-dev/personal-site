@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes page-star-twinkle {
+  0%, 100% { opacity: 0.08; transform: scale(1); }
+  50%       { opacity: 0.85; transform: scale(1.5); }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -144,6 +149,7 @@
   --site-hero-bg: #000000;
   --site-hero-overlay: rgba(0,0,0,0.3);
   --site-backdrop: rgba(0,0,0,0.6);
+  --shimmer-highlight: rgba(255,255,255,0.07);
 }
 
 [data-theme="light"] {
@@ -172,6 +178,7 @@
   --site-hero-bg: #ffffff;
   --site-hero-overlay: rgba(244,241,235,0.3);
   --site-backdrop: rgba(0,0,0,0.3);
+  --shimmer-highlight: rgba(255,255,255,0.6);
 }
 
 @layer base {
@@ -203,6 +210,21 @@
     background: var(--site-scrollbar-thumb);
     border-radius: 2px;
   }
+}
+
+@keyframes img-shimmer {
+  0%   { background-position: -400% 0; }
+  100% { background-position:  400% 0; }
+}
+.img-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--site-bg-card) 25%,
+    var(--shimmer-highlight) 50%,
+    var(--site-bg-card) 75%
+  );
+  background-size: 400% 100%;
+  animation: img-shimmer 2s infinite linear;
 }
 
 @keyframes image-cell-blink {
