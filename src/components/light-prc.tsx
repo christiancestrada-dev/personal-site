@@ -339,15 +339,29 @@ export function LightPRC() {
             <text x={XCbt+10} y={SKY_BOT+40} fontSize={9.5} fill="#f5c842" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.85}>DZ1 · CBTmin</text>
             <text x={XDZ2-10} y={AXIS_Y+38} fontSize={9.5} fill="#7080a8" textAnchor="end" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.75}>DZ2</text>
 
-            {/* Peak labels */}
-            <text x={XPAdv+8} y={YPAdv+4}  fontSize={11} fill="#5dcaa5" fontFamily="var(--font-mono)" fontWeight="700" opacity={0.95}>+1.20h</text>
-            <text x={XPDel-8} y={YPDel-8}  fontSize={11} fill="#db7093" textAnchor="end" fontFamily="var(--font-mono)" fontWeight="700" opacity={0.95}>−2.02h</text>
+            {/* Peak labels — bg rect clears the curve line */}
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}>
+              <rect x={XPAdv+6} y={YPAdv-4} width={48} height={15} rx={3}
+                fill="#050810" fillOpacity={0.92} stroke="#5dcaa5" strokeWidth={0.5} strokeOpacity={0.4} />
+              <text x={XPAdv+10} y={YPAdv+7} fontSize={11} fill="#5dcaa5" fontFamily="var(--font-mono)" fontWeight="700">+1.20h</text>
+            </motion.g>
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.7 }}>
+              <rect x={XPDel-54} y={YPDel-17} width={48} height={15} rx={3}
+                fill="#050810" fillOpacity={0.92} stroke="#db7093" strokeWidth={0.5} strokeOpacity={0.4} />
+              <text x={XPDel-50} y={YPDel-6} fontSize={11} fill="#db7093" fontFamily="var(--font-mono)" fontWeight="700">−2.02h</text>
+            </motion.g>
 
-            {/* ADVANCE / DELAY zone labels */}
-            <motion.text x={hx(10)} y={AXIS_Y-32} fontSize={13} fill="#5dcaa5" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2"
-              initial={{ opacity: 0 }} animate={{ opacity: 0.92 }} transition={{ duration: 0.6, delay: 1.2 }}>▲ ADVANCE</motion.text>
-            <motion.text x={hx(19)} y={AXIS_Y+68} fontSize={13} fill="#db7093" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2"
-              initial={{ opacity: 0 }} animate={{ opacity: 0.92 }} transition={{ duration: 0.6, delay: 1.4 }}>▼ DELAY</motion.text>
+            {/* ADVANCE / DELAY zone labels — bg rect clears the curve line */}
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 0.96 }} transition={{ duration: 0.6, delay: 1.2 }}>
+              <rect x={hx(10)-51} y={AXIS_Y-48} width={102} height={22} rx={4}
+                fill="#050810" fillOpacity={0.9} stroke="#5dcaa5" strokeWidth={0.6} strokeOpacity={0.35} />
+              <text x={hx(10)} y={AXIS_Y-32} fontSize={13} fill="#5dcaa5" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2">▲ ADVANCE</text>
+            </motion.g>
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 0.96 }} transition={{ duration: 0.6, delay: 1.4 }}>
+              <rect x={hx(19)-43} y={AXIS_Y+54} width={86} height={22} rx={4}
+                fill="#050810" fillOpacity={0.9} stroke="#db7093" strokeWidth={0.6} strokeOpacity={0.35} />
+              <text x={hx(19)} y={AXIS_Y+70} fontSize={13} fill="#db7093" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2">▼ DELAY</text>
+            </motion.g>
 
             {/* Y-axis labels */}
             {[-2, -1, 0, 1].map(v => (
