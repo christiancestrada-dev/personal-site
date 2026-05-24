@@ -1,322 +1,403 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Info } from "lucide-react";
 
-// ─── Light Phase Response Curve (PRC) ───────────────────────────────────────
-//
-// The PRC describes how light at different times of day shifts the circadian
-// clock. It's the foundation of jet lag treatment, shift work adaptation,
-// and the science behind light-based circadian interventions.
-//
-// Key principle:
-//   - Light BEFORE the CBT nadir (~4:30am) → DELAYS the clock (shifts later)
-//   - Light AFTER the CBT nadir → ADVANCES the clock (shifts earlier)
-//   - Light around the nadir → largest shifts (~2-3h with bright light)
-//   - Light in midday → negligible effect (dead zone)
-//
-// Sources: Khalsa et al., J Physiol 2003; St Hilaire et al., PNAS 2012
-
-const W = 480;
-const H = 160;
-const AXIS_Y = H / 2 + 5;
-const LEFT_PAD = 40;
-const RIGHT_PAD = 20;
-const USABLE_W = W - LEFT_PAD - RIGHT_PAD;
-
-// PRC model: light sensitivity as a function of circadian time
-// Approximated as a skewed sinusoid with dead zone during daytime
-function prcShift(h: number): number {
-  // Normalize to circadian time (CBT nadir = 0)
-  const ct = ((h - 4.5) % 24 + 24) % 24; // hours since nadir
-
-  // Smooth continuous PRC using sum of Gaussians
-  // Delay lobe (before nadir): centered at ct = -2 (i.e., ct = 22)
-  const t1 = ct >= 12 ? ct - 24 : ct;
-  const delay = -2.5 * Math.exp(-0.5 * ((t1 + 2) / 1.8) ** 2);
-
-  // Advance lobe (after nadir): centered at ct = 3
-  const advance = 2.8 * Math.exp(-0.5 * ((ct - 3) / 2.2) ** 2);
-
-  // Small residual bump in transition zone
-  const transition = 0.3 * Math.exp(-0.5 * ((ct - 7) / 1.5) ** 2);
-
-  return delay + advance + transition;
-}
-
-// Map clock hour to x
-function hourToX(h: number): number {
-  return LEFT_PAD + (h / 24) * USABLE_W;
-}
-
-// Map shift magnitude to y (positive = up = advance, negative = down = delay)
-function shiftToY(shift: number): number {
-  const maxShift = 3.5;
-  return AXIS_Y - (shift / maxShift) * (H * 0.38);
-}
-
-// Build smooth PRC path
-function buildPRCPath(): string {
-  const pts: string[] = [];
-  const steps = 240;
-  for (let i = 0; i <= steps; i++) {
-    const h = (i / steps) * 24;
-    const x = hourToX(h);
-    const y = shiftToY(prcShift(h));
-    pts.push(`${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`);
-  }
-  return pts.join(" ");
-}
-
-// Build area paths for delay (below axis) and advance (above axis)
-function buildAreaPaths(): { advancePath: string; delayPath: string } {
-  const steps = 240;
-  const advPts: Array<[number, number]> = [];
-  const delPts: Array<[number, number]> = [];
-
-  for (let i = 0; i <= steps; i++) {
-    const h = (i / steps) * 24;
-    const x = hourToX(h);
-    const shift = prcShift(h);
-    if (shift > 0) {
-      advPts.push([x, shiftToY(shift)]);
-    }
-    if (shift < 0) {
-      delPts.push([x, shiftToY(shift)]);
-    }
-  }
-
-  const makePath = (pts: Array<[number, number]>): string => {
-    if (pts.length < 2) return "";
-    let d = `M${pts[0][0].toFixed(1)},${AXIS_Y}`;
-    for (const [x, y] of pts) {
-      d += ` L${x.toFixed(1)},${y.toFixed(1)}`;
-    }
-    d += ` L${pts[pts.length - 1][0].toFixed(1)},${AXIS_Y} Z`;
-    return d;
-  };
-
-  return { advancePath: makePath(advPts), delayPath: makePath(delPts) };
-}
-
-const HOUR_LABELS = [
-  { h: 0, label: "12am" }, { h: 4, label: "4am" }, { h: 8, label: "8am" },
-  { h: 12, label: "12pm" }, { h: 16, label: "4pm" }, { h: 20, label: "8pm" },
+// St. Hilaire et al. (2012) — Phase Response Curve to 1h bright white light
+// [CT_hours_from_CBTmin, phase_shift_hours]
+// CT0  = CBTmin  = Dead Zone 1 — delay→advance crossover (~4:30am)
+// CT11 = Dead Zone 2 — advance→delay crossover (~3:30pm)
+// CT4  = peak advance +1.20h  (~8:30am)
+// CT18 = peak delay  −2.02h  (~10:30pm)
+const ST_HILAIRE: [number, number][] = [
+  [0,0],[1,.35],[2,.70],[3,.98],[4,1.20],[5,1.10],[6,.92],
+  [7,.68],[8,.42],[9,.18],[10,.03],[11,0],[12,-.12],[13,-.38],
+  [14,-.70],[15,-1.08],[16,-1.48],[17,-1.82],[18,-2.02],
+  [19,-1.88],[20,-1.55],[21,-1.15],[22,-.72],[23,-.32],[24,0],
 ];
 
-interface SelectedPoint {
-  hour: number;
-  shift: number;
+function mkSpline(pts: [number, number][]): (x: number) => number {
+  const n = pts.length - 1;
+  const h: number[] = [], a: number[] = [], l: number[] = [],
+        mu: number[] = [], z: number[] = [], c: number[] = [],
+        b: number[] = [], d: number[] = [];
+  for (let i = 0; i < n; i++) h[i] = pts[i+1][0] - pts[i][0];
+  for (let i = 1; i < n; i++)
+    a[i] = (3/h[i])*(pts[i+1][1]-pts[i][1]) - (3/h[i-1])*(pts[i][1]-pts[i-1][1]);
+  l[0]=1; mu[0]=0; z[0]=0;
+  for (let i=1;i<n;i++){
+    l[i]=2*(pts[i+1][0]-pts[i-1][0])-h[i-1]*mu[i-1];
+    mu[i]=h[i]/l[i];
+    z[i]=(a[i]-h[i-1]*z[i-1])/l[i];
+  }
+  l[n]=1; z[n]=0; c[n]=0;
+  for (let j=n-1;j>=0;j--){
+    c[j]=z[j]-mu[j]*c[j+1];
+    b[j]=(pts[j+1][1]-pts[j][1])/h[j]-h[j]*(c[j+1]+2*c[j])/3;
+    d[j]=(c[j+1]-c[j])/(3*h[j]);
+  }
+  return (x: number) => {
+    if (x <= pts[0][0]) return pts[0][1];
+    if (x >= pts[n][0]) return pts[n][1];
+    let lo=0, hi=n-1;
+    while(lo<hi){const m=(lo+hi)>>1; if(pts[m+1][0]<x) lo=m+1; else hi=m;}
+    const dx=x-pts[lo][0];
+    return pts[lo][1]+b[lo]*dx+c[lo]*dx*dx+d[lo]*dx*dx*dx;
+  };
 }
 
+const _spline = mkSpline(ST_HILAIRE);
+
+const CBT_MIN = 4.5;
+const WAKE_H  = 7;
+const SLEEP_H = 23;
+const SUNRISE = 6;
+const SUNSET  = 20;
+const DZ2_H   = CBT_MIN + 11; // 15.5 = 3:30pm
+
+function prcShift(h: number): number {
+  const ct = ((h - CBT_MIN) % 24 + 24) % 24;
+  return _spline(ct);
+}
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
+const W        = 900;
+const H        = 260;
+const LP       = 52;   // left pad (y-axis labels)
+const RP       = 16;   // right pad
+const UW       = W - LP - RP;
+const SKY_TOP  = 4;
+const SKY_H    = 20;
+const SKY_BOT  = SKY_TOP + SKY_H;
+const AXIS_Y   = 148;  // y of zero line
+const SCALE    = 44;   // px per hour of phase shift
+
+function hx(h: number) { return LP + (h / 24) * UW; }
+function sy(s: number) { return AXIS_Y - s * SCALE; }
+
+function buildPath(steps = 480): string {
+  return Array.from({ length: steps + 1 }, (_, i) => {
+    const h = (i / steps) * 24;
+    return `${i === 0 ? "M" : "L"}${hx(h).toFixed(1)},${sy(prcShift(h)).toFixed(1)}`;
+  }).join(" ");
+}
+
+function buildArea(test: (v: number) => boolean, steps = 480): string {
+  let d = "", seg: string[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const h = (i / steps) * 24;
+    const v = prcShift(h);
+    const x = hx(h), y = sy(v);
+    if (test(v) && seg.length === 0) seg.push(`M${x.toFixed(1)},${AXIS_Y}`);
+    if (seg.length > 0) seg.push(`L${x.toFixed(1)},${y.toFixed(1)}`);
+    if (seg.length > 0 && (!test(v) || i === steps)) {
+      seg.push(`L${x.toFixed(1)},${AXIS_Y} Z`);
+      d += seg.join(" ") + " ";
+      seg = [];
+    }
+  }
+  return d;
+}
+
+const PRC_PATH    = buildPath();
+const ADV_AREA    = buildArea(v => v > 0.02);
+const DEL_AREA    = buildArea(v => v < -0.02);
+
+// Key x positions
+const XCbt  = hx(CBT_MIN);
+const XWake = hx(WAKE_H);
+const XSlp  = hx(SLEEP_H);
+const XRise = hx(SUNRISE);
+const XSet  = hx(SUNSET);
+const XDZ2  = hx(DZ2_H);
+const XPAdv = hx(CBT_MIN + 4);
+const XPDel = hx(CBT_MIN + 18);
+const YPAdv = sy(1.20);
+const YPDel = sy(-2.02);
+
+const HOUR_LABELS = [
+  { h: 0,   t: "12am" },
+  { h: 3,   t: "3am"  },
+  { h: 6,   t: "6am"  },
+  { h: 9,   t: "9am"  },
+  { h: 12,  t: "noon" },
+  { h: 15,  t: "3pm"  },
+  { h: 18,  t: "6pm"  },
+  { h: 21,  t: "9pm"  },
+  { h: 24,  t: "12am" },
+];
+
+// Stripe pattern spacing
+const STRIPE_SZ = 8;
+
+interface Pt { hour: number; shift: number; }
+
 export function LightPRC() {
-  const [time, setTime] = useState<Date | null>(null);
-  const [clickedPoint, setClickedPoint] = useState<SelectedPoint | null>(null);
-  const [hoverPoint, setHoverPoint] = useState<SelectedPoint | null>(null);
+  const [time, setTime]   = useState<Date | null>(null);
+  const [hover, setHover] = useState<Pt | null>(null);
+  const [click, setClick] = useState<Pt | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     setTime(new Date());
-    const i = setInterval(() => setTime(new Date()), 60000);
-    return () => clearInterval(i);
+    const id = setInterval(() => setTime(new Date()), 30_000);
+    return () => clearInterval(id);
   }, []);
 
-  const prcPath = buildPRCPath();
-  const { advancePath, delayPath } = buildAreaPaths();
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
-    if (!svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const svgX = (x / rect.width) * W;
-    const h = ((svgX - LEFT_PAD) / USABLE_W) * 24;
-    if (h >= 0 && h <= 24) {
-      setHoverPoint({ hour: h, shift: prcShift(h) });
-    } else {
-      setHoverPoint(null);
-    }
+  const getPt = useCallback((e: React.MouseEvent<SVGSVGElement>): Pt | null => {
+    if (!svgRef.current) return null;
+    const r = svgRef.current.getBoundingClientRect();
+    const sx = ((e.clientX - r.left) / r.width) * W;
+    const h = ((sx - LP) / UW) * 24;
+    if (h < 0 || h > 24) return null;
+    return { hour: h, shift: prcShift(h) };
   }, []);
 
-  const handleClick = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
-    if (!svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const svgX = (x / rect.width) * W;
-    const h = ((svgX - LEFT_PAD) / USABLE_W) * 24;
-    if (h >= 0 && h <= 24) {
-      setClickedPoint({ hour: h, shift: prcShift(h) });
-    }
-  }, []);
+  const onMove  = useCallback((e: React.MouseEvent<SVGSVGElement>) => setHover(getPt(e)), [getPt]);
+  const onClick = useCallback((e: React.MouseEvent<SVGSVGElement>) => setClick(getPt(e)), [getPt]);
 
   if (!time) return null;
 
-  const t = time.getHours() + time.getMinutes() / 60;
-  const currentShift = prcShift(t);
-  const dotX = hourToX(t);
-  const dotY = shiftToY(currentShift);
+  const t     = time.getHours() + time.getMinutes() / 60;
+  const shift = prcShift(t);
+  const dotX  = hx(t);
+  const dotY  = sy(shift);
+  const active = click ?? hover;
 
-  // Active point (clicked takes priority over hover)
-  const active = clickedPoint || hoverPoint;
+  const zoneColor =
+    Math.abs(shift) < 0.15 ? "var(--site-text-muted)" :
+    shift > 0 ? "#5dcaa5" : "#db7093";
 
-  let currentAdvice: string;
-  if (Math.abs(currentShift) < 0.3) {
-    currentAdvice = "dead zone, light has minimal clock-shifting effect right now";
-  } else if (currentShift > 0) {
-    currentAdvice = `light now would advance your clock by ~${currentShift.toFixed(1)}h (shift earlier)`;
-  } else {
-    currentAdvice = `light now would delay your clock by ~${Math.abs(currentShift).toFixed(1)}h (shift later)`;
-  }
+  const zoneLabel =
+    Math.abs(shift) < 0.15 ? "dead zone" :
+    shift > 0 ? `+${shift.toFixed(2)}h advance` :
+    `${shift.toFixed(2)}h delay`;
+
+  const advice =
+    Math.abs(shift) < 0.15
+      ? "light now has minimal clock-shifting effect"
+      : shift > 0
+        ? `light now would advance your clock by ~${shift.toFixed(1)}h`
+        : `light now would delay your clock by ~${Math.abs(shift).toFixed(1)}h`;
+
+  const isNight = t < SUNRISE || t > SUNSET;
 
   return (
     <div className="space-y-3">
-      {/* Status */}
+      {/* Status row */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span
-          className="text-xs px-2 py-0.5 rounded border"
-          style={{
-            color: Math.abs(currentShift) < 0.3 ? "var(--site-text-muted)" : currentShift > 0 ? "#5dcaa5" : "#db7093",
-            borderColor: Math.abs(currentShift) < 0.3 ? "var(--site-border)" : currentShift > 0 ? "#5dcaa5" : "#db7093",
-            backgroundColor: Math.abs(currentShift) < 0.3 ? "transparent" : (currentShift > 0 ? "#5dcaa518" : "#db709318"),
-          }}
-        >
-          {Math.abs(currentShift) < 0.3 ? "dead zone" : currentShift > 0 ? `+${currentShift.toFixed(1)}h advance` : `${currentShift.toFixed(1)}h delay`}
+        <span className="text-xs px-2 py-0.5 rounded border"
+          style={{ color: zoneColor, borderColor: zoneColor,
+            backgroundColor: zoneColor === "var(--site-text-muted)" ? "transparent" : zoneColor + "18" }}>
+          {zoneLabel}
         </span>
-        <span className="text-xs" style={{ color: "var(--site-text-secondary)" }}>{currentAdvice}</span>
+        <span className="text-xs" style={{ color: "var(--site-text-secondary)" }}>
+          {advice}{isNight ? " · natural darkness" : ""}
+        </span>
+        <span className="text-xs ml-auto tabular-nums" style={{ color: "var(--site-text-muted)" }}>
+          {time.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}
+        </span>
       </div>
 
       {/* Graph */}
       <div className="rounded overflow-hidden" style={{ border: "1px solid var(--site-border)" }}>
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${W} ${H}`}
-          width="100%"
+        <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%"
           style={{ display: "block", cursor: "crosshair" }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={() => setHoverPoint(null)}
-          onClick={handleClick}
-        >
+          onMouseMove={onMove} onMouseLeave={() => setHover(null)} onClick={onClick}>
           <defs>
-            <linearGradient id="grad-advance" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor="#5dcaa5" stopOpacity="0" />
-              <stop offset="100%" stopColor="#5dcaa5" stopOpacity="0.2" />
+            {/* Sky gradient */}
+            <linearGradient id="lp-sky" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"    stopColor="#010208" />
+              <stop offset="22%"   stopColor="#010208" />
+              <stop offset="24%"   stopColor="#0f1520" />
+              <stop offset="24.5%" stopColor="#521830" />
+              <stop offset="25%"   stopColor="#b03015" />
+              <stop offset="26%"   stopColor="#d07030" />
+              <stop offset="28%"   stopColor="#5aaed4" />
+              <stop offset="50%"   stopColor="#7ecbe8" />
+              <stop offset="77%"   stopColor="#5aaed4" />
+              <stop offset="82%"   stopColor="#d07030" />
+              <stop offset="83%"   stopColor="#b03015" />
+              <stop offset="83.5%" stopColor="#521830" />
+              <stop offset="86%"   stopColor="#0f1520" />
+              <stop offset="91%"   stopColor="#010208" />
+              <stop offset="100%"  stopColor="#010208" />
             </linearGradient>
-            <linearGradient id="grad-delay" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#db7093" stopOpacity="0" />
-              <stop offset="100%" stopColor="#db7093" stopOpacity="0.2" />
+
+            {/* Phase fill gradients */}
+            <linearGradient id="lp-adv" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%"   stopColor="#5dcaa5" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#5dcaa5" stopOpacity="0.55" />
             </linearGradient>
+            <linearGradient id="lp-del" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor="#db7093" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#db7093" stopOpacity="0.55" />
+            </linearGradient>
+
+            {/* Diagonal stripe pattern for sleep zones */}
+            <pattern id="lp-sleep-stripe" x="0" y="0" width={STRIPE_SZ} height={STRIPE_SZ} patternUnits="userSpaceOnUse">
+              <rect width={STRIPE_SZ} height={STRIPE_SZ} fill="#06060e" />
+              <line x1="0" y1={STRIPE_SZ} x2={STRIPE_SZ} y2="0" stroke="#14162a" strokeWidth="1.5" />
+            </pattern>
+
+            <clipPath id="lp-clip">
+              <rect x={LP} y={SKY_BOT} width={UW} height={H - SKY_BOT - 18} />
+            </clipPath>
           </defs>
 
-          {/* CBT nadir marker */}
-          <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
-            <line x1={hourToX(4.5)} y1={10} x2={hourToX(4.5)} y2={H - 10} stroke="#4a8adc" strokeWidth="0.8" strokeDasharray="3,4" opacity="0.5" />
-            <text x={hourToX(4.5)} y={10} textAnchor="middle" fontSize="8" fill="#4a8adc" fontFamily="var(--font-mono)">
-              CBT nadir
-            </text>
-          </motion.g>
+          {/* ── Sky strip ── */}
+          <rect x={LP} y={SKY_TOP} width={UW} height={SKY_H} fill="url(#lp-sky)" rx={2} />
 
-          {/* Axis labels */}
-          <text x={LEFT_PAD - 4} y={shiftToY(2.5)} textAnchor="end" fontSize="8" fill="#5dcaa5" fontFamily="var(--font-mono)">
-            advance
-          </text>
-          <text x={LEFT_PAD - 4} y={shiftToY(-2.5)} textAnchor="end" fontSize="8" fill="#db7093" fontFamily="var(--font-mono)">
-            delay
-          </text>
+          <g clipPath="url(#lp-clip)">
 
-          {/* Zero axis */}
-          <line x1={LEFT_PAD} y1={AXIS_Y} x2={W - RIGHT_PAD} y2={AXIS_Y} stroke="var(--site-text-dim)" strokeWidth="0.8" />
+            {/* Sleep zones (0→wake, sleep→midnight) — diagonal stripe */}
+            <rect x={LP}    y={SKY_BOT} width={XWake - LP}       height={H - SKY_BOT - 18} fill="url(#lp-sleep-stripe)" opacity={0.9} />
+            <rect x={XSlp}  y={SKY_BOT} width={LP + UW - XSlp}   height={H - SKY_BOT - 18} fill="url(#lp-sleep-stripe)" opacity={0.9} />
 
-          {/* Grid lines */}
-          {[-2, -1, 1, 2].map((v) => (
-            <line key={v} x1={LEFT_PAD} y1={shiftToY(v)} x2={W - RIGHT_PAD} y2={shiftToY(v)} stroke="var(--site-border)" strokeWidth="0.5" strokeDasharray="4,6" />
-          ))}
+            {/* Zero line */}
+            <line x1={LP} y1={AXIS_Y} x2={LP+UW} y2={AXIS_Y} stroke="var(--site-text-dim)" strokeWidth={1} />
 
-          {/* Area fills */}
-          {advancePath && (
-            <motion.path d={advancePath} fill="url(#grad-advance)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.3 }} />
-          )}
-          {delayPath && (
-            <motion.path d={delayPath} fill="url(#grad-delay)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.3 }} />
-          )}
+            {/* Grid lines */}
+            {[-2, -1, 1].map(v => (
+              <line key={v} x1={LP} y1={sy(v)} x2={LP+UW} y2={sy(v)}
+                stroke="var(--site-border)" strokeWidth={0.6} strokeDasharray="5,7" />
+            ))}
 
-          {/* PRC curve */}
-          <motion.path
-            d={prcPath}
-            fill="none"
-            stroke="var(--site-text)"
-            strokeWidth="2"
-            strokeLinejoin="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1.6, ease: "easeInOut" }}
-          />
+            {/* Phase zone fills — reveal left-to-right in sync with curve draw */}
+            <motion.path d={ADV_AREA} fill="url(#lp-adv)"
+              initial={{ clipPath: "inset(0 100% 0 0)" }}
+              animate={{ clipPath: "inset(0 0% 0 0)" }}
+              transition={{ duration: 2, ease: "easeInOut", delay: 0 }} />
+            <motion.path d={DEL_AREA} fill="url(#lp-del)"
+              initial={{ clipPath: "inset(0 100% 0 0)" }}
+              animate={{ clipPath: "inset(0 0% 0 0)" }}
+              transition={{ duration: 2, ease: "easeInOut", delay: 0 }} />
 
-          {/* Hover / clicked point */}
-          {active && (
-            <g>
-              <line
-                x1={hourToX(active.hour)}
-                y1={10}
-                x2={hourToX(active.hour)}
-                y2={H - 10}
-                stroke="var(--site-text-dim)"
-                strokeWidth="0.8"
-                strokeDasharray="2,3"
-              />
-              <circle
-                cx={hourToX(active.hour)}
-                cy={shiftToY(active.shift)}
-                r="5"
-                fill={Math.abs(active.shift) < 0.3 ? "var(--site-text-muted)" : active.shift > 0 ? "#5dcaa5" : "#db7093"}
-              />
-              <rect
-                x={hourToX(active.hour) - 50}
-                y={shiftToY(active.shift) - 28}
-                width={100}
-                height={20}
-                rx={4}
-                fill="var(--site-bg-card)"
-                stroke="var(--site-border)"
-                strokeWidth="1"
-              />
-              <text
-                x={hourToX(active.hour)}
-                y={shiftToY(active.shift) - 15}
-                textAnchor="middle"
-                fontSize="9"
-                fontWeight="600"
-                fill={Math.abs(active.shift) < 0.3 ? "var(--site-text-muted)" : active.shift > 0 ? "#5dcaa5" : "#db7093"}
-                fontFamily="var(--font-mono)"
-              >
-                {Math.abs(active.shift) < 0.1
-                  ? "no effect"
-                  : active.shift > 0
-                    ? `+${active.shift.toFixed(1)}h advance`
-                    : `${active.shift.toFixed(1)}h delay`}
+            {/* Sunrise / sunset lines */}
+            {[XRise, XSet].map((x, i) => (
+              <motion.line key={i} x1={x} y1={SKY_BOT} x2={x} y2={H - 38}
+                stroke="#d07030" strokeWidth={1.2} strokeDasharray="4,5"
+                initial={{ opacity: 0 }} animate={{ opacity: 0.6 }} transition={{ delay: 0.4 }} />
+            ))}
+
+            {/* DZ1 — CBTmin */}
+            <motion.line x1={XCbt} y1={SKY_BOT} x2={XCbt} y2={H - 38}
+              stroke="#f5c842" strokeWidth={1.4} strokeDasharray="6,3"
+              initial={{ opacity: 0 }} animate={{ opacity: 0.8 }} transition={{ delay: 0.5 }} />
+
+            {/* DZ2 */}
+            <motion.line x1={XDZ2} y1={SKY_BOT} x2={XDZ2} y2={H - 38}
+              stroke="#7080a8" strokeWidth={1.2} strokeDasharray="5,4"
+              initial={{ opacity: 0 }} animate={{ opacity: 0.7 }} transition={{ delay: 0.5 }} />
+
+            {/* Wake / sleep lines */}
+            <motion.line x1={XWake} y1={SKY_BOT} x2={XWake} y2={H - 38}
+              stroke="#50c8f8" strokeWidth={1.2} strokeDasharray="4,4"
+              initial={{ opacity: 0 }} animate={{ opacity: 0.7 }} transition={{ delay: 0.6 }} />
+            <motion.line x1={XSlp} y1={SKY_BOT} x2={XSlp} y2={H - 38}
+              stroke="#6068a0" strokeWidth={1.2} strokeDasharray="4,4"
+              initial={{ opacity: 0 }} animate={{ opacity: 0.65 }} transition={{ delay: 0.6 }} />
+
+            {/* PRC curve */}
+            <motion.path d={PRC_PATH} fill="none" stroke="var(--site-text)" strokeWidth={2.5}
+              strokeLinejoin="round"
+              initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+              transition={{ duration: 2, ease: "easeInOut" }} />
+
+            {/* Peak dots with glow rings */}
+            <motion.circle cx={XPAdv} cy={YPAdv} r={5} fill="#5dcaa5"
+              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.6 }} />
+            <circle cx={XPAdv} cy={YPAdv} r={5} fill="none" stroke="#5dcaa5" strokeWidth={1.5} opacity={0.4}>
+              <animate attributeName="r" values="6;13;6" dur="2.4s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.4;0;0.4" dur="2.4s" repeatCount="indefinite" />
+            </circle>
+            <motion.circle cx={XPDel} cy={YPDel} r={5} fill="#db7093"
+              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.7 }} />
+            <circle cx={XPDel} cy={YPDel} r={5} fill="none" stroke="#db7093" strokeWidth={1.5} opacity={0.4}>
+              <animate attributeName="r" values="6;13;6" dur="2.8s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.4;0;0.4" dur="2.8s" repeatCount="indefinite" />
+            </circle>
+
+            {/* DZ diamonds on zero line */}
+            <motion.path d={`M${XCbt},${AXIS_Y-8} L${XCbt+7},${AXIS_Y} L${XCbt},${AXIS_Y+8} L${XCbt-7},${AXIS_Y} Z`}
+              fill="#f5c842" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }} />
+            <motion.path d={`M${XDZ2},${AXIS_Y-8} L${XDZ2+7},${AXIS_Y} L${XDZ2},${AXIS_Y+8} L${XDZ2-7},${AXIS_Y} Z`}
+              fill="#7080a8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }} />
+
+            {/* ── Labels ── */}
+
+            {/* rise / set in sky strip */}
+            <text x={XRise+5} y={SKY_BOT-4} fontSize={9} fill="#d07030" fontFamily="var(--font-mono)" opacity={0.9}>rise</text>
+            <text x={XSet+5}  y={SKY_BOT-4} fontSize={9} fill="#d07030" fontFamily="var(--font-mono)" opacity={0.9}>set</text>
+
+            {/* wake / sleep labels */}
+            <text x={XWake+5} y={SKY_BOT+26} fontSize={10} fill="#50c8f8" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.85}>wake</text>
+            <text x={XSlp-5}  y={SKY_BOT+26} fontSize={10} fill="#6068a0" textAnchor="end" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.8}>sleep</text>
+
+            {/* DZ labels */}
+            <text x={XCbt+10} y={SKY_BOT+40} fontSize={9.5} fill="#f5c842" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.85}>DZ1 · CBTmin</text>
+            <text x={XDZ2-10} y={AXIS_Y+38} fontSize={9.5} fill="#7080a8" textAnchor="end" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.75}>DZ2</text>
+
+            {/* Peak labels */}
+            <text x={XPAdv+8} y={YPAdv+4}  fontSize={11} fill="#5dcaa5" fontFamily="var(--font-mono)" fontWeight="700" opacity={0.95}>+1.20h</text>
+            <text x={XPDel-8} y={YPDel-8}  fontSize={11} fill="#db7093" textAnchor="end" fontFamily="var(--font-mono)" fontWeight="700" opacity={0.95}>−2.02h</text>
+
+            {/* ADVANCE / DELAY zone labels */}
+            <motion.text x={hx(10)} y={AXIS_Y-32} fontSize={13} fill="#5dcaa5" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2"
+              initial={{ opacity: 0 }} animate={{ opacity: 0.92 }} transition={{ duration: 0.6, delay: 1.2 }}>▲ ADVANCE</motion.text>
+            <motion.text x={hx(19)} y={AXIS_Y+68} fontSize={13} fill="#db7093" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2"
+              initial={{ opacity: 0 }} animate={{ opacity: 0.92 }} transition={{ duration: 0.6, delay: 1.4 }}>▼ DELAY</motion.text>
+
+            {/* Y-axis labels */}
+            {[-2, -1, 0, 1].map(v => (
+              <text key={v} x={LP-6} y={sy(v)+4}
+                textAnchor="end" fontSize={10} fill="var(--site-text-secondary)" fontFamily="var(--font-mono)">
+                {v > 0 ? `+${v}h` : v === 0 ? "0" : `${v}h`}
               </text>
-            </g>
-          )}
+            ))}
 
-          {/* Current time marker */}
-          <motion.line
-            x1={dotX} y1={10} x2={dotX} y2={H - 10}
-            stroke="#525252" strokeWidth="0.8" strokeDasharray="2,3"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
-          />
-          <motion.circle
-            cx={dotX} cy={dotY} r="4"
-            fill={Math.abs(currentShift) < 0.3 ? "var(--site-text-muted)" : currentShift > 0 ? "#5dcaa5" : "#db7093"}
-            initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.5 }}
-          />
-          <circle cx={dotX} cy={dotY} r="7" fill="none" stroke={currentShift > 0 ? "#5dcaa5" : "#db7093"} strokeWidth="0.8" opacity="0.3">
-            <animate attributeName="r" values="6;11;6" dur="2.5s" repeatCount="indefinite" />
-            <animate attributeName="opacity" values="0.3;0;0.3" dur="2.5s" repeatCount="indefinite" />
-          </circle>
+            {/* Hover / click tooltip */}
+            {active && (() => {
+              const tx = hx(active.hour);
+              const ty = sy(active.shift);
+              const col = Math.abs(active.shift) < 0.15 ? "var(--site-text-muted)" : active.shift > 0 ? "#5dcaa5" : "#db7093";
+              const label = Math.abs(active.shift) < 0.05 ? "dead zone"
+                : active.shift > 0 ? `+${active.shift.toFixed(2)}h advance`
+                : `${active.shift.toFixed(2)}h delay`;
+              const tipX = Math.min(Math.max(tx - 56, LP), LP + UW - 116);
+              const tipY = ty > AXIS_Y + 40 ? ty - 38 : ty - 38;
+              return (
+                <g>
+                  <line x1={tx} y1={SKY_BOT} x2={tx} y2={H-38}
+                    stroke="var(--site-text-dim)" strokeWidth={1} strokeDasharray="2,3" />
+                  <circle cx={tx} cy={ty} r={6} fill={col} />
+                  <rect x={tipX} y={tipY} width={114} height={22} rx={4}
+                    fill="var(--site-bg-card)" stroke="var(--site-border)" strokeWidth={1} />
+                  <text x={tipX+57} y={tipY+15} textAnchor="middle" fontSize={10} fontWeight="700"
+                    fill={col} fontFamily="var(--font-mono)">{label}</text>
+                </g>
+              );
+            })()}
 
-          {/* Hour labels */}
-          {HOUR_LABELS.map(({ h, label }) => (
-            <text key={label} x={hourToX(h)} y={H - 4} textAnchor="middle" fontSize="9" fill="var(--site-text-dim)" fontFamily="var(--font-mono)">
-              {label}
+            {/* Current time dot */}
+            <motion.line x1={dotX} y1={SKY_BOT} x2={dotX} y2={H-38}
+              stroke="#404040" strokeWidth={1} strokeDasharray="2,3"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }} />
+            <motion.circle cx={dotX} cy={dotY} r={5} fill={zoneColor}
+              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.7 }} />
+            <circle cx={dotX} cy={dotY} r={8} fill="none" stroke={zoneColor} strokeWidth={1} opacity={0.25}>
+              <animate attributeName="r" values="7;14;7" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.25;0;0.25" dur="3s" repeatCount="indefinite" />
+            </circle>
+
+          </g>
+
+          {/* Hour axis */}
+          {HOUR_LABELS.map(({ h, t }) => (
+            <text key={t+h} x={hx(h)} y={H-4}
+              textAnchor="middle" fontSize={10} fill="var(--site-text-secondary)" fontFamily="var(--font-mono)">
+              {t}
             </text>
           ))}
         </svg>
@@ -324,45 +405,71 @@ export function LightPRC() {
 
       {/* Instruction */}
       <p className="text-[10px]" style={{ color: "var(--site-text-dim)", fontFamily: "var(--font-mono)" }}>
-        click anywhere on the graph to see the predicted phase shift at that time
+        click or hover anywhere on the graph to see predicted phase shift · dot = now
       </p>
 
       {/* Legend */}
-      <div className="flex items-center gap-5 text-[9px] uppercase tracking-wider flex-wrap" style={{ color: "var(--site-text-muted)" }}>
-        <span className="flex items-center gap-1.5">
-          <span className="inline-block w-3 h-2 rounded-sm" style={{ backgroundColor: "#5dcaa530" }} />
-          <span style={{ color: "#5dcaa5" }}>advance zone</span>
-          <span>(shifts clock earlier)</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="inline-block w-3 h-2 rounded-sm" style={{ backgroundColor: "#db709330" }} />
-          <span style={{ color: "#db7093" }}>delay zone</span>
-          <span>(shifts clock later)</span>
-        </span>
+      <div className="flex items-center gap-6 text-[10px] uppercase tracking-wider flex-wrap" style={{ color: "var(--site-text-muted)" }}>
+        <LegSwatch color="#5dcaa5" label="advance" detail="shifts clock earlier" />
+        <LegSwatch color="#db7093" label="delay" detail="shifts clock later" />
+        <LegDiamond color="#f5c842" label="DZ1 · CBTmin (4:30am)" />
+        <LegDiamond color="#7080a8" label="DZ2 · CT11 (3:30pm)" />
+        <LegStripe label="sleep" />
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-2 text-[10px]">
-        <StatCard label="max advance" value="+2.8h" color="#5dcaa5" detail="light at ~7:30am" />
-        <StatCard label="max delay" value="-2.5h" color="#db7093" detail="light at ~2:30am" />
-        <StatCard label="dead zone" value="10am–8pm" color="var(--site-text-muted)" detail="minimal effect" />
+      {/* Stat cards */}
+      <div className="grid grid-cols-3 gap-3 text-[11px]">
+        <StatCard label="max advance" value="+1.20h" color="#5dcaa5" detail="8:30am · CT4" />
+        <StatCard label="max delay"   value="−2.02h" color="#db7093" detail="10:30pm · CT18" />
+        <StatCard label="dead zones"  value="2"      color="var(--site-text-muted)" detail="4:30am & 3:30pm" />
       </div>
 
-      {/* Info */}
       <PRCInfo />
     </div>
   );
 }
 
+function LegSwatch({ color, label, detail }: { color: string; label: string; detail: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="inline-block w-4 h-2.5 rounded-sm" style={{ backgroundColor: color + "35", border: `1px solid ${color}` }} />
+      <span style={{ color }}>{label}</span>
+      <span>({detail})</span>
+    </span>
+  );
+}
+
+function LegDiamond({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <svg width="10" height="10" viewBox="0 0 10 10">
+        <path d="M5,0 L10,5 L5,10 L0,5 Z" fill={color} />
+      </svg>
+      <span style={{ color }}>{label}</span>
+    </span>
+  );
+}
+
+function LegStripe({ label }: { label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <svg width="16" height="10" viewBox="0 0 16 10">
+        <rect width="16" height="10" fill="#060610" rx="1" />
+        <line x1="0" y1="8"  x2="8"  y2="0"  stroke="#1a1f3a" strokeWidth="1.5" />
+        <line x1="8" y1="10" x2="16" y2="2"   stroke="#1a1f3a" strokeWidth="1.5" />
+      </svg>
+      <span>{label}</span>
+    </span>
+  );
+}
+
 function StatCard({ label, value, color, detail }: { label: string; value: string; color: string; detail: string }) {
   return (
-    <div
-      className="rounded px-2 py-2 flex flex-col gap-1"
-      style={{ border: "1px solid var(--site-border)", backgroundColor: "var(--site-bg-card)" }}
-    >
-      <span className="text-[8px] uppercase tracking-wider" style={{ color: "var(--site-text-muted)" }}>{label}</span>
-      <span className="text-sm font-bold tabular-nums" style={{ color, fontFamily: "var(--font-mono)" }}>{value}</span>
-      <span className="text-[8px]" style={{ color: "var(--site-text-dim)" }}>{detail}</span>
+    <div className="rounded px-3 py-2.5 flex flex-col gap-1"
+      style={{ border: "1px solid var(--site-border)", backgroundColor: "var(--site-bg-card)" }}>
+      <span className="text-[9px] uppercase tracking-wider" style={{ color: "var(--site-text-muted)" }}>{label}</span>
+      <span className="text-base font-bold tabular-nums" style={{ color, fontFamily: "var(--font-mono)" }}>{value}</span>
+      <span className="text-[9px]" style={{ color: "var(--site-text-dim)" }}>{detail}</span>
     </div>
   );
 }
@@ -373,51 +480,42 @@ function PRCInfo() {
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    const fn = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", fn);
+    return () => document.removeEventListener("mousedown", fn);
   }, [open]);
 
   return (
     <div className="relative inline-block" ref={ref}>
-      <button
-        onClick={() => setOpen(!open)}
-        onMouseEnter={() => setOpen(true)}
-        className="flex items-center gap-1.5 text-[10px] transition-colors"
-        style={{ color: "var(--site-text-dim)" }}
-      >
+      <button onClick={() => setOpen(!open)} onMouseEnter={() => setOpen(true)}
+        className="flex items-center gap-1.5 text-[11px] transition-colors"
+        style={{ color: "var(--site-text-dim)" }}>
         <Info size={13} />
         <span>how this applies to jet lag</span>
       </button>
 
       {open && (
-        <div
-          className="absolute left-0 bottom-full mb-2 z-50 w-72 rounded-lg p-4 space-y-2 text-[11px] leading-relaxed shadow-lg"
-          style={{
-            backgroundColor: "var(--site-bg-card)",
-            border: "1px solid var(--site-border)",
-            color: "var(--site-text-prose)",
-          }}
-        >
+        <div className="absolute left-0 bottom-full mb-2 z-50 w-80 rounded-lg p-4 space-y-2 text-[11px] leading-relaxed shadow-lg"
+          style={{ backgroundColor: "var(--site-bg-card)", border: "1px solid var(--site-border)", color: "var(--site-text-prose)" }}>
           <p>
-            The PRC is why jet lag advice isn&apos;t just &ldquo;get sunlight.&rdquo; Light at the{" "}
-            <strong style={{ color: "var(--site-text)" }}>wrong time</strong> pushes your clock in the wrong direction and makes adaptation slower.
+            The PRC tells you <strong style={{ color: "var(--site-text)" }}>when</strong> light shifts your clock and in which direction.
+            The two dead zones (DZ1 at 4:30am, DZ2 at 3:30pm) are the zero crossings — light there has no effect.
           </p>
           <p>
-            <span style={{ color: "#5dcaa5" }}>Eastward travel</span> (e.g., NYC → London) requires advancing your clock. You need bright light in the{" "}
-            <strong style={{ color: "var(--site-text)" }}>morning</strong> and darkness in the evening.
+            <span style={{ color: "#5dcaa5" }}>Eastward travel</span> requires advancing your clock.
+            Seek bright light in the <strong style={{ color: "var(--site-text)" }}>morning advance zone</strong> (after CBTmin)
+            and avoid light in the evening delay zone.
           </p>
           <p>
-            <span style={{ color: "#db7093" }}>Westward travel</span> (e.g., London → NYC) requires delaying. You need bright light in the{" "}
-            <strong style={{ color: "var(--site-text)" }}>evening</strong> and avoiding early morning light.
+            <span style={{ color: "#db7093" }}>Westward travel</span> requires delaying.
+            Seek light in the <strong style={{ color: "var(--site-text)" }}>evening delay zone</strong>
+            and avoid early morning light.
           </p>
           <p>
-            The critical boundary is your CBT nadir (~4:30am home time). Light before it delays; light after advances. Timed light exposure is the single most effective tool for shifting your clock.
+            Striped bands = typical sleep window. Night zones require <strong style={{ color: "var(--site-text)" }}>artificial light</strong> to shift the clock.
           </p>
-          <div className="pt-1" style={{ borderTop: "1px solid var(--site-border)", color: "var(--site-text-dim)", fontSize: "9px" }}>
-            Khalsa et al., J Physiol 2003 &middot; St Hilaire et al., PNAS 2012
+          <div className="pt-1 text-[9px]" style={{ borderTop: "1px solid var(--site-border)", color: "var(--site-text-dim)" }}>
+            St. Hilaire et al. (2012) J Physiology 590(13) · 1h bright white light pulse
           </div>
         </div>
       )}

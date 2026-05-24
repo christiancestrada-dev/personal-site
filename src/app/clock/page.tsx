@@ -21,48 +21,50 @@ export default function ClockPage() {
           <PageHeader title="Visualizations" subtitle="Sleep and circadian graphs" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-16">
-          {/* Circadian state */}
-          <section>
-            <SectionLabel live>How Sleepy Am I?</SectionLabel>
-            {mounted && <MelatoninGraph />}
-          </section>
-
-          {/* Hypnogram */}
-          <section>
-            <SectionLabel>Hypnogram</SectionLabel>
-            {mounted && <Hypnogram />}
-          </section>
-
-          {/* Sleep Debt */}
-          <section>
-            <SectionLabel subtitle="Can you make up for lost sleep on the weekends?">Sleep Debt Accumulator</SectionLabel>
-            {mounted && <SleepDebt />}
-          </section>
-
-          {/* Core Body Temp */}
-          <section>
-            <SectionLabel>Core Body Temperature Rhythm</SectionLabel>
-            {mounted && <BodyTempRhythm />}
-          </section>
-
-          {/* Chronotype */}
-          <section>
-            <SectionLabel>Chronotype Spectrum</SectionLabel>
-            {mounted && <ChronotypeSpectrum />}
-          </section>
-
-          {/* Light PRC */}
+        <div className="space-y-16">
+          {/* Light PRC — hero, full width */}
           <section>
             <SectionLabel>Light Phase Response Curve</SectionLabel>
             {mounted && <LightPRC />}
           </section>
 
-          {/* CYCLOPS Ellipse */}
-          <section>
-            <SectionLabel>How CYCLOPS Reads the Clock</SectionLabel>
-            {mounted && <CyclopsEllipse />}
-          </section>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-16">
+            {/* Circadian state */}
+            <section>
+              <SectionLabel live>How Sleepy Am I?</SectionLabel>
+              {mounted && <MelatoninGraph />}
+            </section>
+
+            {/* Hypnogram */}
+            <section>
+              <SectionLabel>Hypnogram</SectionLabel>
+              {mounted && <Hypnogram />}
+            </section>
+
+            {/* Sleep Debt */}
+            <section>
+              <SectionLabel subtitle="Can you make up for lost sleep on the weekends?">Sleep Debt Accumulator</SectionLabel>
+              {mounted && <SleepDebt />}
+            </section>
+
+            {/* Core Body Temp */}
+            <section>
+              <SectionLabel>Core Body Temperature Rhythm</SectionLabel>
+              {mounted && <BodyTempRhythm />}
+            </section>
+
+            {/* Chronotype */}
+            <section>
+              <SectionLabel>Chronotype Spectrum</SectionLabel>
+              {mounted && <ChronotypeSpectrum />}
+            </section>
+
+            {/* CYCLOPS Ellipse */}
+            <section>
+              <SectionLabel>How CYCLOPS Reads the Clock</SectionLabel>
+              {mounted && <CyclopsEllipse />}
+            </section>
+          </div>
         </div>
       </main>
     </div>
