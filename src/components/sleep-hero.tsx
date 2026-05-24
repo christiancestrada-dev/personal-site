@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { CircadianClock } from "@/components/circadian-clock";
+import { FlipDotCanvas } from "@/components/ui/flipdot-canvas";
 
 // ─── Annotated clock with arrow pointing to phase text ──────────────────────
 function AnnotatedClock() {
@@ -152,13 +153,15 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <animate attributeName="stroke-dashoffset" from={String(gapFrom)} to={String(gapTo)} dur="55s" repeatCount="indefinite" begin="arc1-draw.end" />
       </path>
 
-      {/* ── Orbital stars on arc 1 — one every 7s ── */}
+      {/* ── Arc 1: erase diamond followed by actual diamond ── */}
       {Array.from({ length: Math.floor(55 / 21) }, (_, i) => -(i * 21)).map((offset, i) => (
         <g key={`s1-${i}`}>
           <animateMotion dur="55s" repeatCount="indefinite" rotate="auto" begin={`${offset}s`}>
             <mpath href="#hero-m1" />
           </animateMotion>
-          <path d={star} fill={dotColor} />
+          {/* X matches diamond tip so the line connects flush; Y slightly wider to clear the crossing */}
+          <path d="M 0,-15 L 19,0 L 0,15 L -19,0 Z" style={{ fill: "var(--site-bg)" }} />
+          <path d={star} fill={dotColor} stroke="black" strokeWidth="1.5" />
         </g>
       ))}
 
@@ -168,13 +171,15 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         <animate attributeName="stroke-dashoffset" from="12" to="0" dur="0.8s" repeatCount="indefinite" begin="0.5s" />
       </path>
 
-      {/* ── Orbital stars on arc 2 — one every 7s ── */}
+      {/* ── Arc 2: erase diamond followed by actual diamond ── */}
       {Array.from({ length: Math.floor(70 / 21) }, (_, i) => -(i * 21)).map((offset, i) => (
         <g key={`s2-${i}`}>
           <animateMotion dur="70s" repeatCount="indefinite" rotate="auto" begin={`${offset}s`}>
             <mpath href="#hero-m2" />
           </animateMotion>
-          <path d={starSm} fill={dotColor} />
+          {/* X matches diamond tip so the line connects flush; Y slightly wider to clear the crossing */}
+          <path d="M 0,-14 L 17,0 L 0,14 L -17,0 Z" style={{ fill: "var(--site-bg)" }} />
+          <path d={starSm} fill={dotColor} stroke="black" strokeWidth="1.5" />
         </g>
       ))}
     </svg>
@@ -264,20 +269,6 @@ function SheepSVG({ num, golden = false }: { num: number; golden?: boolean }) {
       >
         {golden ? "\u2605" : num}
       </text>
-    </svg>
-  );
-}
-
-// ─── Fence ────────────────────────────────────────────────────────────────────
-function Fence() {
-  const posts = Array.from({ length: 12 }, (_, i) => i * 9.5 + 0.5);
-  return (
-    <svg viewBox="0 0 100 36" preserveAspectRatio="none" width="100%" height="36" aria-hidden="true">
-      <rect x="0" y="10" width="100" height="2.5" rx="1" fill="var(--site-border)" />
-      <rect x="0" y="22" width="100" height="2.5" rx="1" fill="var(--site-border)" />
-      {posts.map((x) => (
-        <rect key={x} x={x} y="4" width="1.5" height="30" rx="0.7" fill="var(--site-border)" />
-      ))}
     </svg>
   );
 }
@@ -458,6 +449,9 @@ export function SleepHero() {
         background: "var(--site-hero-bg, #000000)",
       }}
     >
+      {/* ── Flipdot cursor canvas ── */}
+      <FlipDotCanvas />
+
       {/* ── Orbital arcs ── */}
       <OrbitalArcs isDark={isDark} />
 
@@ -555,13 +549,7 @@ export function SleepHero() {
         </div>
       </div>
 
-      {/* ── Fence at 50% mark ── */}
-      <div className="absolute left-0 right-0 z-10" style={{ top: "50%" }}>
-        <div style={{ height: 1, background: "var(--site-border)" }} />
-        <Fence />
-      </div>
-
-      {/* ── Quote — below fence ── */}
+      {/* ── Quote — bottom half ── */}
       <div
         className="absolute left-0 right-0 flex flex-col justify-center z-10"
         style={{ top: "54%", bottom: "5%", paddingLeft: "max(2rem, calc((100% - 72rem) / 2 + 2rem))" }}
