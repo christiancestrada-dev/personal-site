@@ -9,8 +9,6 @@ import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
 import { Pencil, Check, X, Plus, Trash2, GripVertical } from "lucide-react";
 import React from "react";
-import { ProgressiveBlur } from "@/components/ui/progressive-blur";
-import { PageStars } from "@/components/ui/page-stars";
 
 // ─── Default content ─────────────────────────────────────────────────────────
 
@@ -111,19 +109,6 @@ export default function Home() {
 
   return (
     <>
-      {/* Fixed viewport blur overlays */}
-      <div className="pointer-events-none" style={{ position: "fixed", top: 0, left: 0, right: 0, height: "80px", zIndex: 20 }}>
-        <div style={{ position: "relative", width: "100%", height: "100%" }}>
-          <ProgressiveBlur position="top" backgroundColor="var(--site-bg)" height="80px" blurAmount="6px" />
-        </div>
-      </div>
-      <div className="pointer-events-none" style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: "80px", zIndex: 20 }}>
-        <div style={{ position: "relative", width: "100%", height: "100%" }}>
-          <ProgressiveBlur position="bottom" backgroundColor="var(--site-bg)" height="80px" blurAmount="6px" />
-        </div>
-      </div>
-
-      <PageStars />
       <div className="relative min-h-screen" style={{ backgroundColor: "var(--site-bg)", color: "var(--site-text)" }}>
         {/* Sheep float across the entire page */}
         {mounted && <FloatingSheep />}

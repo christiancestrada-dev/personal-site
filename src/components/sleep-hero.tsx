@@ -2,7 +2,6 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { CircadianClock } from "@/components/circadian-clock";
 
 // ─── Annotated clock with arrow pointing to phase text ──────────────────────
@@ -443,32 +442,30 @@ export function SleepHero() {
 
   return (
     <div
-      className="relative w-full overflow-hidden"
-      style={{ minHeight: "70vh", background: "#050810" }}
+      className="relative w-full"
+      style={{
+        minHeight: "70vh",
+        background: "var(--site-hero-bg, #000000)",
+      }}
     >
-      {/* ── Hero background image ── */}
-      <Image
-        src="/hero-stars.jpg"
-        alt=""
-        fill
-        priority
-        style={{ objectFit: "cover", objectPosition: "center 30%" }}
-      />
-
-      {/* ── Left gradient so text is readable ── */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: "linear-gradient(to right, rgba(5,8,20,0.72) 0%, rgba(5,8,20,0.42) 55%, rgba(5,8,20,0.1) 100%)" }}
-      />
-
-      {/* ── Bottom fade into page background ── */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none"
-        style={{ background: "linear-gradient(to top, var(--site-bg, #0b1728) 0%, transparent 100%)" }}
-      />
-
       {/* ── Orbital arcs ── */}
       <OrbitalArcs isDark={isDark} />
+
+      {/* ── Stars (dark mode) ── */}
+      {isDark && (
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
+          {STARS.map((s, i) => (
+            <motion.circle
+              key={i}
+              cx={`${s.x}%`} cy={`${s.y}%`} r={s.r}
+              fill="#d4d4d4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.5, 1.0, 0.5] }}
+              transition={{ duration: 2.2 + s.d, repeat: Infinity, delay: s.d * 0.25 + 0.4, ease: "easeInOut" }}
+            />
+          ))}
+        </svg>
+      )}
 
       {isDark ? (
         /* ── Moon (dark mode) ── */
