@@ -1,152 +1,259 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useLayoutEffect, useState } from "react";
 
-const CELL_SIZE = 10;
-const ALIVE_COLOR = "rgba(212, 212, 212, 0.32)";
-const TICK_MS = 130;
-const MOUSE_RADIUS = 0;
-const SEED_CHANCE = 1.0;
-const INITIAL_DENSITY = 0.03;
+// Matches kdrag0n.dev's constants exactly
+const CELL = 8;       // cell size px
+const TICK = 85;      // ms per generation
+const LINE_GAP = 20;  // ms threshold — draw line vs single cell
 
+// Gosper's Glider Gun (rotated 90° as on kdrag0n.dev)
+const GLIDER_GUN_RAW = `........................O
+......................O.O
+............OO......OO............OO
+...........O...O....OO............OO
+OO........O.....O...OO
+OO........O...O.OO....O.O
+..........O.....O.......O
+...........O...O
+............OO`;
+
+function rotatePattern(src: string): string {
+  const rows = src.split("\n");
+  const w = Math.max(...rows.map(r => r.length));
+  const cols: string[] = Array.from({ length: w }, () => "");
+  for (let c = 0; c < w; c++)
+    for (let r = 0; r < rows.length; r++)
+      cols[c] += rows[rows.length - 1 - r][c] ?? ".";
+  return cols.join("\n");
+}
+
+const GLIDER_GUN = rotatePattern(GLIDER_GUN_RAW);
+function patternSize(p: string): [number, number] {
+  const rows = p.split("\n");
+  return [Math.max(...rows.map(r => r.length)), rows.length];
+}
+
+// ── Grid (non-toroidal, bounds-checked like kdrag0n.dev) ──────────────────────
+class Grid {
+  w: number; h: number;
+  cells: Uint8Array;
+  constructor(w: number, h: number) {
+    this.w = w; this.h = h;
+    this.cells = new Uint8Array(w * h);
+  }
+  get(x: number, y: number) { return this.cells[y * this.w + x]; }
+  set(x: number, y: number, v: number) { this.cells[y * this.w + x] = v; }
+  copyFrom(src: Grid, srcX: number, srcY: number, dstX: number, dstY: number, cw: number, ch: number) {
+    for (let dy = 0; dy < ch; dy++)
+      for (let dx = 0; dx < cw; dx++)
+        this.set(dstX + dx, dstY + dy, src.get(srcX + dx, srcY + dy));
+  }
+}
+
+// ── Simulation ────────────────────────────────────────────────────────────────
+class Sim {
+  ctx: CanvasRenderingContext2D;
+  w = 0; h = 0;
+  cur: Grid = new Grid(0, 0);
+  nxt: Grid = new Grid(0, 0);
+  lastMouse: { t: number; x: number; y: number } | null = null;
+  touches: Map<number, { x: number; y: number }> = new Map();
+
+  constructor(ctx: CanvasRenderingContext2D, pattern: string) {
+    this.ctx = ctx;
+    this.resize();
+    // Place Gosper's Gun near top-right (matches kdrag0n.dev placement)
+    const [pw] = patternSize(pattern);
+    const ox = Math.max(0, this.w - pw - 5);
+    this.stampPattern(ox, 5, pattern);
+    // Small random block top-left for entropy
+    const seed = Math.max(10, Math.floor(Math.max(this.w, this.h) / 6));
+    for (let y = 5; y < seed + 5; y++)
+      for (let x = 5; x < seed + 5; x++)
+        this.cur.set(x, y, Math.random() < 0.5 ? 1 : 0);
+    // Run a few generations to settle
+    for (let i = 0; i < 10; i++) this.tick();
+  }
+
+  stampPattern(ox: number, oy: number, pattern: string) {
+    const rows = pattern.split("\n");
+    for (let y = 0; y < rows.length; y++)
+      for (let x = 0; x < rows[y].length; x++)
+        this.cur.set(ox + x, oy + y, rows[y][x] === "O" ? 1 : 0);
+  }
+
+  neighbors(x: number, y: number): number {
+    let n = 0;
+    for (let dy = -1; dy <= 1; dy++)
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || nx >= this.w || ny < 0 || ny >= this.h) continue;
+        n += this.cur.get(nx, ny);
+      }
+    return n;
+  }
+
+  tick() {
+    for (let y = 0; y < this.h; y++)
+      for (let x = 0; x < this.w; x++) {
+        const n = this.neighbors(x, y);
+        const alive = this.cur.get(x, y);
+        this.nxt.set(x, y, alive ? (n === 2 || n === 3 ? 1 : 0) : (n === 3 ? 1 : 0));
+      }
+    const tmp = this.cur; this.cur = this.nxt; this.nxt = tmp;
+  }
+
+  draw() {
+    const { ctx, w, h } = this;
+    ctx.clearRect(0, 0, w * CELL, h * CELL);
+    ctx.fillStyle = "black";
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++)
+        if (this.cur.get(x, y))
+          ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2);
+  }
+
+  resize() {
+    const canvas = this.ctx.canvas;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    this.ctx.scale(dpr, dpr);
+    const nw = Math.floor(rect.width / CELL);
+    const nh = Math.floor(rect.height / CELL);
+    if (nw !== this.w || nh !== this.h) {
+      const next = new Grid(nw, nh);
+      const cw = Math.min(this.w, nw), ch = Math.min(this.h, nh);
+      const sx = Math.max(0, this.w - cw);
+      const dx = Math.max(0, nw - cw);
+      if (this.cur.cells.length) next.copyFrom(this.cur, sx, 0, dx, 0, cw, ch);
+      this.w = nw; this.h = nh;
+      this.cur = next;
+      this.nxt = new Grid(nw, nh);
+    }
+  }
+
+  // Bresenham's line — draws a line of cells between two grid points
+  setLine(x0: number, y0: number, x1: number, y1: number) {
+    const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+    const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx - dy, x = x0, y = y0;
+    for (let i = 0; i < 250; i++) {
+      if (x >= 0 && x < this.w && y >= 0 && y < this.h) this.cur.set(x, y, 1);
+      if (x === x1 && y === y1) break;
+      const e2 = 2 * err;
+      if (e2 > -dy) { err -= dy; x += sx; }
+      if (e2 < dx)  { err += dx; y += sy; }
+    }
+    this.draw();
+  }
+
+  onMouseMove(t: number, x: number, y: number) {
+    if (this.lastMouse && t - this.lastMouse.t < LINE_GAP)
+      this.setLine(this.lastMouse.x, this.lastMouse.y, x, y);
+    else if (x >= 0 && x < this.w && y >= 0 && y < this.h)
+      this.cur.set(x, y, 1);
+    this.lastMouse = { t, x, y };
+  }
+
+  onTouchStart(id: number, x: number, y: number) {
+    this.touches.set(id, { x, y });
+    if (x >= 0 && x < this.w && y >= 0 && y < this.h) this.cur.set(x, y, 1);
+  }
+
+  onTouchMove(id: number, x: number, y: number) {
+    const prev = this.touches.get(id);
+    if (prev) this.setLine(prev.x, prev.y, x, y);
+    this.touches.set(id, { x, y });
+  }
+
+  onTouchEnd(id: number) { this.touches.delete(id); }
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 export function GameOfLife() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const gridRef = useRef<Uint8Array | null>(null);
-  const nextRef = useRef<Uint8Array | null>(null);
-  const colsRef = useRef(0);
-  const rowsRef = useRef(0);
-  const rafRef = useRef<number>(0);
-  const lastTickRef = useRef(0);
+  const simRef = useRef<Sim | null>(null);
+  const [visible, setVisible] = useState(true);
 
-  const idx = useCallback((col: number, row: number) =>
-    ((row + rowsRef.current) % rowsRef.current) * colsRef.current +
-    ((col + colsRef.current) % colsRef.current), []);
-
-  const step = useCallback(() => {
-    const grid = gridRef.current!;
-    const next = nextRef.current!;
-    const cols = colsRef.current;
-    const rows = rowsRef.current;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const n =
-          grid[idx(c-1,r-1)] + grid[idx(c,r-1)] + grid[idx(c+1,r-1)] +
-          grid[idx(c-1,r)]                        + grid[idx(c+1,r)] +
-          grid[idx(c-1,r+1)] + grid[idx(c,r+1)] + grid[idx(c+1,r+1)];
-        const alive = grid[idx(c, r)];
-        next[idx(c, r)] = alive ? (n === 2 || n === 3 ? 1 : 0) : (n === 3 ? 1 : 0);
-      }
-    }
-    gridRef.current = next;
-    nextRef.current = grid;
-  }, [idx]);
-
-  const draw = useCallback(() => {
+  useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d")!;
-    const grid = gridRef.current!;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = ALIVE_COLOR;
-    for (let r = 0; r < rowsRef.current; r++) {
-      for (let c = 0; c < colsRef.current; c++) {
-        if (grid[idx(c, r)]) {
-          ctx.fillRect(c * CELL_SIZE + 1, r * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
-        }
-      }
-    }
-  }, [idx]);
-
-  const loop = useCallback((ts: number) => {
-    if (ts - lastTickRef.current >= TICK_MS) {
-      step();
-      draw();
-      lastTickRef.current = ts;
-    }
-    rafRef.current = requestAnimationFrame(loop);
-  }, [step, draw]);
-
-  const init = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const w = canvas.offsetWidth;
-    const h = canvas.offsetHeight;
-    if (!w || !h) return;
-    canvas.width = w;
-    canvas.height = h;
-    colsRef.current = Math.ceil(w / CELL_SIZE);
-    rowsRef.current = Math.ceil(h / CELL_SIZE);
-    const size = colsRef.current * rowsRef.current;
-    const grid = new Uint8Array(size);
-    for (let i = 0; i < size; i++) {
-      if (Math.random() < INITIAL_DENSITY) grid[i] = 1;
-    }
-    gridRef.current = grid;
-    nextRef.current = new Uint8Array(size);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const sim = new Sim(ctx, GLIDER_GUN);
+    simRef.current = sim;
+    sim.draw();
   }, []);
 
-  const seedAt = useCallback((cx: number, cy: number) => {
-    const grid = gridRef.current;
-    if (!grid) return;
-    const col = Math.floor(cx / CELL_SIZE);
-    const row = Math.floor(cy / CELL_SIZE);
-    for (let dr = -MOUSE_RADIUS; dr <= MOUSE_RADIUS; dr++) {
-      for (let dc = -MOUSE_RADIUS; dc <= MOUSE_RADIUS; dc++) {
-        if (Math.random() < SEED_CHANCE) grid[idx(col + dc, row + dr)] = 1;
-      }
-    }
-  }, [idx]);
-
+  // Tick loop — pauses when tab hidden
   useEffect(() => {
-    init();
-    rafRef.current = requestAnimationFrame(loop);
+    if (!visible) return;
+    const id = setInterval(() => {
+      simRef.current?.tick();
+      simRef.current?.draw();
+    }, TICK);
+    return () => clearInterval(id);
+  }, [visible]);
 
+  // Visibility API
+  useEffect(() => {
+    const fn = () => setVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", fn);
+    return () => document.removeEventListener("visibilitychange", fn);
+  }, []);
+
+  // Resize
+  useEffect(() => {
     const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(rafRef.current);
-      init();
-      rafRef.current = requestAnimationFrame(loop);
+      simRef.current?.resize();
+      simRef.current?.draw();
     });
-    const parent = canvasRef.current?.parentElement;
-    if (parent) ro.observe(parent);
+    if (canvasRef.current) ro.observe(canvasRef.current);
+    return () => ro.disconnect();
+  }, []);
 
-    const onMouseMove = (e: MouseEvent) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      if (e.clientX >= rect.left && e.clientX <= rect.right &&
-          e.clientY >= rect.top  && e.clientY <= rect.bottom) {
-        seedAt(e.clientX - rect.left, e.clientY - rect.top);
-      }
+  // Mouse
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const x = Math.floor(e.clientX / CELL);
+      const y = Math.floor(e.clientY / CELL);
+      simRef.current?.onMouseMove(e.timeStamp, x, y);
+    };
+    const onTouchStart = (e: TouchEvent) => {
+      for (const t of Array.from(e.touches))
+        simRef.current?.onTouchStart(t.identifier, Math.floor(t.clientX / CELL), Math.floor(t.clientY / CELL));
     };
     const onTouchMove = (e: TouchEvent) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      for (const t of Array.from(e.touches)) {
-        if (t.clientX >= rect.left && t.clientX <= rect.right &&
-            t.clientY >= rect.top  && t.clientY <= rect.bottom) {
-          seedAt(t.clientX - rect.left, t.clientY - rect.top);
-        }
-      }
+      for (const t of Array.from(e.touches))
+        simRef.current?.onTouchMove(t.identifier, Math.floor(t.clientX / CELL), Math.floor(t.clientY / CELL));
     };
-
-    window.addEventListener("mousemove", onMouseMove);
+    const onTouchEnd = (e: TouchEvent) => {
+      for (const t of Array.from(e.changedTouches))
+        simRef.current?.onTouchEnd(t.identifier);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("touchstart", onTouchStart);
     window.addEventListener("touchmove", onTouchMove, { passive: true });
-
+    window.addEventListener("touchend", onTouchEnd);
     return () => {
-      cancelAnimationFrame(rafRef.current);
-      ro.disconnect();
-      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [init, loop, seedAt]);
+  }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ display: "block", zIndex: 0 }}
-      aria-hidden="true"
-    />
+    <div className="-z-30 print:hidden" style={{ position: "fixed", inset: 0, pointerEvents: "none" }}>
+      <canvas
+        ref={canvasRef}
+        className="opacity-[0.07] dark:invert dark:opacity-[0.11]"
+        style={{ display: "block", width: "100vw", height: "100vh", userSelect: "none" }}
+      />
+    </div>
   );
 }

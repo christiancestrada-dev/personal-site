@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { CircadianClock } from "@/components/circadian-clock";
-import { GameOfLife } from "@/components/game-of-life";
 
 // ─── Annotated clock with arrow pointing to phase text ──────────────────────
 function AnnotatedClock() {
@@ -425,8 +424,6 @@ export function SleepHero() {
       {/* ── Orbital arcs ── */}
       <OrbitalArcs isDark={isDark} />
 
-      {/* ── Game of Life background (dark mode) ── */}
-      {isDark && <GameOfLife />}
 
       {isDark ? (
         /* ── Moon (dark mode) ── */
