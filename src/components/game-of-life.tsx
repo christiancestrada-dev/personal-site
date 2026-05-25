@@ -179,14 +179,18 @@ export function GameOfLife() {
   const simRef = useRef<Sim | null>(null);
   const [visible, setVisible] = useState(true);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const sim = new Sim(ctx, GLIDER_GUN);
-    simRef.current = sim;
-    sim.draw();
+    // Wait one frame so CSS layout (100vw × 100vh) is fully computed
+    const raf = requestAnimationFrame(() => {
+      const sim = new Sim(ctx, GLIDER_GUN);
+      simRef.current = sim;
+      sim.draw();
+    });
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   // Tick loop — pauses when tab hidden
@@ -251,7 +255,7 @@ export function GameOfLife() {
     <div className="print:hidden" style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
       <canvas
         ref={canvasRef}
-        className="opacity-[0.10] dark:invert dark:opacity-[0.15]"
+        className="opacity-[0.12] dark:invert dark:opacity-[0.18]"
         style={{ display: "block", width: "100vw", height: "100vh", userSelect: "none" }}
       />
     </div>

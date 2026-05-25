@@ -418,7 +418,7 @@ export function SleepHero() {
       className="relative w-full"
       style={{
         minHeight: "70vh",
-        background: "var(--site-hero-bg, #000000)",
+        background: "transparent",
       }}
     >
       {/* ── Orbital arcs ── */}
