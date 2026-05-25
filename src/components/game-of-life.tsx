@@ -5,9 +5,9 @@ import { useEffect, useRef, useCallback } from "react";
 const CELL_SIZE = 10;
 const ALIVE_COLOR = "rgba(212, 212, 212, 0.32)";
 const TICK_MS = 130;
-const MOUSE_RADIUS = 3;
-const SEED_CHANCE = 0.55;
-const INITIAL_DENSITY = 0.1;
+const MOUSE_RADIUS = 0;
+const SEED_CHANCE = 1.0;
+const INITIAL_DENSITY = 0.03;
 
 export function GameOfLife() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
