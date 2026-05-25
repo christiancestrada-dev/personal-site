@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { CircadianClock } from "@/components/circadian-clock";
+import { GameOfLife } from "@/components/game-of-life";
 
 // ─── Annotated clock with arrow pointing to phase text ──────────────────────
 function AnnotatedClock() {
@@ -74,55 +75,6 @@ function getLunarPhase(): { name: string; emoji: string; age: number } {
   if (age < 27.68) return { name: "Waning Crescent", emoji: "\u{1F318}", age };
   return { name: "New Moon", emoji: "\u{1F311}", age };
 }
-
-// ─── Stars ───────────────────────────────────────────────────────────────────
-const STARS = [
-  // top band y 2–9%
-  { x:  3, y:  3, r: 1.3, d: 0.0 }, { x:  9, y:  7, r: 1.0, d: 0.6 },
-  { x: 15, y:  2, r: 1.5, d: 1.2 }, { x: 22, y:  6, r: 1.1, d: 0.3 },
-  { x: 28, y:  4, r: 1.6, d: 1.9 }, { x: 35, y:  8, r: 0.9, d: 0.8 },
-  { x: 41, y:  3, r: 1.4, d: 0.1 }, { x: 47, y:  7, r: 1.2, d: 2.2 },
-  { x: 54, y:  2, r: 1.7, d: 0.5 }, { x: 61, y:  5, r: 1.0, d: 1.4 },
-  { x: 67, y:  8, r: 1.3, d: 1.0 }, { x: 74, y:  3, r: 1.1, d: 0.4 },
-  { x: 80, y:  6, r: 1.5, d: 1.1 }, { x: 86, y:  2, r: 0.9, d: 2.5 },
-  { x: 92, y:  7, r: 1.2, d: 0.7 }, { x: 97, y:  4, r: 1.4, d: 1.6 },
-  // middle band y 13–24%
-  { x:  6, y: 14, r: 1.1, d: 0.2 }, { x: 13, y: 20, r: 1.4, d: 1.5 },
-  { x: 20, y: 13, r: 0.9, d: 0.7 }, { x: 27, y: 22, r: 1.6, d: 1.8 },
-  { x: 33, y: 16, r: 1.2, d: 0.4 }, { x: 40, y: 23, r: 1.0, d: 2.1 },
-  { x: 46, y: 13, r: 1.5, d: 1.3 }, { x: 53, y: 21, r: 1.1, d: 0.6 },
-  { x: 59, y: 15, r: 1.3, d: 1.9 }, { x: 66, y: 22, r: 0.9, d: 0.3 },
-  { x: 72, y: 14, r: 1.6, d: 1.7 }, { x: 79, y: 20, r: 1.2, d: 0.9 },
-  { x: 85, y: 15, r: 1.0, d: 2.4 }, { x: 91, y: 23, r: 1.4, d: 0.5 },
-  { x: 96, y: 18, r: 1.1, d: 1.2 },
-  // lower band y 29–40%
-  { x:  4, y: 31, r: 0.9, d: 0.5 }, { x: 11, y: 36, r: 1.3, d: 1.2 },
-  { x: 19, y: 29, r: 1.1, d: 0.9 }, { x: 38, y: 34, r: 1.0, d: 2.0 },
-  { x: 57, y: 30, r: 1.2, d: 0.2 }, { x: 75, y: 37, r: 1.4, d: 1.6 },
-  { x: 87, y: 32, r: 0.9, d: 0.8 }, { x: 95, y: 39, r: 1.1, d: 1.4 },
-  // mid-lower band y 44–57%
-  { x:  2, y: 45, r: 1.0, d: 1.7 }, { x:  8, y: 52, r: 1.3, d: 0.3 },
-  { x: 16, y: 47, r: 0.8, d: 2.0 }, { x: 24, y: 55, r: 1.1, d: 0.9 },
-  { x: 31, y: 44, r: 1.4, d: 1.4 }, { x: 43, y: 50, r: 0.9, d: 0.1 },
-  { x: 50, y: 56, r: 1.2, d: 2.3 }, { x: 63, y: 46, r: 1.0, d: 0.7 },
-  { x: 70, y: 53, r: 1.5, d: 1.1 }, { x: 78, y: 44, r: 0.8, d: 1.8 },
-  { x: 84, y: 51, r: 1.3, d: 0.4 }, { x: 90, y: 47, r: 1.1, d: 2.6 },
-  { x: 98, y: 55, r: 0.9, d: 0.6 },
-  // lower-mid band y 61–72%
-  { x:  5, y: 63, r: 1.2, d: 1.3 }, { x: 14, y: 69, r: 0.9, d: 0.5 },
-  { x: 22, y: 62, r: 1.4, d: 2.1 }, { x: 30, y: 71, r: 1.0, d: 0.8 },
-  { x: 39, y: 65, r: 1.3, d: 1.6 }, { x: 48, y: 68, r: 0.8, d: 0.2 },
-  { x: 56, y: 63, r: 1.1, d: 2.4 }, { x: 65, y: 70, r: 1.5, d: 0.9 },
-  { x: 73, y: 64, r: 0.9, d: 1.5 }, { x: 81, y: 68, r: 1.2, d: 0.3 },
-  { x: 89, y: 62, r: 1.0, d: 1.9 }, { x: 94, y: 71, r: 1.3, d: 0.7 },
-  // bottom band y 76–88%
-  { x:  7, y: 78, r: 0.8, d: 2.2 }, { x: 17, y: 84, r: 1.1, d: 0.4 },
-  { x: 26, y: 77, r: 1.3, d: 1.0 }, { x: 35, y: 82, r: 0.9, d: 1.7 },
-  { x: 44, y: 87, r: 1.2, d: 0.1 }, { x: 52, y: 79, r: 1.0, d: 2.5 },
-  { x: 60, y: 85, r: 0.8, d: 1.2 }, { x: 68, y: 76, r: 1.4, d: 0.6 },
-  { x: 77, y: 83, r: 1.1, d: 1.8 }, { x: 83, y: 78, r: 0.9, d: 0.3 },
-  { x: 91, y: 86, r: 1.2, d: 2.0 }, { x: 99, y: 80, r: 1.0, d: 1.3 },
-];
 
 // ─── Orbital arcs ────────────────────────────────────────────────────────────
 function OrbitalArcs({ isDark }: { isDark: boolean }) {
@@ -473,21 +425,8 @@ export function SleepHero() {
       {/* ── Orbital arcs ── */}
       <OrbitalArcs isDark={isDark} />
 
-      {/* ── Stars (dark mode) ── */}
-      {isDark && (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
-          {STARS.map((s, i) => (
-            <motion.circle
-              key={i}
-              cx={`${s.x}%`} cy={`${s.y}%`} r={s.r}
-              fill="#d4d4d4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0.5, 1.0, 0.5] }}
-              transition={{ duration: 2.2 + s.d, repeat: Infinity, delay: s.d * 0.25 + 0.4, ease: "easeInOut" }}
-            />
-          ))}
-        </svg>
-      )}
+      {/* ── Game of Life background (dark mode) ── */}
+      {isDark && <GameOfLife />}
 
       {isDark ? (
         /* ── Moon (dark mode) ── */
