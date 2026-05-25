@@ -2,6 +2,7 @@
 
 import type { ReadingItem } from "@/lib/reading-data";
 import { BookSpine } from "./book-spine";
+import { useTheme } from "@/lib/use-theme";
 
 interface BookshelfProps {
   items: ReadingItem[];
@@ -9,16 +10,16 @@ interface BookshelfProps {
   onSelect: (index: number) => void;
 }
 
-// Shelf "wood" colors — dark stained wood that works on both themes
-const SHELF_WOOD = "#1c1612";
-const SHELF_WOOD_LIGHT = "#2a211a";
-const SHELF_WOOD_EDGE = "#3a2e24";
-const SHELF_BACK = "#0e0b09";
+const DARK_WOOD  = { back: "#0e0b09", wood: "#1c1612", light: "#2a211a", edge: "#3a2e24" };
+const LIGHT_WOOD = { back: "#2c1f10", wood: "#8b6843", light: "#a88260", edge: "#6a4e30" };
 
 export function Bookshelf({ items, selectedIndex, onSelect }: BookshelfProps) {
+  const { isDark } = useTheme();
+  const W = isDark ? DARK_WOOD : LIGHT_WOOD;
+
   if (items.length === 0) {
     return (
-      <div className="relative rounded-lg overflow-hidden" style={{ background: SHELF_BACK, border: `1px solid ${SHELF_WOOD_LIGHT}` }}>
+      <div className="relative rounded-lg overflow-hidden" style={{ background: W.back, border: `1px solid ${W.light}` }}>
         <p className="py-20 text-center text-sm" style={{ color: "var(--site-text-muted)" }}>
           No items on this shelf
         </p>
@@ -30,8 +31,8 @@ export function Bookshelf({ items, selectedIndex, onSelect }: BookshelfProps) {
     <div
       className="relative rounded-lg overflow-hidden"
       style={{
-        background: SHELF_BACK,
-        border: `1px solid ${SHELF_WOOD_LIGHT}`,
+        background: W.back,
+        border: `1px solid ${W.light}`,
       }}
     >
       {/* Back panel — subtle wood grain texture */}
@@ -64,7 +65,7 @@ export function Bookshelf({ items, selectedIndex, onSelect }: BookshelfProps) {
           className="shrink-0 hidden sm:block"
           style={{
             width: 14,
-            background: `linear-gradient(to right, ${SHELF_WOOD_EDGE}, ${SHELF_WOOD})`,
+            background: `linear-gradient(to right, ${W.edge}, ${W.wood})`,
           }}
         />
 
@@ -92,7 +93,7 @@ export function Bookshelf({ items, selectedIndex, onSelect }: BookshelfProps) {
             <div
               style={{
                 height: 14,
-                background: `linear-gradient(to bottom, ${SHELF_WOOD_EDGE}, ${SHELF_WOOD_LIGHT} 40%, ${SHELF_WOOD})`,
+                background: `linear-gradient(to bottom, ${W.edge}, ${W.light} 40%, ${W.wood})`,
                 boxShadow: `0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)`,
               }}
             />
@@ -100,7 +101,7 @@ export function Bookshelf({ items, selectedIndex, onSelect }: BookshelfProps) {
             <div
               style={{
                 height: 6,
-                background: `linear-gradient(to bottom, ${SHELF_WOOD}, transparent)`,
+                background: `linear-gradient(to bottom, ${W.wood}, transparent)`,
                 opacity: 0.6,
               }}
             />
@@ -112,7 +113,7 @@ export function Bookshelf({ items, selectedIndex, onSelect }: BookshelfProps) {
           className="shrink-0 hidden sm:block"
           style={{
             width: 14,
-            background: `linear-gradient(to left, ${SHELF_WOOD_EDGE}, ${SHELF_WOOD})`,
+            background: `linear-gradient(to left, ${W.edge}, ${W.wood})`,
           }}
         />
       </div>

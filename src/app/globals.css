@@ -162,13 +162,13 @@
   --site-bg-card-alpha: rgba(220,216,208,0.6);
   --site-bg-sidebar: rgba(240,237,231,0.97);
   --site-bg-sidebar-mobile: rgba(240,237,231,0.99);
-  --site-text: #2a3444;
-  --site-text-bright: #111827;
-  --site-text-secondary: #5a6a7e;
-  --site-text-muted: #7a8a9a;
-  --site-text-dim: #96a3b0;
-  --site-text-serif: #3a4a5e;
-  --site-text-prose: #5a6a7e;
+  --site-text: #243244;
+  --site-text-bright: #0e1a28;
+  --site-text-secondary: #3f5468;
+  --site-text-muted: #4f6475;
+  --site-text-dim: #68788a;
+  --site-text-serif: #2a3a50;
+  --site-text-prose: #3f5468;
   --site-border: #ccc8c0;
   --site-border-subtle: #ddd9d1;
   --site-accent: #c4607a;
@@ -273,4 +273,14 @@
   50%  { transform: translate(28vw,  -72px); }
   58%  { transform: translate(16vw,    0px); }
   100% { transform: translate(-22vw,   0px); }
+}
+
+/* Canvas visualizations are always dark — wrap to signal intent in light mode */
+.viz-dark-wrap {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+[data-theme="light"] .viz-dark-wrap {
+  box-shadow: 0 2px 20px rgba(0,0,0,0.18);
+  outline: 1px solid rgba(0,0,0,0.1);
 }

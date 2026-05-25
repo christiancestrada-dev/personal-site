@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { LocationTag } from "@/components/ui/location-tag";
+import { useTheme } from "@/lib/use-theme";
 
 // ─── Sleep stage config ───────────────────────────────────────────────────────
 
@@ -14,24 +15,25 @@ interface NavStage {
   opacity: number;
 }
 
-function getNavStage(hour: number): NavStage {
+function getNavStage(hour: number, isDark: boolean): NavStage {
   if (hour >= 22 || hour < 1)  return { label: "N1",   color: "#7a9fc4", amplitude: 5,  frequency: 4, speed: 4,   opacity: 0.5 };
   if (hour >= 1  && hour < 2)  return { label: "N2",   color: "#60a5ff", amplitude: 8,  frequency: 3, speed: 5.5, opacity: 0.5 };
   if (hour >= 2  && hour < 4)  return { label: "N3",   color: "#4a8adc", amplitude: 14, frequency: 1, speed: 8,   opacity: 0.6 };
   if (hour >= 4  && hour < 6)  return { label: "REM",  color: "#9b8fce", amplitude: 4,  frequency: 6, speed: 2,   opacity: 0.5 };
   if (hour >= 6  && hour < 7)  return { label: "N2",   color: "#60a5ff", amplitude: 7,  frequency: 3, speed: 5,   opacity: 0.4 };
   if (hour >= 13 && hour < 15) return { label: "Dip",  color: "#7a9fc4", amplitude: 4,  frequency: 4, speed: 4,   opacity: 0.35 };
-  return                               { label: "Wake", color: "#d4d4d4", amplitude: 2,  frequency: 7, speed: 1.5, opacity: 0.3 };
+  return                               { label: "Wake", color: isDark ? "#d4d4d4" : "#5a7080", amplitude: 2,  frequency: 7, speed: 1.5, opacity: 0.3 };
 }
 
 function useSleepStage(): NavStage {
-  const [stage, setStage] = useState<NavStage>(() => getNavStage(new Date().getHours()));
+  const { isDark } = useTheme();
+  const [stage, setStage] = useState<NavStage>(() => getNavStage(new Date().getHours(), true));
   useEffect(() => {
-    const update = () => setStage(getNavStage(new Date().getHours()));
+    const update = () => setStage(getNavStage(new Date().getHours(), isDark));
     update();
     const i = setInterval(update, 60000);
     return () => clearInterval(i);
-  }, []);
+  }, [isDark]);
   return stage;
 }
 
