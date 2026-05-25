@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Lora } from "next/font/google";
 import { SidebarLayout } from "@/components/ui/sidebar-nav";
+import { GameOfLife } from "@/components/game-of-life";
 import "./globals.css";
 
 const geist = Geist({
@@ -26,18 +27,18 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "christian estrada",
-  description: "student researcher — sleep, memory, neuroscience",
+  title: "christian's website",
+  description: "putting the personal in personal website",
   metadataBase: new URL("https://christian-estrada.com"),
   icons: {
     icon: "/favicon.png",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "christian estrada",
-    description: "student researcher — sleep, memory, neuroscience",
+    title: "christian's website",
+    description: "putting the personal in personal website",
     url: "https://christian-estrada.com",
-    siteName: "christian estrada",
+    siteName: "christian's website",
     type: "website",
   },
 };
@@ -53,6 +54,7 @@ export default function RootLayout({
         className={`${geist.variable} ${geistMono.variable} ${inter.variable} ${lora.variable} antialiased`}
         style={{ backgroundColor: "var(--site-bg)", margin: 0 }}
       >
+        <GameOfLife />
         <SidebarLayout>{children}</SidebarLayout>
       </body>
     </html>

@@ -110,7 +110,7 @@ class Sim {
     ctx.clearRect(0, 0, w * CELL, h * CELL);
     // site uses data-theme="light" for light mode; default (:root) is dark
     const dark = document.documentElement.getAttribute("data-theme") !== "light";
-    ctx.fillStyle = dark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)";
+    ctx.fillStyle = dark ? "rgba(255,255,255,0.40)" : "rgba(0,0,0,0.40)";
     for (let y = 0; y < h; y++)
       for (let x = 0; x < w; x++)
         if (this.cur.get(x, y))
