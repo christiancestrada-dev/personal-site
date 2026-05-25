@@ -147,13 +147,13 @@ export function SleepNavbar() {
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-6 border-b overflow-hidden"
-      style={{ borderColor: "#1a1a1a", backgroundColor: "rgba(0,0,0,0.88)" }}
+      style={{ borderColor: "var(--site-border)", backgroundColor: "var(--site-navbar-bg)" }}
     >
       {/* Fading grid texture */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: `linear-gradient(to right, #1a1a1a 1px, transparent 1px), linear-gradient(to bottom, #1a1a1a 1px, transparent 1px)`,
+          backgroundImage: "linear-gradient(to right, var(--site-navbar-grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--site-navbar-grid-color) 1px, transparent 1px)",
           backgroundSize: "32px 32px",
           WebkitMaskImage: "radial-gradient(ellipse 70% 200% at 0% 50%, #000 30%, transparent 80%)",
           maskImage: "radial-gradient(ellipse 70% 200% at 0% 50%, #000 30%, transparent 80%)",
@@ -165,7 +165,7 @@ export function SleepNavbar() {
       <div className="relative z-10 flex flex-col justify-center gap-0.5">
         <h1
           className="text-[11px] font-bold italic uppercase tracking-[0.2em]"
-          style={{ color: "#d4d4d4" }}
+          style={{ color: "var(--site-text)" }}
         >
           christian estrada
         </h1>
@@ -184,7 +184,7 @@ export function SleepNavbar() {
             <LocationTag city="Boston" timezone="America/New_York" />
             <div
               className="hidden sm:block w-px h-4"
-              style={{ backgroundColor: "#1a1a1a" }}
+              style={{ backgroundColor: "var(--site-border)" }}
             />
             <PhaseBadge stage={stage} />
           </>

@@ -150,6 +150,10 @@
   --anim-base: 300ms;
   --anim-slow: 600ms;
   --anim-feature: 1.5s;
+
+  /* Navbar */
+  --site-navbar-bg: rgba(0,0,0,0.88);
+  --site-navbar-grid-color: #1a1a1a;
 }
 
 [data-theme="light"] {
@@ -178,6 +182,10 @@
   --site-hero-bg: #ffffff;
   --site-hero-overlay: rgba(244,241,235,0.3);
   --site-backdrop: rgba(0,0,0,0.3);
+
+  /* Navbar */
+  --site-navbar-bg: rgba(244,241,235,0.92);
+  --site-navbar-grid-color: #ccc8c0;
 }
 
 @layer base {
@@ -229,6 +237,22 @@
 @keyframes fadeInWave {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.img-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--site-bg-card) 0%,
+    var(--site-border) 50%,
+    var(--site-bg-card) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 }
 
 @keyframes bubble-pop {
