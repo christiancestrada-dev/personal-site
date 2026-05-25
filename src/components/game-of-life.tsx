@@ -248,10 +248,10 @@ export function GameOfLife() {
   }, []);
 
   return (
-    <div className="-z-30 print:hidden" style={{ position: "fixed", inset: 0, pointerEvents: "none" }}>
+    <div className="print:hidden" style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
       <canvas
         ref={canvasRef}
-        className="opacity-[0.07] dark:invert dark:opacity-[0.11]"
+        className="opacity-[0.10] dark:invert dark:opacity-[0.15]"
         style={{ display: "block", width: "100vw", height: "100vh", userSelect: "none" }}
       />
     </div>
