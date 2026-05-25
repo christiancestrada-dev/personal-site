@@ -56,25 +56,6 @@ function AnnotatedClock() {
   );
 }
 
-// ─── Lunar phase calculation ─────────────────────────────────────────────────
-function getLunarPhase(): { name: string; emoji: string; age: number } {
-  const now = new Date();
-  const known = new Date(2000, 0, 6, 18, 14, 0).getTime();
-  const cycle = 29.53058770576;
-  const days = (now.getTime() - known) / (1000 * 60 * 60 * 24);
-  const age = ((days % cycle) + cycle) % cycle;
-
-  if (age < 1.85) return { name: "New Moon", emoji: "\u{1F311}", age };
-  if (age < 5.53) return { name: "Waxing Crescent", emoji: "\u{1F312}", age };
-  if (age < 9.22) return { name: "First Quarter", emoji: "\u{1F313}", age };
-  if (age < 12.91) return { name: "Waxing Gibbous", emoji: "\u{1F314}", age };
-  if (age < 16.61) return { name: "Full Moon", emoji: "\u{1F315}", age };
-  if (age < 20.30) return { name: "Waning Gibbous", emoji: "\u{1F316}", age };
-  if (age < 23.99) return { name: "Last Quarter", emoji: "\u{1F317}", age };
-  if (age < 27.68) return { name: "Waning Crescent", emoji: "\u{1F318}", age };
-  return { name: "New Moon", emoji: "\u{1F311}", age };
-}
-
 // ─── Orbital arcs ────────────────────────────────────────────────────────────
 function OrbitalArcs({ isDark }: { isDark: boolean }) {
   const lineColor = isDark ? "rgba(200,220,255,0.25)" : "rgba(50,80,120,0.14)";
@@ -401,7 +382,6 @@ export function FloatingSheep() {
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
 export function SleepHero() {
-  const [showMoonTip, setShowMoonTip] = useState(false);
   const [showQuoteInfo, setShowQuoteInfo] = useState(false);
   const [isDark, setIsDark] = useState(true);
 
@@ -425,59 +405,6 @@ export function SleepHero() {
       <OrbitalArcs isDark={isDark} />
 
 
-      {isDark ? (
-        /* ── Moon (dark mode) ── */
-        <div
-          className="absolute z-30 cursor-pointer"
-          style={{ right: "8%", top: "5%" }}
-          onClick={() => setShowMoonTip(prev => !prev)}
-        >
-          <svg width="52" height="52" viewBox="0 0 52 52" aria-label="Moon">
-            <circle cx="26" cy="26" r="26" fill="#cfc4a8" opacity="0.12" />
-            <circle cx="30" cy="24" r="21" fill="#000000" />
-          </svg>
-          <AnimatePresence>
-            {showMoonTip && (
-              <motion.div
-                className="absolute top-full mt-2 right-0 px-3 py-2 rounded-md text-[10px] z-50 max-w-[min(200px,calc(100vw-4rem))]"
-                style={{ backgroundColor: "rgba(0,0,0,0.95)", border: "1px solid var(--site-border)", color: "var(--site-text)" }}
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.2 }}
-              >
-                {(() => {
-                  const phase = getLunarPhase();
-                  return <span>{phase.emoji} {phase.name} · day {phase.age.toFixed(1)}</span>;
-                })()}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      ) : (
-        /* ── Sun (light mode) ── */
-        <div className="absolute z-20" style={{ right: "8%", top: "5%" }}>
-          <motion.svg width="64" height="64" viewBox="0 0 64 64" aria-label="Sun"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-          >
-            {/* Rays */}
-            {Array.from({ length: 12 }).map((_, i) => (
-              <motion.line
-                key={i}
-                x1="32" y1="4" x2="32" y2="10"
-                stroke="#f59e0b" strokeWidth="2" strokeLinecap="round"
-                style={{ transformOrigin: "32px 32px", transform: `rotate(${i * 30}deg)` }}
-                animate={{ opacity: [0.4, 0.8, 0.4] }}
-                transition={{ duration: 2, repeat: Infinity, delay: i * 0.15 }}
-              />
-            ))}
-            {/* Core */}
-            <circle cx="32" cy="32" r="14" fill="#fbbf24" />
-            <circle cx="32" cy="32" r="18" fill="#fbbf24" opacity="0.2" />
-          </motion.svg>
-        </div>
-      )}
 
 
       {/* ── Greeting — top half ── */}
