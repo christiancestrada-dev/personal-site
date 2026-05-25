@@ -110,7 +110,7 @@ class Sim {
     ctx.clearRect(0, 0, w * CELL, h * CELL);
     // site uses data-theme="light" for light mode; default (:root) is dark
     const dark = document.documentElement.getAttribute("data-theme") !== "light";
-    ctx.fillStyle = dark ? "rgba(255,255,255,0.40)" : "rgba(0,0,0,0.40)";
+    ctx.fillStyle = dark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)";
     for (let y = 0; y < h; y++)
       for (let x = 0; x < w; x++)
         if (this.cur.get(x, y))
@@ -222,12 +222,21 @@ export function GameOfLife() {
     return () => ro.disconnect();
   }, []);
 
-  // Mouse
+  // Mouse — only draw while button held (click-drag)
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
+      if (!e.buttons) return;
       const x = Math.floor(e.clientX / CELL);
       const y = Math.floor(e.clientY / CELL);
       simRef.current?.onMouseMove(e.timeStamp, x, y);
+    };
+    const onDown = (e: MouseEvent) => {
+      const x = Math.floor(e.clientX / CELL);
+      const y = Math.floor(e.clientY / CELL);
+      simRef.current?.onMouseMove(e.timeStamp, x, y);
+    };
+    const onUp = () => {
+      if (simRef.current) simRef.current.lastMouse = null;
     };
     const onTouchStart = (e: TouchEvent) => {
       for (const t of Array.from(e.touches))
@@ -241,12 +250,16 @@ export function GameOfLife() {
       for (const t of Array.from(e.changedTouches))
         simRef.current?.onTouchEnd(t.identifier);
     };
+    window.addEventListener("mousedown", onDown);
     window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
     window.addEventListener("touchstart", onTouchStart);
     window.addEventListener("touchmove", onTouchMove, { passive: true });
     window.addEventListener("touchend", onTouchEnd);
     return () => {
+      window.removeEventListener("mousedown", onDown);
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
