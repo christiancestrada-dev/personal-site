@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Lora } from "next/font/google";
 import { SidebarLayout } from "@/components/ui/sidebar-nav";
-import { GameOfLife } from "@/components/game-of-life";
 import "./globals.css";
 
 const geist = Geist({
@@ -54,7 +53,6 @@ export default function RootLayout({
         className={`${geist.variable} ${geistMono.variable} ${inter.variable} ${lora.variable} antialiased`}
         style={{ backgroundColor: "var(--site-bg)", margin: 0 }}
       >
-        <GameOfLife />
         <SidebarLayout>{children}</SidebarLayout>
       </body>
     </html>

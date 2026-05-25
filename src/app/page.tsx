@@ -9,6 +9,7 @@ import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
 import { Pencil, Check, X, Plus, Trash2, GripVertical } from "lucide-react";
 import React from "react";
+import { GameOfLife } from "@/components/game-of-life";
 
 // ─── Default content ─────────────────────────────────────────────────────────
 
@@ -109,6 +110,7 @@ export default function Home() {
 
   return (
     <>
+      {mounted && <GameOfLife />}
       <div className="relative min-h-screen" style={{ color: "var(--site-text)" }}>
         {/* Sheep float across the entire page */}
         {mounted && <FloatingSheep />}
