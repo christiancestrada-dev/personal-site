@@ -108,7 +108,9 @@ class Sim {
   draw() {
     const { ctx, w, h } = this;
     ctx.clearRect(0, 0, w * CELL, h * CELL);
-    ctx.fillStyle = "black";
+    // site uses data-theme="light" for light mode; default (:root) is dark
+    const dark = document.documentElement.getAttribute("data-theme") !== "light";
+    ctx.fillStyle = dark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)";
     for (let y = 0; y < h; y++)
       for (let x = 0; x < w; x++)
         if (this.cur.get(x, y))
@@ -255,7 +257,6 @@ export function GameOfLife() {
     <div className="print:hidden" style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
       <canvas
         ref={canvasRef}
-        className="opacity-[0.12] dark:invert dark:opacity-[0.18]"
         style={{ display: "block", width: "100vw", height: "100vh", userSelect: "none" }}
       />
     </div>
