@@ -247,7 +247,8 @@ export function LightPRC() {
           </defs>
 
           {/* ── Sky strip ── */}
-          <rect x={LP} y={SKY_TOP} width={UW} height={SKY_H} fill="url(#lp-sky)" rx={2} />
+          <motion.rect x={LP} y={SKY_TOP} width={UW} height={SKY_H} fill="url(#lp-sky)" rx={2}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 4.0 }} />
 
           <g clipPath="url(#lp-clip)">
 
@@ -264,103 +265,91 @@ export function LightPRC() {
                 stroke="var(--site-border)" strokeWidth={0.6} strokeDasharray="5,7" />
             ))}
 
-            {/* Phase zone fills — reveal left-to-right in sync with curve draw */}
-            <motion.path d={ADV_AREA} fill="url(#lp-adv)"
-              initial={{ clipPath: "inset(0 100% 0 0)" }}
-              animate={{ clipPath: "inset(0 0% 0 0)" }}
-              transition={{ duration: 2, ease: "easeInOut", delay: 0 }} />
-            <motion.path d={DEL_AREA} fill="url(#lp-del)"
-              initial={{ clipPath: "inset(0 100% 0 0)" }}
-              animate={{ clipPath: "inset(0 0% 0 0)" }}
-              transition={{ duration: 2, ease: "easeInOut", delay: 0 }} />
-
-            {/* Sunrise / sunset lines */}
-            {[XRise, XSet].map((x, i) => (
-              <motion.line key={i} x1={x} y1={SKY_BOT} x2={x} y2={H - 38}
-                stroke="#d07030" strokeWidth={1.2} strokeDasharray="4,5"
-                initial={{ opacity: 0 }} animate={{ opacity: 0.6 }} transition={{ delay: 0.4 }} />
-            ))}
-
-            {/* DZ1 — CBTmin */}
-            <motion.line x1={XCbt} y1={SKY_BOT} x2={XCbt} y2={H - 38}
-              stroke="#f5c842" strokeWidth={1.4} strokeDasharray="6,3"
-              initial={{ opacity: 0 }} animate={{ opacity: 0.8 }} transition={{ delay: 0.5 }} />
-
-            {/* DZ2 */}
-            <motion.line x1={XDZ2} y1={SKY_BOT} x2={XDZ2} y2={H - 38}
-              stroke="#7080a8" strokeWidth={1.2} strokeDasharray="5,4"
-              initial={{ opacity: 0 }} animate={{ opacity: 0.7 }} transition={{ delay: 0.5 }} />
-
-            {/* Wake / sleep lines */}
-            <motion.line x1={XWake} y1={SKY_BOT} x2={XWake} y2={H - 38}
-              stroke="#50c8f8" strokeWidth={1.2} strokeDasharray="4,4"
-              initial={{ opacity: 0 }} animate={{ opacity: 0.7 }} transition={{ delay: 0.6 }} />
-            <motion.line x1={XSlp} y1={SKY_BOT} x2={XSlp} y2={H - 38}
-              stroke="#6068a0" strokeWidth={1.2} strokeDasharray="4,4"
-              initial={{ opacity: 0 }} animate={{ opacity: 0.65 }} transition={{ delay: 0.6 }} />
-
-            {/* PRC curve */}
+            {/* 1 — PRC curve */}
             <motion.path d={PRC_PATH} fill="none" stroke="var(--site-text)" strokeWidth={2.5}
               strokeLinejoin="round"
               initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
-              transition={{ duration: 2, ease: "easeInOut" }} />
+              transition={{ duration: 2, ease: "easeInOut", delay: 0 }} />
 
-            {/* Peak dots with glow rings */}
+            {/* 2 — Color fills (advance / delay) */}
+            <motion.path d={ADV_AREA} fill="url(#lp-adv)"
+              initial={{ clipPath: "inset(0 100% 0 0)" }}
+              animate={{ clipPath: "inset(0 0% 0 0)" }}
+              transition={{ duration: 1, ease: "easeInOut", delay: 2 }} />
+            <motion.path d={DEL_AREA} fill="url(#lp-del)"
+              initial={{ clipPath: "inset(0 100% 0 0)" }}
+              animate={{ clipPath: "inset(0 0% 0 0)" }}
+              transition={{ duration: 1, ease: "easeInOut", delay: 2 }} />
+
+            {/* 3 — Labels (zone labels first, then peak labels on top) */}
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 0.96 }} transition={{ duration: 0.5, delay: 3.0 }}>
+              <rect x={hx(10)-51} y={AXIS_Y-48} width={102} height={22} rx={4}
+                fill="#050810" fillOpacity={0.9} stroke="#5dcaa5" strokeWidth={0.6} strokeOpacity={0.35} />
+              <text x={hx(10)} y={AXIS_Y-32} fontSize={13} fill="#5dcaa5" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2">▲ ADVANCE</text>
+            </motion.g>
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 0.96 }} transition={{ duration: 0.5, delay: 3.1 }}>
+              <rect x={hx(19)-43} y={AXIS_Y+54} width={86} height={22} rx={4}
+                fill="#050810" fillOpacity={0.9} stroke="#db7093" strokeWidth={0.6} strokeOpacity={0.35} />
+              <text x={hx(19)} y={AXIS_Y+70} fontSize={13} fill="#db7093" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2">▼ DELAY</text>
+            </motion.g>
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 3.2 }}>
+              <rect x={XPAdv-27} y={YPAdv-30} width={54} height={16} rx={3}
+                fill="#050810" fillOpacity={0.92} stroke="#5dcaa5" strokeWidth={0.5} strokeOpacity={0.4} />
+              <text x={XPAdv} y={YPAdv-17} fontSize={11} fill="#5dcaa5" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700">+1.20h</text>
+            </motion.g>
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 3.25 }}>
+              <rect x={XPDel-54} y={YPDel-17} width={48} height={15} rx={3}
+                fill="#050810" fillOpacity={0.92} stroke="#db7093" strokeWidth={0.5} strokeOpacity={0.4} />
+              <text x={XPDel-50} y={YPDel-6} fontSize={11} fill="#db7093" fontFamily="var(--font-mono)" fontWeight="700">−2.02h</text>
+            </motion.g>
+            {/* Peak dots */}
             <motion.circle cx={XPAdv} cy={YPAdv} r={5} fill="#5dcaa5"
-              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.6 }} />
+              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 3.2 }} />
             <circle cx={XPAdv} cy={YPAdv} r={5} fill="none" stroke="#5dcaa5" strokeWidth={1.5} opacity={0.4}>
               <animate attributeName="r" values="6;13;6" dur="2.4s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="0.4;0;0.4" dur="2.4s" repeatCount="indefinite" />
             </circle>
             <motion.circle cx={XPDel} cy={YPDel} r={5} fill="#db7093"
-              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.7 }} />
+              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 3.25 }} />
             <circle cx={XPDel} cy={YPDel} r={5} fill="none" stroke="#db7093" strokeWidth={1.5} opacity={0.4}>
               <animate attributeName="r" values="6;13;6" dur="2.8s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="0.4;0;0.4" dur="2.8s" repeatCount="indefinite" />
             </circle>
 
-            {/* DZ diamonds on zero line */}
-            <motion.path d={`M${XCbt},${AXIS_Y-8} L${XCbt+7},${AXIS_Y} L${XCbt},${AXIS_Y+8} L${XCbt-7},${AXIS_Y} Z`}
-              fill="#f5c842" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }} />
-            <motion.path d={`M${XDZ2},${AXIS_Y-8} L${XDZ2+7},${AXIS_Y} L${XDZ2},${AXIS_Y+8} L${XDZ2-7},${AXIS_Y} Z`}
-              fill="#7080a8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }} />
-
-            {/* ── Labels ── */}
-
-            {/* rise / set in sky strip */}
-            <text x={XRise+5} y={SKY_BOT-4} fontSize={9} fill="#d07030" fontFamily="var(--font-mono)" opacity={0.9}>rise</text>
-            <text x={XSet+5}  y={SKY_BOT-4} fontSize={9} fill="#d07030" fontFamily="var(--font-mono)" opacity={0.9}>set</text>
-
-            {/* wake / sleep labels */}
-            <text x={XWake+5} y={SKY_BOT+26} fontSize={10} fill="#50c8f8" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.85}>wake</text>
-            <text x={XSlp-5}  y={SKY_BOT+26} fontSize={10} fill="#6068a0" textAnchor="end" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.8}>sleep</text>
-
-            {/* DZ labels */}
-            <text x={XCbt+10} y={SKY_BOT+40} fontSize={9.5} fill="#f5c842" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.85}>DZ1 · CBTmin</text>
-            <text x={XDZ2-10} y={AXIS_Y+38} fontSize={9.5} fill="#7080a8" textAnchor="end" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.75}>DZ2</text>
-
-            {/* Peak labels — bg rect clears the curve line */}
-            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}>
-              <rect x={XPAdv+6} y={YPAdv-4} width={48} height={15} rx={3}
-                fill="#050810" fillOpacity={0.92} stroke="#5dcaa5" strokeWidth={0.5} strokeOpacity={0.4} />
-              <text x={XPAdv+10} y={YPAdv+7} fontSize={11} fill="#5dcaa5" fontFamily="var(--font-mono)" fontWeight="700">+1.20h</text>
+            {/* 4 — Dead zones */}
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 3.5 }}>
+              <line x1={XCbt} y1={SKY_BOT} x2={XCbt} y2={H - 18}
+                stroke="#f5c842" strokeWidth={1.4} strokeDasharray="6,3" />
+              <path d={`M${XCbt},${AXIS_Y-8} L${XCbt+7},${AXIS_Y} L${XCbt},${AXIS_Y+8} L${XCbt-7},${AXIS_Y} Z`}
+                fill="#f5c842" />
+              <text x={XCbt+10} y={SKY_BOT+40} fontSize={9.5} fill="#f5c842" fontFamily="var(--font-mono)" fontWeight="600">DZ1 · CBTmin</text>
             </motion.g>
-            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.7 }}>
-              <rect x={XPDel-54} y={YPDel-17} width={48} height={15} rx={3}
-                fill="#050810" fillOpacity={0.92} stroke="#db7093" strokeWidth={0.5} strokeOpacity={0.4} />
-              <text x={XPDel-50} y={YPDel-6} fontSize={11} fill="#db7093" fontFamily="var(--font-mono)" fontWeight="700">−2.02h</text>
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 3.6 }}>
+              <line x1={XDZ2} y1={SKY_BOT} x2={XDZ2} y2={H - 18}
+                stroke="#7080a8" strokeWidth={1.2} strokeDasharray="5,4" />
+              <path d={`M${XDZ2},${AXIS_Y-8} L${XDZ2+7},${AXIS_Y} L${XDZ2},${AXIS_Y+8} L${XDZ2-7},${AXIS_Y} Z`}
+                fill="#7080a8" />
+              <text x={XDZ2-10} y={AXIS_Y+38} fontSize={9.5} fill="#7080a8" textAnchor="end" fontFamily="var(--font-mono)" fontWeight="600">DZ2</text>
             </motion.g>
 
-            {/* ADVANCE / DELAY zone labels — bg rect clears the curve line */}
-            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 0.96 }} transition={{ duration: 0.6, delay: 1.2 }}>
-              <rect x={hx(10)-51} y={AXIS_Y-48} width={102} height={22} rx={4}
-                fill="#050810" fillOpacity={0.9} stroke="#5dcaa5" strokeWidth={0.6} strokeOpacity={0.35} />
-              <text x={hx(10)} y={AXIS_Y-32} fontSize={13} fill="#5dcaa5" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2">▲ ADVANCE</text>
+            {/* 5 — Daytime (sunrise / sunset) */}
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 4.0 }}>
+              {[XRise, XSet].map((x, i) => (
+                <line key={i} x1={x} y1={SKY_BOT} x2={x} y2={H - 18}
+                  stroke="#d07030" strokeWidth={1.2} strokeDasharray="4,5" opacity={0.6} />
+              ))}
+              <text x={XRise+5} y={SKY_BOT-4} fontSize={9} fill="#d07030" fontFamily="var(--font-mono)" opacity={0.9}>rise</text>
+              <text x={XSet+5}  y={SKY_BOT-4} fontSize={9} fill="#d07030" fontFamily="var(--font-mono)" opacity={0.9}>set</text>
             </motion.g>
-            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 0.96 }} transition={{ duration: 0.6, delay: 1.4 }}>
-              <rect x={hx(19)-43} y={AXIS_Y+54} width={86} height={22} rx={4}
-                fill="#050810" fillOpacity={0.9} stroke="#db7093" strokeWidth={0.6} strokeOpacity={0.35} />
-              <text x={hx(19)} y={AXIS_Y+70} fontSize={13} fill="#db7093" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2">▼ DELAY</text>
+
+            {/* 6 — Wake and sleep */}
+            <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 4.4 }}>
+              <line x1={XWake} y1={SKY_BOT} x2={XWake} y2={H - 18}
+                stroke="#50c8f8" strokeWidth={1.2} strokeDasharray="4,4" opacity={0.7} />
+              <line x1={XSlp}  y1={SKY_BOT} x2={XSlp}  y2={H - 18}
+                stroke="#6068a0" strokeWidth={1.2} strokeDasharray="4,4" opacity={0.65} />
+              <text x={XWake+5} y={SKY_BOT+26} fontSize={10} fill="#50c8f8" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.85}>wake</text>
+              <text x={XSlp-5}  y={SKY_BOT+26} fontSize={10} fill="#6068a0" textAnchor="end" fontFamily="var(--font-mono)" fontWeight="600" opacity={0.8}>sleep</text>
             </motion.g>
 
             {/* Y-axis labels */}
@@ -383,7 +372,7 @@ export function LightPRC() {
               const tipY = ty > AXIS_Y + 40 ? ty - 38 : ty - 38;
               return (
                 <g>
-                  <line x1={tx} y1={SKY_BOT} x2={tx} y2={H-38}
+                  <line x1={tx} y1={SKY_BOT} x2={tx} y2={H-18}
                     stroke="var(--site-text-dim)" strokeWidth={1} strokeDasharray="2,3" />
                   <circle cx={tx} cy={ty} r={6} fill={col} />
                   <rect x={tipX} y={tipY} width={114} height={22} rx={4}
@@ -394,12 +383,12 @@ export function LightPRC() {
               );
             })()}
 
-            {/* Current time dot */}
-            <motion.line x1={dotX} y1={SKY_BOT} x2={dotX} y2={H-38}
+            {/* Current time dot — appears last */}
+            <motion.line x1={dotX} y1={SKY_BOT} x2={dotX} y2={H-18}
               stroke="#404040" strokeWidth={1} strokeDasharray="2,3"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }} />
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 4.7 }} />
             <motion.circle cx={dotX} cy={dotY} r={5} fill={zoneColor}
-              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.7 }} />
+              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 4.7 }} />
             <circle cx={dotX} cy={dotY} r={8} fill="none" stroke={zoneColor} strokeWidth={1} opacity={0.25}>
               <animate attributeName="r" values="7;14;7" dur="3s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="0.25;0;0.25" dur="3s" repeatCount="indefinite" />
@@ -422,68 +411,7 @@ export function LightPRC() {
         click or hover anywhere on the graph to see predicted phase shift · dot = now
       </p>
 
-      {/* Legend */}
-      <div className="flex items-center gap-6 text-[10px] uppercase tracking-wider flex-wrap" style={{ color: "var(--site-text-muted)" }}>
-        <LegSwatch color="#5dcaa5" label="advance" detail="shifts clock earlier" />
-        <LegSwatch color="#db7093" label="delay" detail="shifts clock later" />
-        <LegDiamond color="#f5c842" label="DZ1 · CBTmin (4:30am)" />
-        <LegDiamond color="#7080a8" label="DZ2 · CT11 (3:30pm)" />
-        <LegStripe label="sleep" />
-      </div>
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-3 gap-3 text-[11px]">
-        <StatCard label="max advance" value="+1.20h" color="#5dcaa5" detail="8:30am · CT4" />
-        <StatCard label="max delay"   value="−2.02h" color="#db7093" detail="10:30pm · CT18" />
-        <StatCard label="dead zones"  value="2"      color="var(--site-text-muted)" detail="4:30am & 3:30pm" />
-      </div>
-
       <PRCInfo />
-    </div>
-  );
-}
-
-function LegSwatch({ color, label, detail }: { color: string; label: string; detail: string }) {
-  return (
-    <span className="flex items-center gap-1.5">
-      <span className="inline-block w-4 h-2.5 rounded-sm" style={{ backgroundColor: color + "35", border: `1px solid ${color}` }} />
-      <span style={{ color }}>{label}</span>
-      <span>({detail})</span>
-    </span>
-  );
-}
-
-function LegDiamond({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5">
-      <svg width="10" height="10" viewBox="0 0 10 10">
-        <path d="M5,0 L10,5 L5,10 L0,5 Z" fill={color} />
-      </svg>
-      <span style={{ color }}>{label}</span>
-    </span>
-  );
-}
-
-function LegStripe({ label }: { label: string }) {
-  return (
-    <span className="flex items-center gap-1.5">
-      <svg width="16" height="10" viewBox="0 0 16 10">
-        <rect width="16" height="10" fill="#060610" rx="1" />
-        <line x1="0" y1="8"  x2="8"  y2="0"  stroke="#1a1f3a" strokeWidth="1.5" />
-        <line x1="8" y1="10" x2="16" y2="2"   stroke="#1a1f3a" strokeWidth="1.5" />
-      </svg>
-      <span>{label}</span>
-    </span>
-  );
-}
-
-function StatCard({ label, value, color, detail }: { label: string; value: string; color: string; detail: string }) {
-  return (
-    <div className="rounded px-3 py-2.5 flex flex-col gap-1"
-      style={{ border: "1px solid var(--site-border)", backgroundColor: "var(--site-bg-card)" }}>
-      <span className="text-[9px] uppercase tracking-wider" style={{ color: "var(--site-text-muted)" }}>{label}</span>
-      <span className="text-base font-bold tabular-nums" style={{ color, fontFamily: "var(--font-mono)" }}>{value}</span>
-      <span className="text-[9px]" style={{ color: "var(--site-text-dim)" }}>{detail}</span>
     </div>
   );
 }

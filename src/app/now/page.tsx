@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { PageHeader } from "@/components/ui/page-header";
 import { MasonryGallery, type GalleryItem } from "@/components/ui/masonry-gallery";
 import ImageLoader from "@/components/ui/image-loading";
@@ -65,41 +67,65 @@ const GALLERY_ITEMS: GalleryItem[] = [
   { id: "snowstorm-walk",   src: "/now/snowstorm-walk.mp4",      caption: "Snowstorm had me walking backwards",                                                      type: "video" as const },
 ];
 
+function NowItemCard({ item, reversed, priority, isDark }: { item: typeof NOW_ITEMS[0]; reversed: boolean; priority: boolean; isDark: boolean }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className={`flex flex-col ${reversed ? "md:flex-row-reverse" : "md:flex-row"} gap-8 items-center`}>
+      <div className="flex-1">
+        <motion.p
+          className="text-sm leading-relaxed"
+          style={{ color: "var(--site-text-prose)" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: loaded ? 1 : 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {item.text}
+        </motion.p>
+      </div>
+      <div className="w-full md:w-64 shrink-0">
+        <ImageLoader
+          src={item.photo}
+          alt={item.alt}
+          aspectWidth={item.w}
+          aspectHeight={item.h}
+          priority={priority}
+          cellColor={isDark ? "#1a1a1a" : "#ccc8c0"}
+          className="rounded-lg"
+          onLoad={() => setLoaded(true)}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function NowPage() {
+  const [isDark, setIsDark] = useState(true);
+  useEffect(() => {
+    const check = () => setIsDark(document.documentElement.getAttribute("data-theme") !== "light");
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--site-bg)", color: "var(--site-text)" }}>
       <main className="mx-auto max-w-3xl px-6 py-24 space-y-24">
         <PageHeader title="Now" subtitle="What I'm up to this week · Last updated April" />
 
-        {/* Now items with photos */}
         <div className="space-y-16">
           {NOW_ITEMS.map((item, i) => (
-            <div
+            <NowItemCard
               key={i}
-              className={`flex flex-col ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"} gap-8 items-center`}
-            >
-              <div className="flex-1">
-                <p className="text-sm leading-relaxed" style={{ color: "var(--site-text-prose)" }}>
-                  {item.text}
-                </p>
-              </div>
-              <div className="w-full md:w-64 shrink-0">
-                <ImageLoader
-                  src={item.photo}
-                  alt={item.alt}
-                  aspectWidth={item.w}
-                  aspectHeight={item.h}
-                  priority={i === 0}
-                  className="rounded-lg"
-                />
-              </div>
-            </div>
+              item={item}
+              reversed={i % 2 !== 0}
+              priority={i === 0}
+              isDark={isDark}
+            />
           ))}
         </div>
-
       </main>
 
-      {/* Photo Gallery — full width */}
       <section className="w-full px-4 md:px-12 pb-24 space-y-8">
         <h2 className="text-lg font-medium text-center" style={{ color: "var(--site-text-bright)" }}>
           Photo Gallery

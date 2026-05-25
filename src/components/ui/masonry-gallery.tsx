@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import ImageLoader from "@/components/ui/image-loading";
 
 export interface GalleryItem {
   src: string;
@@ -29,6 +29,53 @@ const cardVariants = {
     transition: { duration: 0.5, ease: "easeOut" as const },
   },
 };
+
+function GalleryImageCard({ item }: { item: GalleryItem }) {
+  const [loaded, setLoaded] = useState(false);
+  const aspect = `${item.w ?? 800} / ${item.h ?? 600}`;
+
+  return (
+    <div className="relative rounded-xl overflow-hidden group transition-transform duration-300 ease-in-out hover:scale-[1.02]">
+      {item.type === "video" ? (
+        <video
+          src={item.src}
+          className="w-full h-auto object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      ) : (
+        <div className="relative w-full" style={{ aspectRatio: aspect }}>
+          {!loaded && <div className="absolute inset-0 img-shimmer" />}
+          <img
+            src={item.src}
+            alt={item.caption}
+            loading="lazy"
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
+              loaded ? "opacity-100" : "opacity-0"
+            )}
+            onLoad={() => setLoaded(true)}
+          />
+        </div>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent pointer-events-none" />
+      {(item.type === "video" || loaded) && (
+        <motion.div
+          className="absolute top-0 left-0 p-4 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <p className="text-sm font-medium text-white leading-tight drop-shadow-md">
+            {item.caption}
+          </p>
+        </motion.div>
+      )}
+    </div>
+  );
+}
 
 export function MasonryGallery({
   images,
@@ -64,37 +111,7 @@ export function MasonryGallery({
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
         >
-          <div className="relative rounded-xl overflow-hidden group transition-transform duration-300 ease-in-out hover:scale-[1.02]">
-            {item.type === "video" ? (
-              <video
-                src={item.src}
-                className="w-full h-auto object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-              />
-            ) : (
-              <ImageLoader
-                src={item.src}
-                alt={item.caption}
-                aspectWidth={item.w ?? 800}
-                aspectHeight={item.h ?? 600}
-                gridSize={36}
-                cellGap={4}
-                cellColor="#0f0f0f"
-                blinkSpeed={1600}
-                transitionDuration={500}
-                fadeOutDuration={400}
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent pointer-events-none" />
-            <div className="absolute top-0 left-0 p-4 pointer-events-none">
-              <p className="text-sm font-medium text-white leading-tight drop-shadow-md">
-                {item.caption}
-              </p>
-            </div>
-          </div>
+          <GalleryImageCard item={item} />
         </motion.div>
       ))}
     </div>

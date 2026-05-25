@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Lora } from "next/font/google";
+import { Geist, Geist_Mono, Lora } from "next/font/google";
 import { SidebarLayout } from "@/components/ui/sidebar-nav";
 import "./globals.css";
 
@@ -11,12 +11,6 @@ const geist = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
 const lora = Lora({
@@ -50,7 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geist.variable} ${geistMono.variable} ${inter.variable} ${lora.variable} antialiased`}
+        className={`${geist.variable} ${geistMono.variable} ${lora.variable} antialiased`}
         style={{ backgroundColor: "var(--site-bg)", margin: 0 }}
       >
         <SidebarLayout>{children}</SidebarLayout>

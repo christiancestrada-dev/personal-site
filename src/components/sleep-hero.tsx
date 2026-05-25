@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CircadianClock } from "@/components/circadian-clock";
 
 // ─── Annotated clock with arrow pointing to phase text ──────────────────────
@@ -136,6 +136,426 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
         </g>
       ))}
     </svg>
+  );
+}
+
+// ─── Twinkling stars for variant 1 (no moon) ─────────────────────────────────
+function StarField() {
+  const stars = useMemo(
+    () =>
+      Array.from({ length: 90 }, () => ({
+        cx: Math.random() * 1440,
+        cy: Math.random() * 700,
+        r: 0.7 + Math.random() * 1.8,
+        op: 0.2 + Math.random() * 0.7,
+        dur: `${2.5 + Math.random() * 6}s`,
+        begin: `${Math.random() * 7}s`,
+      })),
+    []
+  );
+
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      viewBox="0 0 1440 700"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      style={{ zIndex: 0 }}
+    >
+      {stars.map((s, i) => (
+        <circle key={i} cx={s.cx} cy={s.cy} r={s.r} fill="white" opacity={s.op}>
+          <animate
+            attributeName="opacity"
+            values={`${s.op};${Math.max(0.04, s.op - 0.35)};${s.op}`}
+            dur={s.dur}
+            begin={s.begin}
+            repeatCount="indefinite"
+          />
+        </circle>
+      ))}
+    </svg>
+  );
+}
+
+// ─── Constellation canvas for variant 2 (mouse-interactive) ──────────────────
+function ConstellationCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d")!;
+
+    const NUM = 130;
+    const MAX_D = 155;
+    const MOUSE_R = 150;
+    let animId: number;
+    let w = 0, h = 0;
+    let mouseX = -9999, mouseY = -9999;
+
+    interface Star { x: number; y: number; vx: number; vy: number; r: number; op: number }
+    let stars: Star[] = [];
+
+    function init() {
+      const c = canvas!;
+      const rect = c.getBoundingClientRect();
+      w = rect.width || window.innerWidth;
+      h = rect.height || 600;
+      const dpr = window.devicePixelRatio || 1;
+      c.width = w * dpr;
+      c.height = h * dpr;
+      ctx.scale(dpr, dpr);
+      stars = Array.from({ length: NUM }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        r: 0.6 + Math.random() * 1.7,
+        op: 0.3 + Math.random() * 0.65,
+      }));
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      for (const s of stars) {
+        s.x += s.vx; s.y += s.vy;
+        if (s.x < 0) s.x = w; if (s.x > w) s.x = 0;
+        if (s.y < 0) s.y = h; if (s.y > h) s.y = 0;
+      }
+
+      // Pre-compute which stars are within mouse radius (for pink reactions)
+      const near = new Set<number>();
+      if (mouseX > -9000) {
+        for (let i = 0; i < stars.length; i++) {
+          const dx = stars[i].x - mouseX, dy = stars[i].y - mouseY;
+          if (dx * dx + dy * dy < MOUSE_R * MOUSE_R) near.add(i);
+        }
+      }
+
+      // Star-to-star lines — pink if either endpoint is near cursor
+      for (let i = 0; i < stars.length; i++) {
+        for (let j = i + 1; j < stars.length; j++) {
+          const dx = stars[i].x - stars[j].x;
+          const dy = stars[i].y - stars[j].y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < MAX_D * MAX_D) {
+            const frac = 1 - Math.sqrt(d2) / MAX_D;
+            if (near.has(i) || near.has(j)) {
+              ctx.strokeStyle = `rgba(219,112,147,${frac * 0.55})`;
+              ctx.lineWidth = 0.9;
+            } else {
+              ctx.strokeStyle = `rgba(180,215,255,${frac * 0.2})`;
+              ctx.lineWidth = 0.55;
+            }
+            ctx.beginPath();
+            ctx.moveTo(stars[i].x, stars[i].y);
+            ctx.lineTo(stars[j].x, stars[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Mouse-to-star lines — pink, cubic easing
+      if (mouseX > -9000) {
+        for (let i = 0; i < stars.length; i++) {
+          if (!near.has(i)) continue;
+          const dx = stars[i].x - mouseX, dy = stars[i].y - mouseY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const e = 1 - dist / MOUSE_R;
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(219,112,147,${e * e * 0.75})`;
+          ctx.lineWidth = 1.0;
+          ctx.moveTo(mouseX, mouseY);
+          ctx.lineTo(stars[i].x, stars[i].y);
+          ctx.stroke();
+        }
+
+        // Cursor glow dot
+        const g = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 18);
+        g.addColorStop(0, "rgba(219,112,147,0.45)");
+        g.addColorStop(1, "rgba(219,112,147,0)");
+        ctx.beginPath();
+        ctx.fillStyle = g;
+        ctx.arc(mouseX, mouseY, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(219,112,147,0.9)";
+        ctx.arc(mouseX, mouseY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Stars — pink + larger when near cursor, white otherwise
+      for (let i = 0; i < stars.length; i++) {
+        const s = stars[i];
+        if (near.has(i)) {
+          // Outer pink glow
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(219,112,147,${s.op * 0.35})`;
+          ctx.arc(s.x, s.y, s.r * 3.5, 0, Math.PI * 2);
+          ctx.fill();
+          // Pink core
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(255,170,200,${Math.min(1, s.op * 1.3)})`;
+          ctx.arc(s.x, s.y, s.r * 1.6, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(220,238,255,${s.op})`;
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      animId = requestAnimationFrame(draw);
+    }
+
+    const onMove = (e: MouseEvent) => {
+      const rect = canvas!.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    };
+    const onLeave = () => { mouseX = -9999; mouseY = -9999; };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseleave", onLeave);
+
+    init();
+    draw();
+
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(animId);
+      init();
+      draw();
+    });
+    ro.observe(canvas!);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      ro.disconnect();
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ zIndex: 0 }}
+    />
+  );
+}
+
+// ─── Mosaic pixel-grid for variant 3 ─────────────────────────────────────────
+// Samples video → one pixel per tile, maps luminance to navy palette.
+// Shadow measured in TILE units (blocky, not smooth circle) to match reference.
+const MOSAIC_VIDEOS = [
+  "/now/golf.mp4",
+  "/now/knoll.mp4",
+  "/now/snowstorm-walk.mp4",
+  "/now/spring-performance.mp4",
+  "/now/valentines.mp4",
+];
+
+// Manual rounded-rect to avoid browser-compat issues with ctx.roundRect
+function fillRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number, w: number, h: number, r: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y,     x + w, y + r,     r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x,     y + h, x,     y + h - r, r);
+  ctx.lineTo(x,     y + r);
+  ctx.arcTo(x,     y,     x + r, y,         r);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function MosaicGrid() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const videoRef  = useRef<HTMLVideoElement>(null);
+  const videoSrc  = useMemo(
+    () => MOSAIC_VIDEOS[Math.floor(Math.random() * MOSAIC_VIDEOS.length)],
+    []
+  );
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const video  = videoRef.current;
+    if (!canvas || !video) return;
+    const ctx = canvas.getContext("2d")!;
+
+    // Constants matched exactly to source
+    const TILE    = 22;   // px
+    const GAP     = 3;
+    const CORNER  = 5;
+    const MOUSE_R = 120;  // px radius — from source: `if (f < 120)`
+    const SPRING  = 0.08; // from source: `* .08`
+    const DAMP    = 0.88; // from source: `* .88`
+    const HOLD    = 40;   // frames to hold boost — from source: `lastMouseInfluence = 40`
+
+    let animId: number;
+    let w = 0, h = 0;
+    let mouseX = -9999, mouseY = -9999;
+
+    interface Tile { intensity: number; target: number; velocity: number; hold: number }
+    let tiles: Tile[][] = [];
+
+    const off    = document.createElement("canvas");
+    const offCtx = off.getContext("2d", { willReadFrequently: true })!;
+
+    function initTiles(cols: number, rows: number) {
+      tiles = Array.from({ length: rows }, () =>
+        Array.from({ length: cols }, () =>
+          ({ intensity: 0.3, target: 0.3, velocity: 0, hold: 0 })
+        )
+      );
+    }
+
+    function init() {
+      const rect = canvas!.getBoundingClientRect();
+      w = rect.width  || window.innerWidth;
+      h = rect.height || 700;
+      const dpr = window.devicePixelRatio || 1;
+      canvas!.width  = w * dpr;
+      canvas!.height = h * dpr;
+      ctx.scale(dpr, dpr);
+      off.width  = Math.ceil(w / TILE);
+      off.height = Math.ceil(h / TILE);
+      initTiles(Math.ceil(w / TILE) + 1, Math.ceil(h / TILE) + 1);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+
+      const cols = Math.ceil(w / TILE) + 1;
+      const rows = Math.ceil(h / TILE) + 1;
+
+      // Sample video → offscreen at tile resolution
+      let pixels: Uint8ClampedArray | null = null;
+      const v = video!;
+      if (v.readyState >= 2 && off.width > 0 && off.height > 0) {
+        try {
+          const vw    = v.videoWidth  || w;
+          const vh    = v.videoHeight || h;
+          const scale = Math.max(off.width / vw, off.height / vh);
+          const dw = vw * scale, dh = vh * scale;
+          offCtx.clearRect(0, 0, off.width, off.height);
+          offCtx.drawImage(v, (off.width - dw) / 2, (off.height - dh) / 2, dw, dh);
+          pixels = offCtx.getImageData(0, 0, off.width, off.height).data;
+        } catch (_) { /* frame not ready */ }
+      }
+
+      for (let r = 0; r < rows; r++) {
+        if (!tiles[r]) continue;
+        for (let c = 0; c < cols; c++) {
+          if (!tiles[r][c]) continue;
+          const t = tiles[r][c];
+
+          // Video luminance → base intensity (0–1)
+          let lum = 0.3;
+          if (pixels) {
+            const sx  = Math.min(c, off.width  - 1);
+            const sy  = Math.min(r, off.height - 1);
+            const idx = (sy * off.width + sx) * 4;
+            lum = (pixels[idx] * 0.299 + pixels[idx + 1] * 0.587 + pixels[idx + 2] * 0.114) / 255;
+          }
+
+          // Mouse spotlight — exact cubic easing + pixel-space radius from source
+          // source: `e = 1 - f/120; o.targetIntensity = .3 + e*e*e*.7`
+          // adapted: boost toward 1.0 from current lum baseline
+          const cx = c * TILE + TILE / 2;
+          const cy = r * TILE + TILE / 2;
+          const dx = mouseX - cx, dy = mouseY - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (mouseX > -9000 && dist < MOUSE_R) {
+            const e = 1 - dist / MOUSE_R;
+            t.target = lum + e * e * e * (1 - lum) * 0.9;
+            t.hold   = HOLD;
+          } else if (t.hold > 0) {
+            t.hold--;          // hold boosted state for HOLD frames after mouse leaves
+          } else {
+            t.target = lum;    // return to video-sampled brightness
+          }
+
+          // Spring physics — source: `d=(target-intensity)*.08; vel+=d; vel*=.88`
+          const force = (t.target - t.intensity) * SPRING;
+          t.velocity += force;
+          t.velocity *= DAMP;
+          t.intensity = Math.max(0, Math.min(1, t.intensity + t.velocity));
+
+          // Exact color from source: rgb(60i, 100i, 180i)
+          const tr = Math.floor(60  * t.intensity);
+          const tg = Math.floor(100 * t.intensity);
+          const tb = Math.floor(180 * t.intensity);
+
+          ctx.fillStyle = `rgb(${tr},${tg},${tb})`;
+          fillRoundRect(ctx, c * TILE + GAP / 2, r * TILE + GAP / 2, TILE - GAP, TILE - GAP, CORNER);
+        }
+      }
+
+      animId = requestAnimationFrame(draw);
+    }
+
+    const onMove = (e: MouseEvent) => {
+      const rect = canvas!.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    };
+    const onLeave = () => { mouseX = -9999; mouseY = -9999; };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseleave", onLeave);
+
+    init();
+    video!.play().catch(() => {});
+    draw();
+
+    const ro = new ResizeObserver(() => { cancelAnimationFrame(animId); init(); draw(); });
+    ro.observe(canvas!);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      ro.disconnect();
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  return (
+    <>
+      {/*
+        opacity:0 + absolute keeps the video in the decode pipeline so
+        frames are available for canvas drawImage sampling.
+        display:none stops frame decoding entirely.
+      */}
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        autoPlay muted loop playsInline
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      />
+      {/* Canvas sits above the invisible video and paints the mosaic */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ zIndex: 1 }}
+      />
+    </>
   );
 }
 
@@ -381,7 +801,7 @@ export function FloatingSheep() {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
-export function SleepHero() {
+export function SleepHero({ variant = 0 }: { variant?: number }) {
   const [showQuoteInfo, setShowQuoteInfo] = useState(false);
   const [isDark, setIsDark] = useState(true);
 
@@ -393,6 +813,8 @@ export function SleepHero() {
     return () => observer.disconnect();
   }, []);
 
+  const textColor = (variant === 0 || variant === 3) ? "#ffffff" : "var(--site-text-secondary)";
+
   return (
     <div
       className="relative w-full"
@@ -401,11 +823,11 @@ export function SleepHero() {
         background: "transparent",
       }}
     >
-      {/* ── Orbital arcs ── */}
-      <OrbitalArcs isDark={isDark} />
-
-
-
+      {/* ── Backgrounds — one per variant ── */}
+      {variant === 1 && <StarField />}
+      {variant === 1 && <OrbitalArcs isDark={isDark} />}
+      {variant === 2 && <ConstellationCanvas />}
+      {variant === 3 && <MosaicGrid />}
 
       {/* ── Greeting — top half ── */}
       <div
@@ -424,7 +846,7 @@ export function SleepHero() {
               return "Good evening";
             })()}
           </h1>
-          <p className="text-sm leading-relaxed" style={{ color: "var(--site-text-secondary)" }}>
+          <p className="text-sm leading-relaxed" style={{ color: textColor }}>
             My name is Christian. Welcome to christian-estrada.com. I&apos;m running an experiment where I&apos;m trying to put the &ldquo;personal&rdquo; in personal website. I want this website to represent who I am and what I am inspired by. Feel free to use the numbers on your computer as hotkeys to navigate between pages.
           </p>
         </div>

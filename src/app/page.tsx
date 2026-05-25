@@ -75,6 +75,7 @@ function getDefaults(): HomeContent {
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const [heroVariant, setHeroVariant] = useState(0);
   const admin = usePageAdmin("home");
   const [content, setContent] = useState<HomeContent>(getDefaults);
   const [editing, setEditing] = useState<string | null>(null);
@@ -82,6 +83,7 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
+    setHeroVariant(Math.floor(Math.random() * 4));
     if (!loadedRef.current) {
       loadedRef.current = true;
       loadContent<HomeContent>("home-content").then((data) => {
@@ -110,15 +112,15 @@ export default function Home() {
 
   return (
     <>
-      {mounted && <GameOfLife />}
+      {mounted && heroVariant === 0 && <GameOfLife />}
       <div className="relative min-h-screen" style={{ color: "var(--site-text)" }}>
         {/* Sheep float across the entire page */}
         {mounted && <FloatingSheep />}
         {/* Hero */}
-        <div>{mounted && <SleepHero />}</div>
+        <div>{mounted && <SleepHero variant={heroVariant} />}</div>
 
         {/* ── Main content ── */}
-        <main className="relative max-w-6xl px-4 sm:px-8 pt-6 pb-24 space-y-20 mx-auto" style={{ zIndex: 3, backgroundColor: "color-mix(in srgb, var(--site-bg) 85%, transparent)" }}>
+        <main className="relative max-w-6xl px-4 sm:px-8 pt-6 pb-24 space-y-20 mx-auto" style={{ zIndex: 3, backgroundColor: heroVariant === 0 ? "color-mix(in srgb, var(--site-bg) 68%, transparent)" : "color-mix(in srgb, var(--site-bg) 85%, transparent)" }}>
 
           {/* Name */}
           <h1 className="font-black uppercase" style={{ color: "var(--site-text-bright)", fontSize: "clamp(3rem, 7vw, 5.5rem)", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
