@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTheme } from "@/lib/use-theme";
 import { loadContent, saveContent } from "@/lib/content-api";
 import Image from "next/image";
 import { AdminBar } from "@/components/ui/admin-bar";
@@ -31,12 +32,19 @@ function statusNote(status: ThingStatus) {
 }
 
 function StatusBadge({ status }: { status: ThingStatus }) {
-  const map: Record<ThingStatus, { label: string; color: string; bg: string; border: string }> = {
-    own: { label: "Own", color: "#4ade80", bg: "rgba(74,222,128,0.1)", border: "rgba(74,222,128,0.2)" },
-    wishlist: { label: "Wishlist", color: "#fbbf24", bg: "rgba(251,191,36,0.1)", border: "rgba(251,191,36,0.2)" },
-    digital: { label: "Free", color: "#60a5fa", bg: "rgba(96,165,250,0.1)", border: "rgba(96,165,250,0.2)" },
+  const { isDark } = useTheme();
+  const map: Record<ThingStatus, { label: string; color: string; bg: string; border: string; colorLight: string; bgLight: string; borderLight: string }> = {
+    own:      { label: "Own",     color: "#4ade80", bg: "rgba(74,222,128,0.1)",  border: "rgba(74,222,128,0.2)",  colorLight: "#166534", bgLight: "rgba(22,101,52,0.1)",   borderLight: "rgba(22,101,52,0.25)" },
+    wishlist: { label: "Wishlist",color: "#fbbf24", bg: "rgba(251,191,36,0.1)", border: "rgba(251,191,36,0.2)", colorLight: "#92400e", bgLight: "rgba(146,64,14,0.1)",  borderLight: "rgba(146,64,14,0.25)" },
+    digital:  { label: "Free",    color: "#60a5fa", bg: "rgba(96,165,250,0.1)", border: "rgba(96,165,250,0.2)", colorLight: "#1e40af", bgLight: "rgba(30,64,175,0.1)",  borderLight: "rgba(30,64,175,0.25)" },
   };
-  const s = map[status];
+  const row = map[status];
+  const s = {
+    label: row.label,
+    color: isDark ? row.color : row.colorLight,
+    bg: isDark ? row.bg : row.bgLight,
+    border: isDark ? row.border : row.borderLight,
+  };
   return (
     <span
       className="px-1.5 py-0.5 rounded text-[9px] font-medium"

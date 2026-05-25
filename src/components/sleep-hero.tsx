@@ -140,7 +140,7 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
 }
 
 // ─── Twinkling stars for variant 1 (no moon) ─────────────────────────────────
-function StarField() {
+function StarField({ isDark }: { isDark: boolean }) {
   const stars = useMemo(
     () =>
       Array.from({ length: 90 }, () => ({
@@ -154,6 +154,8 @@ function StarField() {
     []
   );
 
+  const starFill = isDark ? "white" : "#243244";
+
   return (
     <svg
       className="absolute inset-0 w-full h-full pointer-events-none"
@@ -163,7 +165,7 @@ function StarField() {
       style={{ zIndex: 0 }}
     >
       {stars.map((s, i) => (
-        <circle key={i} cx={s.cx} cy={s.cy} r={s.r} fill="white" opacity={s.op}>
+        <circle key={i} cx={s.cx} cy={s.cy} r={s.r} fill={starFill} opacity={s.op}>
           <animate
             attributeName="opacity"
             values={`${s.op};${Math.max(0.04, s.op - 0.35)};${s.op}`}
@@ -178,8 +180,10 @@ function StarField() {
 }
 
 // ─── Constellation canvas for variant 2 (mouse-interactive) ──────────────────
-function ConstellationCanvas() {
+function ConstellationCanvas({ isDark }: { isDark: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDarkRef = useRef(isDark);
+  useEffect(() => { isDarkRef.current = isDark; }, [isDark]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -232,6 +236,8 @@ function ConstellationCanvas() {
         }
       }
 
+      const lineBase = isDarkRef.current ? `rgba(180,215,255,` : `rgba(15,40,90,`;
+
       // Star-to-star lines — pink if either endpoint is near cursor
       for (let i = 0; i < stars.length; i++) {
         for (let j = i + 1; j < stars.length; j++) {
@@ -244,7 +250,7 @@ function ConstellationCanvas() {
               ctx.strokeStyle = `rgba(219,112,147,${frac * 0.55})`;
               ctx.lineWidth = 0.9;
             } else {
-              ctx.strokeStyle = `rgba(180,215,255,${frac * 0.2})`;
+              ctx.strokeStyle = `${lineBase}${frac * (isDarkRef.current ? 0.2 : 0.18)})`;
               ctx.lineWidth = 0.55;
             }
             ctx.beginPath();
@@ -285,7 +291,9 @@ function ConstellationCanvas() {
         ctx.fill();
       }
 
-      // Stars — pink + larger when near cursor, white otherwise
+      const starColor = isDarkRef.current ? `rgba(220,238,255,` : `rgba(15,40,90,`;
+
+      // Stars — pink + larger when near cursor, themed otherwise
       for (let i = 0; i < stars.length; i++) {
         const s = stars[i];
         if (near.has(i)) {
@@ -301,7 +309,7 @@ function ConstellationCanvas() {
           ctx.fill();
         } else {
           ctx.beginPath();
-          ctx.fillStyle = `rgba(220,238,255,${s.op})`;
+          ctx.fillStyle = `${starColor}${s.op})`;
           ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
           ctx.fill();
         }
@@ -824,9 +832,9 @@ export function SleepHero({ variant = 0 }: { variant?: number }) {
       }}
     >
       {/* ── Backgrounds — one per variant ── */}
-      {variant === 1 && <StarField />}
+      {variant === 1 && <StarField isDark={isDark} />}
       {variant === 1 && <OrbitalArcs isDark={isDark} />}
-      {variant === 2 && <ConstellationCanvas />}
+      {variant === 2 && <ConstellationCanvas isDark={isDark} />}
       {variant === 3 && <MosaicGrid />}
 
       {/* ── Greeting — top half ── */}
