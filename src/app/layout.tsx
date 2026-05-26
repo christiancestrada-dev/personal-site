@@ -43,6 +43,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {/* Runs before any paint — sets data-theme so there's no flash of wrong theme */}
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme')||'dark';var r=t==='light'?'light':t==='auto'?(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):'dark';document.documentElement.setAttribute('data-theme',r);}catch(e){}})();` }} />
+      </head>
       <body
         className={`${geist.variable} ${geistMono.variable} ${lora.variable} antialiased`}
         style={{ backgroundColor: "var(--site-bg)", margin: 0 }}
