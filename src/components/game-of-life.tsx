@@ -129,6 +129,29 @@ class Sim {
     this.stampPattern(ox, oy, pattern);
   }
 
+  spawnSpaceship() {
+    // All three ships move right in standard orientation
+    const rawShips = [
+      `.O..O\nO....\nO...O\nOOOO.`,        // LWSS
+      `..O...\n.O...O\nO.....\nO....O\nOOOOO.`,  // MWSS
+      `..OO...\n.O....O\nO......\nO.....O\nOOOOOO.`, // HWSS
+    ];
+    const raw = rawShips[Math.floor(Math.random() * rawShips.length)];
+    // edge: 0=left(→) 1=right(←) 2=top(↓) 3=bottom(↑)
+    const edge = Math.floor(Math.random() * 4);
+    // rotations needed so ship faces inward: right=0, left=2, down=3, up=1
+    const rots = [0, 2, 3, 1][edge];
+    let pattern = raw;
+    for (let i = 0; i < rots; i++) pattern = rotatePattern(pattern);
+    const [pw, ph] = patternSize(pattern);
+    let ox: number, oy: number;
+    if (edge === 0) { ox = 0; oy = 1 + Math.floor(Math.random() * Math.max(1, this.h - ph - 2)); }
+    else if (edge === 1) { ox = Math.max(0, this.w - pw - 1); oy = 1 + Math.floor(Math.random() * Math.max(1, this.h - ph - 2)); }
+    else if (edge === 2) { ox = 1 + Math.floor(Math.random() * Math.max(1, this.w - pw - 2)); oy = 0; }
+    else { ox = 1 + Math.floor(Math.random() * Math.max(1, this.w - pw - 2)); oy = Math.max(0, this.h - ph - 1); }
+    this.stampPattern(ox, oy, pattern);
+  }
+
   neighbors(x: number, y: number): number {
     let n = 0;
     for (let dy = -1; dy <= 1; dy++)
@@ -148,13 +171,8 @@ class Sim {
         const alive = this.cur.get(x, y);
         const nextAlive = alive ? (n === 2 || n === 3 ? 1 : 0) : (n === 3 ? 1 : 0);
         this.nxt.set(x, y, nextAlive);
-        if (nextAlive && alive) {
-          this.nxt.setPink(x, y, this.cur.getPink(x, y));
-        } else if (nextAlive) {
-          this.nxt.setPink(x, y, Math.random() < 0.12 ? 1 : 0);
-        } else {
-          this.nxt.setPink(x, y, 0);
-        }
+        // Pink only if the cell survived (was alive last gen AND stays alive)
+        this.nxt.setPink(x, y, alive && nextAlive ? 1 : 0);
       }
     const tmp = this.cur; this.cur = this.nxt; this.nxt = tmp;
   }
@@ -269,6 +287,19 @@ export function GameOfLife() {
         simRef.current?.stampRandom();
         schedule();
       }, 2000 + Math.random() * 3000);
+    };
+    schedule();
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // Spaceship spawner — flies one in from a random edge every 5–12 seconds
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      timeout = setTimeout(() => {
+        simRef.current?.spawnSpaceship();
+        schedule();
+      }, 5000 + Math.random() * 7000);
     };
     schedule();
     return () => clearTimeout(timeout);
