@@ -171,6 +171,14 @@ function StarField({ isDark }: { isDark: boolean }) {
       aria-hidden="true"
       style={{ zIndex: 0 }}
     >
+      {/* Pink glow halos — rendered behind stars so they don't conflict with fill attr */}
+      {isDark && stars.filter(s => s.pink).map((s, i) => (
+        <circle key={`glow-${i}`} cx={s.cx} cy={s.cy} r={s.r} fill="#db7093" opacity="0">
+          <animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.5;1" dur={s.pinkDur} begin={s.pinkBegin} repeatCount="indefinite" />
+          <animate attributeName="r" values={`${s.r};${s.r * 6};${s.r}`} keyTimes="0;0.5;1" dur={s.pinkDur} begin={s.pinkBegin} repeatCount="indefinite" />
+        </circle>
+      ))}
+      {/* Stars */}
       {stars.map((s, i) => (
         <circle key={i} cx={s.cx} cy={s.cy} r={s.r} fill={starFill} opacity={s.op}>
           <animate
@@ -181,24 +189,14 @@ function StarField({ isDark }: { isDark: boolean }) {
             repeatCount="indefinite"
           />
           {s.pink && isDark && (
-            <>
-              <animate
-                attributeName="fill"
-                values={`${starFill};#db7093;${starFill}`}
-                keyTimes="0;0.5;1"
-                dur={s.pinkDur}
-                begin={s.pinkBegin}
-                repeatCount="indefinite"
-              />
-              <animate
-                attributeName="r"
-                values={`${s.r};${s.pinkR};${s.r}`}
-                keyTimes="0;0.5;1"
-                dur={s.pinkDur}
-                begin={s.pinkBegin}
-                repeatCount="indefinite"
-              />
-            </>
+            <animate
+              attributeName="fill"
+              values={`${starFill};#db7093;${starFill}`}
+              keyTimes="0;0.5;1"
+              dur={s.pinkDur}
+              begin={s.pinkBegin}
+              repeatCount="indefinite"
+            />
           )}
         </circle>
       ))}

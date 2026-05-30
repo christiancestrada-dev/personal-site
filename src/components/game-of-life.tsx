@@ -38,16 +38,22 @@ function patternSize(p: string): [number, number] {
 class Grid {
   w: number; h: number;
   cells: Uint8Array;
+  pink: Uint8Array;
   constructor(w: number, h: number) {
     this.w = w; this.h = h;
     this.cells = new Uint8Array(w * h);
+    this.pink = new Uint8Array(w * h);
   }
   get(x: number, y: number) { return this.cells[y * this.w + x]; }
   set(x: number, y: number, v: number) { this.cells[y * this.w + x] = v; }
+  getPink(x: number, y: number) { return this.pink[y * this.w + x]; }
+  setPink(x: number, y: number, v: number) { this.pink[y * this.w + x] = v; }
   copyFrom(src: Grid, srcX: number, srcY: number, dstX: number, dstY: number, cw: number, ch: number) {
     for (let dy = 0; dy < ch; dy++)
-      for (let dx = 0; dx < cw; dx++)
+      for (let dx = 0; dx < cw; dx++) {
         this.set(dstX + dx, dstY + dy, src.get(srcX + dx, srcY + dy));
+        this.setPink(dstX + dx, dstY + dy, src.getPink(srcX + dx, srcY + dy));
+      }
   }
 }
 
@@ -100,7 +106,15 @@ class Sim {
       for (let x = 0; x < this.w; x++) {
         const n = this.neighbors(x, y);
         const alive = this.cur.get(x, y);
-        this.nxt.set(x, y, alive ? (n === 2 || n === 3 ? 1 : 0) : (n === 3 ? 1 : 0));
+        const nextAlive = alive ? (n === 2 || n === 3 ? 1 : 0) : (n === 3 ? 1 : 0);
+        this.nxt.set(x, y, nextAlive);
+        if (nextAlive && alive) {
+          this.nxt.setPink(x, y, this.cur.getPink(x, y));
+        } else if (nextAlive) {
+          this.nxt.setPink(x, y, Math.random() < 0.12 ? 1 : 0);
+        } else {
+          this.nxt.setPink(x, y, 0);
+        }
       }
     const tmp = this.cur; this.cur = this.nxt; this.nxt = tmp;
   }
@@ -108,13 +122,15 @@ class Sim {
   draw() {
     const { ctx, w, h } = this;
     ctx.clearRect(0, 0, w * CELL, h * CELL);
-    // site uses data-theme="light" for light mode; default (:root) is dark
     const dark = document.documentElement.getAttribute("data-theme") !== "light";
-    ctx.fillStyle = dark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)";
+    const normalColor = dark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)";
+    const pinkColor = "rgba(219,112,147,0.32)";
     for (let y = 0; y < h; y++)
       for (let x = 0; x < w; x++)
-        if (this.cur.get(x, y))
+        if (this.cur.get(x, y)) {
+          ctx.fillStyle = this.cur.getPink(x, y) ? pinkColor : normalColor;
           ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2);
+        }
   }
 
   resize() {
@@ -222,10 +238,9 @@ export function GameOfLife() {
     return () => ro.disconnect();
   }, []);
 
-  // Mouse — only draw while button held (click-drag)
+  // Mouse — draw on hover (no click required)
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      if (!e.buttons) return;
       const x = Math.floor(e.clientX / CELL);
       const y = Math.floor(e.clientY / CELL);
       simRef.current?.onMouseMove(e.timeStamp, x, y);
