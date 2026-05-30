@@ -13,7 +13,7 @@ import { Signature } from "@/components/ui/signature";
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home, shortcut: "1" },
   { href: "/now", label: "Now", icon: Zap, shortcut: "2" },
-  { href: "/reading", label: "Reading", icon: BookOpen, shortcut: "3" },
+  // { href: "/reading", label: "Reading", icon: BookOpen, shortcut: "3" }, // archived
   { href: "/links", label: "Links", icon: LinkIcon, shortcut: "4" },
   { href: "/things", label: "Things", icon: Gift, shortcut: "5" },
   { href: "/clock", label: "Visualizations", icon: Clock, shortcut: "6" },
