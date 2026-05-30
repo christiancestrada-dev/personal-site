@@ -153,8 +153,8 @@ function StarField({ isDark }: { isDark: boolean }) {
           dur: `${2.5 + Math.random() * 6}s`,
           begin: `${Math.random() * 7}s`,
           pink: Math.random() < 0.28,
-          pinkDur: `${4 + Math.random() * 5}s`,
-          pinkBegin: `${Math.random() * 4}s`,
+          pinkDur: `${1.2 + Math.random() * 1.6}s`,
+          pinkBegin: `${Math.random() * 3}s`,
           pinkR: r * 2.4,
         };
       }),

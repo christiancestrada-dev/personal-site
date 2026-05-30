@@ -34,6 +34,34 @@ function patternSize(p: string): [number, number] {
   return [Math.max(...rows.map(r => r.length)), rows.length];
 }
 
+// ── Random spawn patterns ─────────────────────────────────────────────────────
+const SPAWN_PATTERNS = [
+  // R-pentomino — tiny but explosively chaotic
+  `.OO\nOO.\n.O.`,
+  // Acorn — 7 cells → stabilises after 5206 gen
+  `.O.....\n...O...\nOO..OOO`,
+  // Diehard — dies after 130 gen
+  `......O.\nOO......\n.O...OOO`,
+  // Glider
+  `.O.\n..O\nOOO`,
+  // Lightweight spaceship (LWSS)
+  `.O..O\nO....\nO...O\nOOOO.`,
+  // Middleweight spaceship (MWSS)
+  `..O...\n.O...O\nO.....\nO....O\nOOOOO.`,
+  // Pentadecathlon — period-15 oscillator
+  `.O.\n.O.\nO.O\n.O.\n.O.\n.O.\n.O.\nO.O\n.O.\n.O.`,
+  // Pulsar — period-3 oscillator
+  `..OOO...OOO..\n.............\nO....O.O....O\nO....O.O....O\nO....O.O....O\n..OOO...OOO..\n.............\n..OOO...OOO..\nO....O.O....O\nO....O.O....O\nO....O.O....O\n.............\n..OOO...OOO..`,
+  // Queen bee shuttle (period 30)
+  `OO...................\n.OO..................\n..O..................\n..O..O...............\n.....O...............\n.....OO.....OO.......\n...........O.O.......\n..........O..........\n..........O.O........\n...........OO........`,
+  // Beacon — period-2 oscillator
+  `OO..\nOO..\n..OO\n..OO`,
+  // Toad — period-2 oscillator
+  `.OOO\nOOO.`,
+  // Figure-eight — period-8 oscillator
+  `OOO...\nOOO...\nOOO...\n...OOO\n...OOO\n...OOO`,
+];
+
 // ── Grid (non-toroidal, bounds-checked like kdrag0n.dev) ──────────────────────
 class Grid {
   w: number; h: number;
@@ -87,6 +115,18 @@ class Sim {
     for (let y = 0; y < rows.length; y++)
       for (let x = 0; x < rows[y].length; x++)
         this.cur.set(ox + x, oy + y, rows[y][x] === "O" ? 1 : 0);
+  }
+
+  stampRandom() {
+    const raw = SPAWN_PATTERNS[Math.floor(Math.random() * SPAWN_PATTERNS.length)];
+    // Random rotation for variety
+    const rotations = Math.floor(Math.random() * 4);
+    let pattern = raw;
+    for (let i = 0; i < rotations; i++) pattern = rotatePattern(pattern);
+    const [pw, ph] = patternSize(pattern);
+    const ox = Math.floor(Math.random() * Math.max(1, this.w - pw - 4)) + 2;
+    const oy = Math.floor(Math.random() * Math.max(1, this.h - ph - 4)) + 2;
+    this.stampPattern(ox, oy, pattern);
   }
 
   neighbors(x: number, y: number): number {
@@ -220,6 +260,19 @@ export function GameOfLife() {
     }, TICK);
     return () => clearInterval(id);
   }, [visible]);
+
+  // Random pattern spawner — stamps a new GoL artifact every 2–5 seconds
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      timeout = setTimeout(() => {
+        simRef.current?.stampRandom();
+        schedule();
+      }, 2000 + Math.random() * 3000);
+    };
+    schedule();
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Visibility API
   useEffect(() => {
