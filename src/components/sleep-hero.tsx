@@ -143,17 +143,21 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
 function StarField({ isDark }: { isDark: boolean }) {
   const stars = useMemo(
     () =>
-      Array.from({ length: 90 }, () => ({
-        cx: Math.random() * 1440,
-        cy: Math.random() * 700,
-        r: 0.7 + Math.random() * 1.8,
-        op: 0.2 + Math.random() * 0.7,
-        dur: `${2.5 + Math.random() * 6}s`,
-        begin: `${Math.random() * 7}s`,
-        pink: Math.random() < 0.25,
-        pinkDur: `${5 + Math.random() * 7}s`,
-        pinkBegin: `${Math.random() * 12}s`,
-      })),
+      Array.from({ length: 90 }, () => {
+        const r = 0.7 + Math.random() * 1.8;
+        return {
+          cx: Math.random() * 1440,
+          cy: Math.random() * 700,
+          r,
+          op: 0.2 + Math.random() * 0.7,
+          dur: `${2.5 + Math.random() * 6}s`,
+          begin: `${Math.random() * 7}s`,
+          pink: Math.random() < 0.28,
+          pinkDur: `${4 + Math.random() * 5}s`,
+          pinkBegin: `${Math.random() * 4}s`,
+          pinkR: r * 2.4,
+        };
+      }),
     []
   );
 
@@ -177,14 +181,24 @@ function StarField({ isDark }: { isDark: boolean }) {
             repeatCount="indefinite"
           />
           {s.pink && isDark && (
-            <animate
-              attributeName="fill"
-              values={`${starFill};${starFill};#db7093;${starFill};${starFill}`}
-              keyTimes="0;0.38;0.5;0.62;1"
-              dur={s.pinkDur}
-              begin={s.pinkBegin}
-              repeatCount="indefinite"
-            />
+            <>
+              <animate
+                attributeName="fill"
+                values={`${starFill};#db7093;${starFill}`}
+                keyTimes="0;0.5;1"
+                dur={s.pinkDur}
+                begin={s.pinkBegin}
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="r"
+                values={`${s.r};${s.pinkR};${s.r}`}
+                keyTimes="0;0.5;1"
+                dur={s.pinkDur}
+                begin={s.pinkBegin}
+                repeatCount="indefinite"
+              />
+            </>
           )}
         </circle>
       ))}
