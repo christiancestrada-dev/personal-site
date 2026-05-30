@@ -150,6 +150,9 @@ function StarField({ isDark }: { isDark: boolean }) {
         op: 0.2 + Math.random() * 0.7,
         dur: `${2.5 + Math.random() * 6}s`,
         begin: `${Math.random() * 7}s`,
+        pink: Math.random() < 0.25,
+        pinkDur: `${5 + Math.random() * 7}s`,
+        pinkBegin: `${Math.random() * 12}s`,
       })),
     []
   );
@@ -173,6 +176,16 @@ function StarField({ isDark }: { isDark: boolean }) {
             begin={s.begin}
             repeatCount="indefinite"
           />
+          {s.pink && isDark && (
+            <animate
+              attributeName="fill"
+              values={`${starFill};${starFill};#db7093;${starFill};${starFill}`}
+              keyTimes="0;0.38;0.5;0.62;1"
+              dur={s.pinkDur}
+              begin={s.pinkBegin}
+              repeatCount="indefinite"
+            />
+          )}
         </circle>
       ))}
     </svg>
@@ -821,7 +834,7 @@ export function SleepHero({ variant = 0 }: { variant?: number }) {
     return () => observer.disconnect();
   }, []);
 
-  const textColor = (variant === 0 || variant === 3) ? "#ffffff" : "var(--site-text-secondary)";
+  const textColor = "#ffffff";
 
   return (
     <div
