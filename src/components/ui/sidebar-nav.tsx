@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Home, Zap, BookOpen, Gift, Clock, Mail, Calendar, Menu, X, ChevronLeft, ChevronRight, Sun, Moon, Monitor, LinkIcon, Info } from "lucide-react";
+import { Home, Zap, Gift, Clock, Mail, Calendar, Menu, X, ChevronLeft, ChevronRight, Sun, Moon, Monitor, LinkIcon, Info } from "lucide-react";
 import { AnimatedText } from "@/components/ui/animated-text";
 import { BGPattern } from "@/components/ui/bg-pattern";
 import { Signature } from "@/components/ui/signature";
