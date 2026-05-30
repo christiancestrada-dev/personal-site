@@ -7,17 +7,5 @@ interface BubbleTextProps {
 }
 
 export function BubbleText({ text, className }: BubbleTextProps) {
-  return (
-    <span className={cn("inline", className)}>
-      {text.split("").map((char, i) =>
-        char === " " ? (
-          <span key={i}>{" "}</span>
-        ) : (
-          <span key={i} className="bubble-letter inline-block">
-            {char}
-          </span>
-        )
-      )}
-    </span>
-  );
+  return <span className={cn("inline", className)}>{text}</span>;
 }

@@ -411,12 +411,30 @@ function fillRoundRect(
 }
 
 function MosaicGrid() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const videoRef  = useRef<HTMLVideoElement>(null);
-  const videoSrc  = useMemo(
-    () => MOSAIC_VIDEOS[Math.floor(Math.random() * MOSAIC_VIDEOS.length)],
-    []
-  );
+  const canvasRef  = useRef<HTMLCanvasElement>(null);
+  const videoRef   = useRef<HTMLVideoElement>(null);
+  const idxRef     = useRef(Math.floor(Math.random() * MOSAIC_VIDEOS.length));
+  const [videoSrc, setVideoSrc] = useState(() => MOSAIC_VIDEOS[idxRef.current]);
+
+  // Advance to next video when current one ends
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const onEnded = () => {
+      idxRef.current = (idxRef.current + 1) % MOSAIC_VIDEOS.length;
+      setVideoSrc(MOSAIC_VIDEOS[idxRef.current]);
+    };
+    v.addEventListener("ended", onEnded);
+    return () => v.removeEventListener("ended", onEnded);
+  }, []);
+
+  // Reload + play when src changes
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.load();
+    v.play().catch(() => {});
+  }, [videoSrc]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -571,7 +589,7 @@ function MosaicGrid() {
       <video
         ref={videoRef}
         src={videoSrc}
-        autoPlay muted loop playsInline
+        autoPlay muted playsInline
         style={{
           position: "absolute",
           inset: 0,
