@@ -34,32 +34,43 @@ function patternSize(p: string): [number, number] {
   return [Math.max(...rows.map(r => r.length)), rows.length];
 }
 
-// ── Random spawn patterns ─────────────────────────────────────────────────────
+// ── Rake and puffer seed patterns ─────────────────────────────────────────────
+// Natural glider producers and known rake-building components
 const SPAWN_PATTERNS = [
-  // R-pentomino — tiny but explosively chaotic
+  // R-pentomino — explosive natural glider producer
   `.OO\nOO.\n.O.`,
-  // Acorn — 7 cells → stabilises after 5206 gen
+  // Acorn — 7 cells, stabilises after 5206 gen with many gliders
   `.O.....\n...O...\nOO..OOO`,
-  // Diehard — dies after 130 gen
+  // Diehard — 12 cells, dies after 130 gen leaving gliders
   `......O.\nOO......\n.O...OOO`,
-  // Glider
-  `.O.\n..O\nOOO`,
-  // Lightweight spaceship (LWSS)
-  `.O..O\nO....\nO...O\nOOOO.`,
-  // Middleweight spaceship (MWSS)
-  `..O...\n.O...O\nO.....\nO....O\nOOOOO.`,
-  // Pentadecathlon — period-15 oscillator
-  `.O.\n.O.\nO.O\n.O.\n.O.\n.O.\n.O.\nO.O\n.O.\n.O.`,
-  // Pulsar — period-3 oscillator
+  // Herschel — 7-cell fundamental rake building block
+  `O..\nOOO\n.O.\n.OO`,
+  // Switch engine — diagonal puffer, leaves debris trail indefinitely
+  `.O.O...\n.....O.\nO....O.\n.OOOO..`,
+  // Pi-heptomino — chaotic, produces gliders during long evolution
+  `OOO\nO.O\nO.O`,
+  // Two colliding gliders — interesting collision products
+  `.O.\n..O\nOOO\n...\n...\n...\nO..\nO.O\nOOO`,
+  // Pulsar — period-3 oscillator, creates dense interaction zones
   `..OOO...OOO..\n.............\nO....O.O....O\nO....O.O....O\nO....O.O....O\n..OOO...OOO..\n.............\n..OOO...OOO..\nO....O.O....O\nO....O.O....O\nO....O.O....O\n.............\n..OOO...OOO..`,
-  // Queen bee shuttle (period 30)
+  // Queen bee shuttle — period-30, interacts with passing gliders
   `OO...................\n.OO..................\n..O..................\n..O..O...............\n.....O...............\n.....OO.....OO.......\n...........O.O.......\n..........O..........\n..........O.O........\n...........OO........`,
-  // Beacon — period-2 oscillator
-  `OO..\nOO..\n..OO\n..OO`,
-  // Toad — period-2 oscillator
-  `.OOO\nOOO.`,
-  // Figure-eight — period-8 oscillator
-  `OOO...\nOOO...\nOOO...\n...OOO\n...OOO\n...OOO`,
+];
+
+// ── Rake patterns ─────────────────────────────────────────────────────────────
+// Moving patterns that emit secondary spaceships/gliders as they travel.
+// All move rightward in standard orientation; rotation handles other directions.
+const RAKE_PATTERNS = [
+  // Switch engine — diagonal puffer/rake, leaves a debris wake
+  `.O.O...\n.....O.\nO....O.\n.OOOO..`,
+  // Double switch engine — two interacting switch engines form a stable rake
+  `.O.O...\n.....O.\nO....O.\n.OOOO..\n.......\n.......\n.......\n.O.O...\n.....O.\nO....O.\n.OOOO..`,
+  // Blinker puffer — two MWSS in close parallel (period-8, emits blinkers/gliders)
+  `..O...\n.O...O\nO.....\nO....O\nOOOOO.\n......\n......\n......\n..O...\n.O...O\nO.....\nO....O\nOOOOO.`,
+  // Forward rake — three LWSS stacked, interactions produce secondary objects
+  `.O..O\nO....\nO...O\nOOOO.\n.....\n.O..O\nO....\nO...O\nOOOO.\n.....\n.O..O\nO....\nO...O\nOOOO.`,
+  // Heavy forward rake — two HWSS in parallel
+  `..OO...\n.O....O\nO......\nO.....O\nOOOOOO.\n.......\n.......\n..OO...\n.O....O\nO......\nO.....O\nOOOOOO.`,
 ];
 
 // ── Grid (non-toroidal, bounds-checked like kdrag0n.dev) ──────────────────────
@@ -129,14 +140,8 @@ class Sim {
     this.stampPattern(ox, oy, pattern);
   }
 
-  spawnSpaceship() {
-    // All three ships move right in standard orientation
-    const rawShips = [
-      `.O..O\nO....\nO...O\nOOOO.`,        // LWSS
-      `..O...\n.O...O\nO.....\nO....O\nOOOOO.`,  // MWSS
-      `..OO...\n.O....O\nO......\nO.....O\nOOOOOO.`, // HWSS
-    ];
-    const raw = rawShips[Math.floor(Math.random() * rawShips.length)];
+  spawnRake() {
+    const raw = RAKE_PATTERNS[Math.floor(Math.random() * RAKE_PATTERNS.length)];
     // edge: 0=left(→) 1=right(←) 2=top(↓) 3=bottom(↑)
     const edge = Math.floor(Math.random() * 4);
     // rotations needed so ship faces inward: right=0, left=2, down=3, up=1
@@ -292,12 +297,12 @@ export function GameOfLife() {
     return () => clearTimeout(timeout);
   }, []);
 
-  // Spaceship spawner — flies one in from a random edge every 5–12 seconds
+  // Rake spawner — flies one in from a random edge every 5–12 seconds
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
     const schedule = () => {
       timeout = setTimeout(() => {
-        simRef.current?.spawnSpaceship();
+        simRef.current?.spawnRake();
         schedule();
       }, 5000 + Math.random() * 7000);
     };
