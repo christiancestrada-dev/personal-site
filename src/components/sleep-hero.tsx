@@ -860,6 +860,16 @@ export function SleepHero({ variant = 0 }: { variant?: number }) {
         </div>
       </div>
 
+      {/* ── Bottom fade to background ── */}
+      <div
+        className="absolute bottom-0 left-0 right-0 pointer-events-none"
+        style={{
+          height: "35%",
+          background: "linear-gradient(to bottom, transparent, var(--site-bg))",
+          zIndex: 2,
+        }}
+      />
+
       {/* ── Quote — bottom half ── */}
       <div
         className="absolute left-0 right-0 flex flex-col justify-center z-10"
