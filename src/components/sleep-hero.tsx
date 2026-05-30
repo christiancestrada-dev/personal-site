@@ -152,7 +152,7 @@ function StarField({ isDark }: { isDark: boolean }) {
           op: 0.2 + Math.random() * 0.7,
           dur: `${2.5 + Math.random() * 6}s`,
           begin: `${Math.random() * 7}s`,
-          pink: Math.random() < 0.28,
+          pink: Math.random() < 0.10,
           pinkDur: `${1.2 + Math.random() * 1.6}s`,
           pinkBegin: `${Math.random() * 3}s`,
           pinkR: r * 2.4,
@@ -175,7 +175,7 @@ function StarField({ isDark }: { isDark: boolean }) {
       {isDark && stars.filter(s => s.pink).map((s, i) => (
         <circle key={`glow-${i}`} cx={s.cx} cy={s.cy} r={s.r} fill="#db7093" opacity="0">
           <animate attributeName="opacity" values="0;0.6;0" keyTimes="0;0.5;1" dur={s.pinkDur} begin={s.pinkBegin} repeatCount="indefinite" />
-          <animate attributeName="r" values={`${s.r};${s.r * 6};${s.r}`} keyTimes="0;0.5;1" dur={s.pinkDur} begin={s.pinkBegin} repeatCount="indefinite" />
+          <animate attributeName="r" values={`${s.r};${s.r * 3};${s.r}`} keyTimes="0;0.5;1" dur={s.pinkDur} begin={s.pinkBegin} repeatCount="indefinite" />
         </circle>
       ))}
       {/* Stars */}
