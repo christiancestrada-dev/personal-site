@@ -49,8 +49,8 @@ const SPAWN_PATTERNS = [
   `.O.O...\n.....O.\nO....O.\n.OOOO..`,
   // Pi-heptomino — chaotic, produces gliders during long evolution
   `OOO\nO.O\nO.O`,
-  // Two colliding gliders — interesting collision products
-  `.O.\n..O\nOOO\n...\n...\n...\nO..\nO.O\nOOO`,
+  // Glider stream — 6 gliders in a column, all heading SE; creates a diagonal sweep
+  `.O.\n..O\nOOO\n...\n...\n...\n...\n...\n...\n.O.\n..O\nOOO\n...\n...\n...\n...\n...\n...\n.O.\n..O\nOOO\n...\n...\n...\n...\n...\n...\n.O.\n..O\nOOO\n...\n...\n...\n...\n...\n...\n.O.\n..O\nOOO\n...\n...\n...\n...\n...\n...\n.O.\n..O\nOOO`,
   // Queen bee shuttle — period-30, interacts with passing gliders
   `OO...................\n.OO..................\n..O..................\n..O..O...............\n.....O...............\n.....OO.....OO.......\n...........O.O.......\n..........O..........\n..........O.O........\n...........OO........`,
 ];
@@ -69,6 +69,8 @@ const RAKE_PATTERNS = [
   `.O..O\nO....\nO...O\nOOOO.\n.....\n.O..O\nO....\nO...O\nOOOO.\n.....\n.O..O\nO....\nO...O\nOOOO.`,
   // Heavy forward rake — two HWSS in parallel
   `..OO...\n.O....O\nO......\nO.....O\nOOOOOO.\n.......\n.......\n..OO...\n.O....O\nO......\nO.....O\nOOOOOO.`,
+  // LWSS squadron — 4 lightweight spaceships in formation, 6-row safe gap
+  `.O..O\nO....\nO...O\nOOOO.\n......\n......\n......\n......\n......\n......\n.O..O\nO....\nO...O\nOOOO.\n......\n......\n......\n......\n......\n......\n.O..O\nO....\nO...O\nOOOO.\n......\n......\n......\n......\n......\n......\n.O..O\nO....\nO...O\nOOOO.`,
 ];
 
 // ── Grid (non-toroidal, bounds-checked like kdrag0n.dev) ──────────────────────
