@@ -51,8 +51,6 @@ const SPAWN_PATTERNS = [
   `OOO\nO.O\nO.O`,
   // Two colliding gliders — interesting collision products
   `.O.\n..O\nOOO\n...\n...\n...\nO..\nO.O\nOOO`,
-  // Pulsar — period-3 oscillator, creates dense interaction zones
-  `..OOO...OOO..\n.............\nO....O.O....O\nO....O.O....O\nO....O.O....O\n..OOO...OOO..\n.............\n..OOO...OOO..\nO....O.O....O\nO....O.O....O\nO....O.O....O\n.............\n..OOO...OOO..`,
   // Queen bee shuttle — period-30, interacts with passing gliders
   `OO...................\n.OO..................\n..O..................\n..O..O...............\n.....O...............\n.....OO.....OO.......\n...........O.O.......\n..........O..........\n..........O.O........\n...........OO........`,
 ];
@@ -130,31 +128,19 @@ class Sim {
 
   stampRandom() {
     const raw = SPAWN_PATTERNS[Math.floor(Math.random() * SPAWN_PATTERNS.length)];
-    // Random rotation for variety
-    const rotations = Math.floor(Math.random() * 4);
     let pattern = raw;
-    for (let i = 0; i < rotations; i++) pattern = rotatePattern(pattern);
     const [pw, ph] = patternSize(pattern);
-    const ox = Math.floor(Math.random() * Math.max(1, this.w - pw - 4)) + 2;
+    const ox = 2;
     const oy = Math.floor(Math.random() * Math.max(1, this.h - ph - 4)) + 2;
     this.stampPattern(ox, oy, pattern);
   }
 
   spawnRake() {
     const raw = RAKE_PATTERNS[Math.floor(Math.random() * RAKE_PATTERNS.length)];
-    // edge: 0=left(→) 1=right(←) 2=top(↓) 3=bottom(↑)
-    const edge = Math.floor(Math.random() * 4);
-    // rotations needed so ship faces inward: right=0, left=2, down=3, up=1
-    const rots = [0, 2, 3, 1][edge];
-    let pattern = raw;
-    for (let i = 0; i < rots; i++) pattern = rotatePattern(pattern);
-    const [pw, ph] = patternSize(pattern);
-    let ox: number, oy: number;
-    if (edge === 0) { ox = 0; oy = 1 + Math.floor(Math.random() * Math.max(1, this.h - ph - 2)); }
-    else if (edge === 1) { ox = Math.max(0, this.w - pw - 1); oy = 1 + Math.floor(Math.random() * Math.max(1, this.h - ph - 2)); }
-    else if (edge === 2) { ox = 1 + Math.floor(Math.random() * Math.max(1, this.w - pw - 2)); oy = 0; }
-    else { ox = 1 + Math.floor(Math.random() * Math.max(1, this.w - pw - 2)); oy = Math.max(0, this.h - ph - 1); }
-    this.stampPattern(ox, oy, pattern);
+    // Always enter from left edge, moving right (no rotation needed)
+    const [, ph] = patternSize(raw);
+    const oy = 1 + Math.floor(Math.random() * Math.max(1, this.h - ph - 2));
+    this.stampPattern(0, oy, raw);
   }
 
   neighbors(x: number, y: number): number {
