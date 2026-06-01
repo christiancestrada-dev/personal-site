@@ -126,21 +126,64 @@ class Sim {
         this.cur.set(ox + x, oy + y, rows[y][x] === "O" ? 1 : 0);
   }
 
+  // Runs pattern in an unbounded set-sim for `gens` generations.
+  // Returns cells normalized so the leftmost column is at x=0.
+  preEvolve(pattern: string, gens: number): Array<{ x: number; y: number }> {
+    let alive = new Set<string>();
+    for (const [y, row] of pattern.split("\n").entries())
+      for (let x = 0; x < row.length; x++)
+        if (row[x] === "O") alive.add(`${x},${y}`);
+
+    for (let g = 0; g < gens; g++) {
+      const counts = new Map<string, number>();
+      for (const key of alive) {
+        const [cx, cy] = key.split(",").map(Number);
+        for (let dy = -1; dy <= 1; dy++)
+          for (let dx = -1; dx <= 1; dx++) {
+            if (dx === 0 && dy === 0) continue;
+            const nk = `${cx + dx},${cy + dy}`;
+            counts.set(nk, (counts.get(nk) ?? 0) + 1);
+          }
+      }
+      const next = new Set<string>();
+      for (const [key, cnt] of counts)
+        if (cnt === 3 || (cnt === 2 && alive.has(key))) next.add(key);
+      alive = next;
+    }
+
+    const cells = [...alive].map(k => { const [x, y] = k.split(",").map(Number); return { x, y }; });
+    if (!cells.length) return [];
+    const minX = Math.min(...cells.map(c => c.x));
+    const minY = Math.min(...cells.map(c => c.y));
+    return cells.map(c => ({ x: c.x - minX, y: c.y - minY }));
+  }
+
+  stampEvolved(cells: Array<{ x: number; y: number }>, oy: number) {
+    const maxY = Math.max(...cells.map(c => c.y));
+    const yOff = Math.min(oy, this.h - maxY - 2);
+    for (const { x, y } of cells) {
+      const gx = x, gy = yOff + y;
+      if (gx >= 0 && gx < this.w && gy >= 0 && gy < this.h)
+        this.cur.set(gx, gy, 1);
+    }
+  }
+
   stampRandom() {
     const raw = SPAWN_PATTERNS[Math.floor(Math.random() * SPAWN_PATTERNS.length)];
-    let pattern = raw;
-    const [pw, ph] = patternSize(pattern);
-    const ox = 2;
-    const oy = Math.floor(Math.random() * Math.max(1, this.h - ph - 4)) + 2;
-    this.stampPattern(ox, oy, pattern);
+    const cells = this.preEvolve(raw, 120);
+    if (!cells.length) return;
+    const maxY = Math.max(...cells.map(c => c.y));
+    const oy = Math.floor(Math.random() * Math.max(1, this.h - maxY - 4)) + 2;
+    this.stampEvolved(cells, oy);
   }
 
   spawnRake() {
     const raw = RAKE_PATTERNS[Math.floor(Math.random() * RAKE_PATTERNS.length)];
-    // Always enter from left edge, moving right (no rotation needed)
-    const [, ph] = patternSize(raw);
-    const oy = 1 + Math.floor(Math.random() * Math.max(1, this.h - ph - 2));
-    this.stampPattern(0, oy, raw);
+    const cells = this.preEvolve(raw, 80);
+    if (!cells.length) return;
+    const maxY = Math.max(...cells.map(c => c.y));
+    const oy = 1 + Math.floor(Math.random() * Math.max(1, this.h - maxY - 2));
+    this.stampEvolved(cells, oy);
   }
 
   neighbors(x: number, y: number): number {
