@@ -221,6 +221,7 @@ function ConstellationCanvas({ isDark }: { isDark: boolean }) {
     let animId: number;
     let w = 0, h = 0;
     let mouseX = -9999, mouseY = -9999;
+    let orbX = -9999, orbY = -9999;
 
     interface Star { x: number; y: number; vx: number; vy: number; r: number; op: number }
     let stars: Star[] = [];
@@ -252,11 +253,20 @@ function ConstellationCanvas({ isDark }: { isDark: boolean }) {
         if (s.y < 0) s.y = h; if (s.y > h) s.y = 0;
       }
 
+      // Lerp orb toward actual mouse position
+      if (mouseX > -9000) {
+        if (orbX < -9000) { orbX = mouseX; orbY = mouseY; }
+        orbX += (mouseX - orbX) * 0.07;
+        orbY += (mouseY - orbY) * 0.07;
+      } else {
+        orbX = -9999; orbY = -9999;
+      }
+
       // Pre-compute which stars are within mouse radius (for pink reactions)
       const near = new Set<number>();
-      if (mouseX > -9000) {
+      if (orbX > -9000) {
         for (let i = 0; i < stars.length; i++) {
-          const dx = stars[i].x - mouseX, dy = stars[i].y - mouseY;
+          const dx = stars[i].x - orbX, dy = stars[i].y - orbY;
           if (dx * dx + dy * dy < MOUSE_R * MOUSE_R) near.add(i);
         }
       }
@@ -287,32 +297,32 @@ function ConstellationCanvas({ isDark }: { isDark: boolean }) {
       }
 
       // Mouse-to-star lines — pink, cubic easing
-      if (mouseX > -9000) {
+      if (orbX > -9000) {
         for (let i = 0; i < stars.length; i++) {
           if (!near.has(i)) continue;
-          const dx = stars[i].x - mouseX, dy = stars[i].y - mouseY;
+          const dx = stars[i].x - orbX, dy = stars[i].y - orbY;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const e = 1 - dist / MOUSE_R;
           ctx.beginPath();
           ctx.strokeStyle = `rgba(219,112,147,${e * e * 0.75})`;
           ctx.lineWidth = 1.0;
-          ctx.moveTo(mouseX, mouseY);
+          ctx.moveTo(orbX, orbY);
           ctx.lineTo(stars[i].x, stars[i].y);
           ctx.stroke();
         }
 
         // Cursor glow dot
-        const g = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 18);
+        const g = ctx.createRadialGradient(orbX, orbY, 0, orbX, orbY, 18);
         g.addColorStop(0, "rgba(219,112,147,0.45)");
         g.addColorStop(1, "rgba(219,112,147,0)");
         ctx.beginPath();
         ctx.fillStyle = g;
-        ctx.arc(mouseX, mouseY, 18, 0, Math.PI * 2);
+        ctx.arc(orbX, orbY, 18, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = "rgba(219,112,147,0.9)";
-        ctx.arc(mouseX, mouseY, 2.5, 0, Math.PI * 2);
+        ctx.arc(orbX, orbY, 2.5, 0, Math.PI * 2);
         ctx.fill();
       }
 
