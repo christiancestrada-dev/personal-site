@@ -159,10 +159,8 @@ class Sim {
   }
 
   stampEvolved(cells: Array<{ x: number; y: number }>, oy: number) {
-    const maxY = Math.max(...cells.map(c => c.y));
-    const yOff = Math.min(oy, this.h - maxY - 2);
     for (const { x, y } of cells) {
-      const gx = x, gy = yOff + y;
+      const gx = x, gy = oy + y;
       if (gx >= 0 && gx < this.w && gy >= 0 && gy < this.h)
         this.cur.set(gx, gy, 1);
     }
@@ -170,19 +168,20 @@ class Sim {
 
   stampRandom() {
     const raw = SPAWN_PATTERNS[Math.floor(Math.random() * SPAWN_PATTERNS.length)];
-    const cells = this.preEvolve(raw, 120);
+    const cells = this.preEvolve(raw, 80);
     if (!cells.length) return;
     const maxY = Math.max(...cells.map(c => c.y));
-    const oy = Math.floor(Math.random() * Math.max(1, this.h - maxY - 4)) + 2;
+    // Center at a random y; edge clipping is fine
+    const oy = Math.max(0, Math.floor(Math.random() * this.h) - Math.floor(maxY / 2));
     this.stampEvolved(cells, oy);
   }
 
   spawnRake() {
     const raw = RAKE_PATTERNS[Math.floor(Math.random() * RAKE_PATTERNS.length)];
-    const cells = this.preEvolve(raw, 80);
+    const cells = this.preEvolve(raw, 60);
     if (!cells.length) return;
     const maxY = Math.max(...cells.map(c => c.y));
-    const oy = 1 + Math.floor(Math.random() * Math.max(1, this.h - maxY - 2));
+    const oy = Math.max(0, Math.floor(Math.random() * this.h) - Math.floor(maxY / 2));
     this.stampEvolved(cells, oy);
   }
 
