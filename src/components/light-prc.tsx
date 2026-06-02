@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Info } from "lucide-react";
+import { useTheme } from "@/lib/use-theme";
 
 // St. Hilaire et al. (2012) — Phase Response Curve to 1h bright white light
 // [CT_hours_from_CBTmin, phase_shift_hours]
@@ -157,6 +158,8 @@ export function LightPRC() {
   const onMove  = useCallback((e: React.MouseEvent<SVGSVGElement>) => setHover(getPt(e)), [getPt]);
   const onClick = useCallback((e: React.MouseEvent<SVGSVGElement>) => setClick(getPt(e)), [getPt]);
 
+  const { isDark } = useTheme();
+
   if (!time) return null;
 
   const t     = time.getHours() + time.getMinutes() / 60;
@@ -237,8 +240,8 @@ export function LightPRC() {
 
             {/* Diagonal stripe pattern for sleep zones */}
             <pattern id="lp-sleep-stripe" x="0" y="0" width={STRIPE_SZ} height={STRIPE_SZ} patternUnits="userSpaceOnUse">
-              <rect width={STRIPE_SZ} height={STRIPE_SZ} fill="#06060e" />
-              <line x1="0" y1={STRIPE_SZ} x2={STRIPE_SZ} y2="0" stroke="#14162a" strokeWidth="1.5" />
+              <rect width={STRIPE_SZ} height={STRIPE_SZ} fill={isDark ? "#06060e" : "rgba(150,130,120,0.07)"} />
+              <line x1="0" y1={STRIPE_SZ} x2={STRIPE_SZ} y2="0" stroke={isDark ? "#14162a" : "rgba(140,115,105,0.22)"} strokeWidth="1.5" />
             </pattern>
 
             <clipPath id="lp-clip">
@@ -284,12 +287,12 @@ export function LightPRC() {
             {/* 3 — Labels (zone labels first, then peak labels on top) */}
             <motion.g initial={{ opacity: 0 }} animate={{ opacity: 0.96 }} transition={{ duration: 0.5, delay: 3.0 }}>
               <rect x={hx(10)-51} y={AXIS_Y-48} width={102} height={22} rx={4}
-                fill="#050810" fillOpacity={0.9} stroke="#5dcaa5" strokeWidth={0.6} strokeOpacity={0.35} />
+                fill={isDark ? "#050810" : "var(--site-bg-card)"} fillOpacity={isDark ? 0.9 : 1} stroke="#5dcaa5" strokeWidth={0.6} strokeOpacity={isDark ? 0.35 : 0.6} />
               <text x={hx(10)} y={AXIS_Y-32} fontSize={13} fill="#5dcaa5" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2">▲ ADVANCE</text>
             </motion.g>
             <motion.g initial={{ opacity: 0 }} animate={{ opacity: 0.96 }} transition={{ duration: 0.5, delay: 3.1 }}>
               <rect x={hx(19)-43} y={AXIS_Y+54} width={86} height={22} rx={4}
-                fill="#050810" fillOpacity={0.9} stroke="#db7093" strokeWidth={0.6} strokeOpacity={0.35} />
+                fill={isDark ? "#050810" : "var(--site-bg-card)"} fillOpacity={isDark ? 0.9 : 1} stroke="#db7093" strokeWidth={0.6} strokeOpacity={isDark ? 0.35 : 0.6} />
               <text x={hx(19)} y={AXIS_Y+70} fontSize={13} fill="#db7093" textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" letterSpacing="2">▼ DELAY</text>
             </motion.g>
             <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 3.2 }}>

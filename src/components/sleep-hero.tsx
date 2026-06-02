@@ -875,8 +875,8 @@ export function SleepHero({ variant = 0 }: { variant?: number }) {
     return () => observer.disconnect();
   }, []);
 
-  const onDarkBg = isDark || variant === 3;
-  const textColor = onDarkBg ? "#ffffff" : "var(--site-text)";
+  const mosaicLight = !isDark && variant === 3;
+  const textColor = isDark ? "#ffffff" : "var(--site-text)";
 
   return (
     <div
@@ -897,10 +897,13 @@ export function SleepHero({ variant = 0 }: { variant?: number }) {
         className="absolute left-0 right-0 flex flex-col justify-center z-10"
         style={{ top: 0, height: "50%", paddingLeft: "max(2rem, calc((100% - 72rem) / 2 + 2rem))" }}
       >
-        <div className="text-left space-y-4" style={{ maxWidth: "clamp(300px, 70vw, 680px)" }}>
+        <div className="text-left space-y-4" style={{
+            maxWidth: "clamp(300px, 70vw, 680px)",
+            ...(mosaicLight && { padding: "20px 24px", borderRadius: "14px", background: "rgba(255,255,255,0.72)", backdropFilter: "blur(6px)" }),
+          }}>
           <h1
             className="font-bold whitespace-nowrap"
-            style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)", lineHeight: 1.1, letterSpacing: "-0.03em", color: onDarkBg ? "#ffffff" : "var(--site-text-bright)" }}
+            style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)", lineHeight: 1.1, letterSpacing: "-0.03em", color: isDark ? "#ffffff" : "var(--site-text-bright)" }}
           >
             {(() => {
               const hour = new Date().getHours();
