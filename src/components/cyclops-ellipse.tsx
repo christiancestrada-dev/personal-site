@@ -254,7 +254,7 @@ function Step2({ w, h }: { w: number; h: number }) {
             cy={y}
             r="6"
             fill={dotColor(t)}
-            stroke="rgba(255,255,255,0.5)"
+            stroke="var(--site-bg)"
             strokeWidth="0.8"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}

@@ -102,7 +102,7 @@ export function PolaroidGallery({
                   className="w-full h-72 object-cover rounded-sm pointer-events-none"
                   draggable={false}
                 />
-                <p className="mt-2.5 text-[11px] text-gray-600 text-center leading-relaxed min-h-[2.5em]">
+                <p className="mt-2.5 text-[11px] text-center leading-relaxed min-h-[2.5em]" style={{ color: "var(--site-text-muted)" }}>
                   {image.caption}
                 </p>
               </div>

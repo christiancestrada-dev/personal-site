@@ -800,7 +800,7 @@ export function FloatingSheep() {
       {popCount > 0 && (
         <div
           className="absolute top-4 left-4 z-30 text-[10px] px-2 py-1 rounded pointer-events-auto"
-          style={{ backgroundColor: "rgba(0,0,0,0.8)", border: "1px solid var(--site-border)", color: "var(--site-text-muted)" }}
+          style={{ backgroundColor: "var(--site-bg-card)", border: "1px solid var(--site-border)", color: "var(--site-text-muted)" }}
         >
           {popCount} popped{!goldenUnlocked && ` · ${GOLDEN_THRESHOLD - popCount} to go`}
         </div>
@@ -874,7 +874,7 @@ export function SleepHero({ variant = 0 }: { variant?: number }) {
     return () => observer.disconnect();
   }, []);
 
-  const textColor = "#ffffff";
+  const textColor = isDark ? "#ffffff" : "var(--site-text)";
 
   return (
     <div

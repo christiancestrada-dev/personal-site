@@ -39,13 +39,13 @@ function getCircadianState(hour: number, minute: number): CircadianState {
   if (t >= 7 && t < 10) return {
     phase: "peak alertness",
     detail: "core body temp rising",
-    color: "#d4d4d4",
+    color: "var(--site-text-secondary)",
     breathingRate: 16,
   };
   if (t >= 10 && t < 13) return {
     phase: "cognitive peak",
     detail: "working memory & attention optimal",
-    color: "#d4d4d4",
+    color: "var(--site-text-secondary)",
     breathingRate: 16,
   };
   if (t >= 13 && t < 15) return {
@@ -57,7 +57,7 @@ function getCircadianState(hour: number, minute: number): CircadianState {
   if (t >= 15 && t < 18) return {
     phase: "afternoon recovery",
     detail: "reaction time & motor speed peak",
-    color: "#d4d4d4",
+    color: "var(--site-text-secondary)",
     breathingRate: 16,
   };
   if (t >= 18 && t < 20) return {

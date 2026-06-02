@@ -415,7 +415,7 @@ export default function ThingsPage() {
                   </div>
                 </button>
                 {admin.isAdmin && (
-                  <button onClick={() => setEditingIndex(idx)} className="absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10" style={{ backgroundColor: "rgba(0,0,0,0.7)", color: "var(--site-text-muted)" }} title="Edit">
+                  <button onClick={() => setEditingIndex(idx)} className="absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10" style={{ backgroundColor: "var(--site-bg-card)", border: "1px solid var(--site-border)", color: "var(--site-text-muted)" }} title="Edit">
                     <Pencil size={12} />
                   </button>
                 )}

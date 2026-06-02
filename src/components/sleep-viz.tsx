@@ -156,8 +156,8 @@ export function MelatoninGraph() {
               <stop offset="100%" stopColor="#60a5ff" stopOpacity="0" />
             </linearGradient>
             <linearGradient id="grad-sp" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ddeeff" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="#ddeeff" stopOpacity="0" />
+              <stop offset="0%" stopColor="#7aaee8" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#7aaee8" stopOpacity="0" />
             </linearGradient>
             <clipPath id="graph-clip">
               <rect x="0" y="0" width={W} height={H} />
@@ -171,7 +171,7 @@ export function MelatoninGraph() {
             <motion.rect x="0" y="0" width={(WAKE_H / 24) * W} height={H} style={{ fill: "var(--site-bg-card)" }} initial={{ opacity: 0 }} animate={{ opacity: 0.6 }} transition={{ duration: 0.6 }} />
 
             {/* Midday dip reference line at 1pm */}
-            <motion.line x1={(13/24)*W} y1="0" x2={(13/24)*W} y2={H} stroke="#1a1a1a" strokeWidth="0.8" strokeDasharray="3,4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.3 }} />
+            <motion.line x1={(13/24)*W} y1="0" x2={(13/24)*W} y2={H} stroke="var(--site-text-dim)" strokeWidth="0.8" strokeDasharray="3,4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.3 }} />
 
             {/* S-drive area + line */}
             <motion.path d={areaS} fill="url(#grad-s)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.2 }} />
@@ -182,7 +182,7 @@ export function MelatoninGraph() {
 
             {/* Combined sleep pressure area + line */}
             <motion.path d={areaSP} fill="url(#grad-sp)" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.5 }} />
-            <motion.path d={pathSP} fill="none" stroke="#ddeeff" strokeWidth="2" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.4, ease: "easeInOut", delay: 0.4 }} />
+            <motion.path d={pathSP} fill="none" stroke="#7aaee8" strokeWidth="2" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.4, ease: "easeInOut", delay: 0.4 }} />
 
             {/* Current time vertical line */}
             <motion.line x1={dotX} y1="0" x2={dotX} y2={H} stroke="#525252" strokeWidth="0.8" strokeDasharray="2,3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 1.2 }} />
@@ -197,8 +197,8 @@ export function MelatoninGraph() {
             {/* C-drive dot */}
             <motion.circle cx={dotX} cy={toDotY(dotYc)} r="3" fill="#9b8fce" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3, delay: 1.4 }} />
             {/* Sleep pressure dot */}
-            <motion.circle cx={dotX} cy={toDotY(dotYp)} r="4" fill="#ddeeff" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3, delay: 1.5 }} />
-            <circle cx={dotX} cy={toDotY(dotYp)} r="7" fill="none" stroke="#ddeeff" strokeWidth="0.8" opacity="0.3">
+            <motion.circle cx={dotX} cy={toDotY(dotYp)} r="4" fill="#7aaee8" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3, delay: 1.5 }} />
+            <circle cx={dotX} cy={toDotY(dotYp)} r="7" fill="none" stroke="#7aaee8" strokeWidth="0.8" opacity="0.3">
               <animate attributeName="r" values="6;11;6" dur="2.5s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="0.3;0;0.3" dur="2.5s" repeatCount="indefinite" />
             </circle>
@@ -223,14 +223,14 @@ export function MelatoninGraph() {
       <div className="flex items-center gap-5 text-[9px] uppercase tracking-wider flex-wrap" style={{ color: "var(--site-text-muted)" }}>
         <LegendItem color="#60a5ff" label="S-drive" dash={false} detail="homeostatic" />
         <LegendItem color="#9b8fce" label="C-drive" dash={true}  detail="circadian" />
-        <LegendItem color="#ddeeff" label="sleep pressure" dash={false} detail="S + (1−C)" />
+        <LegendItem color="#7aaee8" label="sleep pressure" dash={false} detail="S + (1−C)" />
       </div>
 
       {/* Live values */}
       <div className="grid grid-cols-3 gap-2 text-[10px]">
         <ValueCard label="S-drive"  value={dotYs} color="#60a5ff" desc="adenosine" peak="11pm" peakVal={S_ONSET} />
         <ValueCard label="C-drive"  value={dotYc} color="#9b8fce" desc="alerting" peak="4pm" peakVal={1.0} />
-        <ValueCard label="pressure" value={dotYp} color="#ddeeff" desc="combined" peak="3am" peakVal={sleepPressure(3)} />
+        <ValueCard label="pressure" value={dotYp} color="#7aaee8" desc="combined" peak="3am" peakVal={sleepPressure(3)} />
       </div>
 
       {/* Info tooltip */}
@@ -320,7 +320,7 @@ function InfoTooltip() {
             <span style={{ color: "#9b8fce" }}>C-drive</span> is your circadian clock fighting to keep you alert, peaking around 4pm.
           </p>
           <p>
-            <span style={{ color: "#ddeeff" }}>Sleep pressure</span> = high adenosine + low circadian alerting.
+            <span style={{ color: "#7aaee8" }}>Sleep pressure</span> = high adenosine + low circadian alerting.
             It peaks between <strong style={{ color: "var(--site-text)" }}>2–4am</strong> and dips again around{" "}
             <strong style={{ color: "var(--site-text)" }}>1–3pm</strong> (afternoon slump).
             Caffeine masks this by blocking adenosine receptors. It hides the debt without reducing it.

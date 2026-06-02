@@ -202,8 +202,8 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
                     className="text-[11px] font-mono font-medium inline-flex items-center justify-center rounded"
                     style={{
                       color: "var(--site-text-bright)",
-                      backgroundColor: "rgba(255,255,255,0.08)",
-                      border: "1px solid rgba(255,255,255,0.1)",
+                      backgroundColor: "var(--site-nav-active)",
+                      border: "1px solid var(--site-border)",
                       minWidth: 22,
                       height: 22,
                       padding: "0 5px",
@@ -244,8 +244,8 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
               className="text-[11px] font-mono font-medium inline-flex items-center justify-center rounded"
               style={{
                 color: "var(--site-text-bright)",
-                backgroundColor: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                backgroundColor: "var(--site-nav-active)",
+                border: "1px solid var(--site-border)",
                 minWidth: 22,
                 height: 22,
                 padding: "0 5px",
@@ -274,8 +274,8 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
               className="text-[11px] font-mono font-medium inline-flex items-center justify-center rounded"
               style={{
                 color: "var(--site-text-bright)",
-                backgroundColor: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                backgroundColor: "var(--site-nav-active)",
+                border: "1px solid var(--site-border)",
                 minWidth: 22,
                 height: 22,
                 padding: "0 5px",

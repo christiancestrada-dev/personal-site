@@ -38,7 +38,7 @@ export default function ImageLoader({
   gridSize = 24,
   cellShape = "square",
   cellGap = 3,
-  cellColor = "#1a1a1a",
+  cellColor = "var(--site-border)",
   blinkSpeed = 1200,
   transitionDuration = 600,
   fadeOutDuration = 500,

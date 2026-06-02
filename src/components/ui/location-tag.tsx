@@ -36,7 +36,7 @@ export function LocationTag({ city = "Boston", timezone = "America/New_York" }: 
       className="relative flex items-center gap-2 px-3 py-1 rounded transition-all duration-300"
       style={{
         border: "1px solid var(--site-border)",
-        backgroundColor: isHovered ? "rgba(26,45,74,0.4)" : "transparent",
+        backgroundColor: isHovered ? "var(--site-nav-active)" : "transparent",
         color: "var(--site-text-muted)",
       }}
     >
