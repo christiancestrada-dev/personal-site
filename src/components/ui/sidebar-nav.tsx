@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   { href: "/now", label: "Now", icon: Zap, shortcut: "2" },
   // { href: "/reading", label: "Reading", icon: BookOpen, shortcut: "3" }, // archived
   { href: "/links", label: "Links", icon: LinkIcon, shortcut: "4" },
-  { href: "/things", label: "Things", icon: Gift, shortcut: "5" },
+  // { href: "/things", label: "Things", icon: Gift, shortcut: "5" },
   { href: "/clock", label: "Visualizations", icon: Clock, shortcut: "6" },
   { href: "/about-site", label: "About This Site", icon: Info, shortcut: "7" },
 ];
@@ -385,3 +385,4 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
     </>
   );
 }
+
