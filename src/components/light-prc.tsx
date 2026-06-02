@@ -369,7 +369,7 @@ export function LightPRC() {
                 : active.shift > 0 ? `+${active.shift.toFixed(2)}h advance`
                 : `${active.shift.toFixed(2)}h delay`;
               const tipX = Math.min(Math.max(tx - 56, LP), LP + UW - 116);
-              const tipY = ty > AXIS_Y + 40 ? ty - 38 : ty - 38;
+              const tipY = ty > AXIS_Y + 40 ? ty - 38 : ty + 16;
               return (
                 <g>
                   <line x1={tx} y1={SKY_BOT} x2={tx} y2={H-18}

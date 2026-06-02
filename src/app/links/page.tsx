@@ -3,8 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { loadContent, saveContent } from "@/lib/content-api";
 import { PageHeader } from "@/components/ui/page-header";
+import { AdminBar } from "@/components/ui/admin-bar";
+import { usePageAdmin } from "@/lib/use-page-admin";
 import { Tabs } from "@/components/ui/vercel-tabs";
-import { Plus, X, Lock, Unlock, ExternalLink, Trash2, Pencil } from "lucide-react";
+import { Plus, X, ExternalLink, Trash2, Pencil } from "lucide-react";
 
 interface LinkItem {
   title: string;
@@ -14,8 +16,6 @@ interface LinkItem {
   tag?: string;
   date: string;
 }
-
-const ADMIN_PASSWORD = "linkspls";
 
 const DEFAULT_LINKS: LinkItem[] = [
   {
@@ -69,12 +69,9 @@ const DEFAULT_LINKS: LinkItem[] = [
 ];
 
 export default function LinksPage() {
+  const admin = usePageAdmin("links");
   const [links, setLinks] = useState<LinkItem[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
   const [newLink, setNewLink] = useState({ title: "", url: "", author: "", note: "", tag: "" });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editLink, setEditLink] = useState({ title: "", url: "", author: "", note: "", tag: "" });
@@ -90,31 +87,12 @@ export default function LinksPage() {
           setLinks(DEFAULT_LINKS);
         }
       });
-      const admin = localStorage.getItem("site-admin-links");
-      if (admin === "true") setIsAdmin(true);
     }
   }, []);
 
   const saveLinks = (updated: LinkItem[]) => {
     setLinks(updated);
     saveContent("links", updated);
-  };
-
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      localStorage.setItem("site-admin-links", "true");
-      setShowPasswordPrompt(false);
-      setPassword("");
-      setPasswordError(false);
-    } else {
-      setPasswordError(true);
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAdmin(false);
-    localStorage.removeItem("site-admin-links");
   };
 
   const addLink = () => {
@@ -172,78 +150,13 @@ export default function LinksPage() {
       <main className="mx-auto max-w-xl px-6 py-24 space-y-8">
         <div className="flex items-start justify-between">
           <PageHeader title="Links" subtitle="Things I've found interesting" />
-          {!isAdmin ? (
-            <button
-              onClick={() => setShowPasswordPrompt(true)}
-              className="mt-2 p-2 rounded-md transition-colors"
-              style={{ color: "var(--site-text-dim)" }}
-              title="Admin login"
-            >
-              <Lock size={14} />
-            </button>
-          ) : (
-            <div className="mt-2 flex items-center gap-2">
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="p-2 rounded-md transition-colors"
-                style={{ color: "var(--site-accent)" }}
-                title="Add link"
-              >
-                <Plus size={16} />
-              </button>
-              <button
-                onClick={handleLogout}
-                className="p-2 rounded-md transition-colors"
-                style={{ color: "var(--site-text-dim)" }}
-                title="Logout"
-              >
-                <Unlock size={14} />
-              </button>
-            </div>
-          )}
+          <div className="mt-2">
+            <AdminBar {...admin} onAdd={() => setShowAddForm(true)} />
+          </div>
         </div>
 
-        {/* Password prompt */}
-        {showPasswordPrompt && (
-          <div
-            className="rounded-lg p-4"
-            style={{ backgroundColor: "var(--site-bg-card-alpha)", border: "1px solid var(--site-border)" }}
-          >
-            <div className="flex items-center gap-2">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); setPasswordError(false); }}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                placeholder="Password"
-                className="flex-1 px-3 py-2 rounded-md text-sm font-mono outline-none"
-                style={{
-                  backgroundColor: "var(--site-bg)",
-                  color: "var(--site-text)",
-                  border: `1px solid ${passwordError ? "var(--site-accent)" : "var(--site-border)"}`,
-                }}
-                autoFocus
-              />
-              <button
-                onClick={handleLogin}
-                className="px-3 py-2 rounded-md text-xs font-medium"
-                style={{ backgroundColor: "var(--site-accent)", color: "#fff" }}
-              >
-                Login
-              </button>
-              <button
-                onClick={() => { setShowPasswordPrompt(false); setPassword(""); setPasswordError(false); }}
-                className="p-2 rounded-md"
-                style={{ color: "var(--site-text-dim)" }}
-              >
-                <X size={14} />
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Add form */}
-        {showAddForm && isAdmin && (
+        {showAddForm && admin.isAdmin && (
           <div
             className="rounded-lg p-5 space-y-3"
             style={{ backgroundColor: "var(--site-bg-card-alpha)", border: "1px solid var(--site-border)" }}
@@ -325,7 +238,7 @@ export default function LinksPage() {
             const realIndex = links.indexOf(link);
             const isEditing = editingIndex === realIndex;
 
-            if (isEditing && isAdmin) {
+            if (isEditing && admin.isAdmin) {
               return (
                 <div
                   key={i}
@@ -434,7 +347,7 @@ export default function LinksPage() {
                     )}
                   </div>
                 </div>
-                {isAdmin && (
+                {admin.isAdmin && (
                   <div className="flex items-center gap-1 mt-0.5">
                     <button
                       onClick={() => startEdit(realIndex)}
@@ -460,7 +373,7 @@ export default function LinksPage() {
 
           {links.length === 0 && (
             <p className="py-12 text-center text-sm" style={{ color: "var(--site-text-muted)" }}>
-              {isAdmin ? "Click + to add your first link" : "Coming soon"}
+              {admin.isAdmin ? "Click + to add your first link" : "Coming soon"}
             </p>
           )}
 

@@ -88,10 +88,6 @@ export default function ProjectsPage() {
           <AdminBar {...admin} onAdd={() => setShowAddForm(true)} />
         </div>
 
-        {admin.showPrompt && (
-          <AdminBar {...admin} onAdd={() => setShowAddForm(true)} />
-        )}
-
         {/* Add form */}
         {showAddForm && admin.isAdmin && (
           <div className="rounded-lg p-5 space-y-3" style={{ backgroundColor: "var(--site-bg-card-alpha)", border: "1px solid var(--site-border)" }}>

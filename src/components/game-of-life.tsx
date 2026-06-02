@@ -232,7 +232,7 @@ class Sim {
     const dpr = window.devicePixelRatio || 1;
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
-    this.ctx.scale(dpr, dpr);
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const nw = Math.floor(rect.width / CELL);
     const nh = Math.floor(rect.height / CELL);
     if (nw !== this.w || nh !== this.h) {
@@ -288,7 +288,7 @@ class Sim {
 export function GameOfLife() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simRef = useRef<Sim | null>(null);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(() => document.visibilityState === "visible");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -387,9 +387,9 @@ export function GameOfLife() {
     window.addEventListener("mousedown", onDown);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchstart", onTouchStart);
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("touchend", onTouchEnd);
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
       window.removeEventListener("mousedown", onDown);
       window.removeEventListener("mousemove", onMove);

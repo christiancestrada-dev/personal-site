@@ -352,9 +352,9 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
         aria-label="Toggle navigation"
       >
         {mobileOpen ? (
-          <X size={20} style={{ color: "#d4d4d4" }} />
+          <X size={20} style={{ color: "var(--site-text)" }} />
         ) : (
-          <Menu size={20} style={{ color: "#d4d4d4" }} />
+          <Menu size={20} style={{ color: "var(--site-text)" }} />
         )}
       </button>
 

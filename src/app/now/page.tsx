@@ -111,7 +111,7 @@ export default function NowPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--site-bg)", color: "var(--site-text)" }}>
       <main className="mx-auto max-w-3xl px-6 py-24 space-y-24">
-        <PageHeader title="Now" subtitle="What I'm up to this week · Last updated April" />
+        <PageHeader title="Now" subtitle="What I'm up to this week · Last updated April 2026" />
 
         <div className="space-y-16">
           {NOW_ITEMS.map((item, i) => (

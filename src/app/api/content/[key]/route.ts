@@ -19,7 +19,7 @@ export async function GET(
     const raw = await readFile(filePath(key), "utf-8");
     return NextResponse.json(JSON.parse(raw));
   } catch {
-    return NextResponse.json(null);
+    return NextResponse.json(null, { status: 404 });
   }
 }
 

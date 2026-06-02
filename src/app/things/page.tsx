@@ -431,7 +431,7 @@ export default function ThingsPage() {
 
       {/* Detail Modal */}
       <AnimatePresence>
-        {selectedRealIndex !== null && selectedIndex !== null && !editingIndex && (
+        {selectedRealIndex !== null && selectedIndex !== null && editingIndex === null && (
           <DetailModal
             item={items[selectedRealIndex]}
             onClose={closeModal}
