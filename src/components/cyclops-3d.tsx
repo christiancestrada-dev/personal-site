@@ -85,12 +85,19 @@ export function Cyclops3D() {
     const cx = W / 2, cy = H * 0.50;
     const sc = W * 0.24;
 
-    ctx.fillStyle = "#010408";
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    ctx.fillStyle = isLight ? "#0b1728" : "#010408";
     ctx.fillRect(0, 0, W, H);
     const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.52);
-    bg.addColorStop(0,   "rgba(8, 20, 55, 0.65)");
-    bg.addColorStop(0.5, "rgba(18, 4, 40, 0.35)");
-    bg.addColorStop(1,   "rgba(0,0,0,0)");
+    if (isLight) {
+      bg.addColorStop(0,   "rgba(20, 50, 110, 0.55)");
+      bg.addColorStop(0.5, "rgba(8, 20, 60, 0.30)");
+      bg.addColorStop(1,   "rgba(0,0,0,0)");
+    } else {
+      bg.addColorStop(0,   "rgba(8, 20, 55, 0.65)");
+      bg.addColorStop(0.5, "rgba(18, 4, 40, 0.35)");
+      bg.addColorStop(1,   "rgba(0,0,0,0)");
+    }
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
 
     function ppt(v: V3): [number, number, number] {

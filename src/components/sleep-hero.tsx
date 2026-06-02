@@ -874,7 +874,8 @@ export function SleepHero({ variant = 0 }: { variant?: number }) {
     return () => observer.disconnect();
   }, []);
 
-  const textColor = isDark ? "#ffffff" : "var(--site-text)";
+  const onDarkBg = isDark || variant === 3;
+  const textColor = onDarkBg ? "#ffffff" : "var(--site-text)";
 
   return (
     <div
@@ -898,7 +899,7 @@ export function SleepHero({ variant = 0 }: { variant?: number }) {
         <div className="text-left space-y-4" style={{ maxWidth: "clamp(300px, 70vw, 680px)" }}>
           <h1
             className="font-bold whitespace-nowrap"
-            style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)", lineHeight: 1.1, letterSpacing: "-0.03em", color: "var(--site-text-bright)" }}
+            style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)", lineHeight: 1.1, letterSpacing: "-0.03em", color: onDarkBg ? "#ffffff" : "var(--site-text-bright)" }}
           >
             {(() => {
               const hour = new Date().getHours();
