@@ -46,7 +46,7 @@ export default function ClockPage() {
             <SectionLabel subtitle="3 genes · 120° phase offsets · any 2D projection gives an ellipse · drag to rotate">
               CYCLOPS: Gene Expression Manifold
             </SectionLabel>
-            {mounted && <div className="viz-dark-wrap"><Cyclops3D /></div>}
+            {mounted && <Cyclops3D />}
           </motion.section>
 
           {/* Phase Space 3D — full width */}
@@ -56,7 +56,7 @@ export default function ClockPage() {
             <SectionLabel subtitle="drag to rotate · X = circadian signal C(t) · Y = homeostatic pressure S(t) · Z = time over 3 days">
               Adenosine / Circadian Phase Space
             </SectionLabel>
-            {mounted && <div className="viz-dark-wrap"><PhaseSpace3D /></div>}
+            {mounted && <PhaseSpace3D />}
           </motion.section>
 
           {/* Light Dose-Response Surface — full width */}
@@ -66,7 +66,7 @@ export default function ClockPage() {
             <SectionLabel subtitle="drag to rotate · X = clock time · Z = light intensity (lux, log scale) · height = phase shift">
               Light Dose-Response Surface
             </SectionLabel>
-            {mounted && <div className="viz-dark-wrap"><LightDoseSurface /></div>}
+            {mounted && <LightDoseSurface />}
           </motion.section>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-16">

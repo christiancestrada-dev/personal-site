@@ -105,10 +105,14 @@ export function LightDoseSurface() {
     const introEase = 1 - Math.pow(1 - intro, 3);
     const W=LW, H=LH, cx=W/2, cy=H*0.50, sc=W*0.32;
 
-    ctx.fillStyle="#010509"; ctx.fillRect(0,0,W,H);
-    const bg = ctx.createRadialGradient(cx,cy*0.75,0,cx,cy*0.75,W*0.52);
-    bg.addColorStop(0,"rgba(10,5,25,0.75)"); bg.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    const labelBg = isLight ? "rgba(255,255,255,0.88)" : "rgba(1,4,10,0.85)";
+    ctx.fillStyle = isLight ? "#ffffff" : "#010509"; ctx.fillRect(0,0,W,H);
+    if (!isLight) {
+      const bg = ctx.createRadialGradient(cx,cy*0.75,0,cx,cy*0.75,W*0.52);
+      bg.addColorStop(0,"rgba(10,5,25,0.75)"); bg.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    }
 
     function ppt(v: V3): [number,number,number] {
       return proj(rotX(rotY(v, rotYAng), rotXAng), cx, cy, sc);
@@ -142,7 +146,7 @@ export function LightDoseSurface() {
         ctx.shadowColor=`rgb(${r},${g},${b})`; ctx.shadowBlur=7;
       }
       ctx.fillStyle=`rgba(${r},${g},${b},0.85)`; ctx.fill(); ctx.shadowBlur=0;
-      ctx.strokeStyle="rgba(1,5,10,0.8)"; ctx.lineWidth=0.45; ctx.stroke();
+      ctx.strokeStyle= isLight ? "rgba(180,180,200,0.4)" : "rgba(1,5,10,0.8)"; ctx.lineWidth=0.45; ctx.stroke();
     }
 
     // Zero-plane reference frame
@@ -150,14 +154,14 @@ export function LightDoseSurface() {
     const corners = [pp2([-1,yZero,-1]),pp2([1,yZero,-1]),pp2([1,yZero,1]),pp2([-1,yZero,1])];
     ctx.beginPath(); ctx.moveTo(corners[0][0],corners[0][1]);
     corners.forEach(([x,y])=>ctx.lineTo(x,y)); ctx.closePath();
-    ctx.strokeStyle="rgba(120,120,180,0.2)"; ctx.lineWidth=1; ctx.stroke();
+    ctx.strokeStyle= isLight ? "rgba(100,100,180,0.12)" : "rgba(120,120,180,0.2)"; ctx.lineWidth=1; ctx.stroke();
 
     const c2d = ctx;
     function lbl(text: string, x: number, y: number, align: "center"|"right"|"left", color: string) {
       c2d.textAlign=align;
       const m=c2d.measureText(text), pad=4;
       const bx=align==="center"?x-m.width/2-pad:align==="right"?x-m.width-pad:x-pad;
-      c2d.fillStyle="rgba(1,4,10,0.85)"; c2d.fillRect(bx,y-12,m.width+pad*2,16);
+      c2d.fillStyle=labelBg; c2d.fillRect(bx,y-12,m.width+pad*2,16);
       c2d.fillStyle=color; c2d.fillText(text,x,y);
     }
 
@@ -167,22 +171,22 @@ export function LightDoseSurface() {
       const x=(h/24)*2-1;
       const [px,py]=pp2([x,yZero,1]);
       const label=h===0?"12am":h===12?"12pm":`${h<12?h:h-12}${h<12?"am":"pm"}`;
-      lbl(label,px,py+16,"center","rgba(180,205,240,0.92)");
+      lbl(label,px,py+16,"center", isLight ? "rgba(20,50,140,0.9)" : "rgba(180,205,240,0.92)");
     }
     const [xL,xR]=[pp2([-1,yZero,1]),pp2([1,yZero,1])];
     c2d.font="11px var(--font-mono,'Courier New',monospace)";
-    lbl("clock time",(xL[0]+xR[0])/2,(xL[1]+xR[1])/2+30,"center","rgba(160,180,220,0.7)");
+    lbl("clock time",(xL[0]+xR[0])/2,(xL[1]+xR[1])/2+30,"center", isLight ? "rgba(20,50,140,0.65)" : "rgba(160,180,220,0.7)");
 
     // Z axis: lux intensity
     c2d.font="bold 12px var(--font-mono,'Courier New',monospace)";
     for (const [ll,label] of [[0,"1 lx"],[1,"10"],[2,"100"],[3,"1K"],[4,"10K"],[5,"100K"]] as [number,string][]) {
       const z=(ll/LUX_LOG_MAX)*2-1;
       const [px,py]=pp2([-1,yZero,z]);
-      lbl(label,px-8,py+4,"right","rgba(180,205,240,0.92)");
+      lbl(label,px-8,py+4,"right", isLight ? "rgba(20,50,140,0.9)" : "rgba(180,205,240,0.92)");
     }
     const [zF,zB]=[pp2([-1,yZero,1]),pp2([-1,yZero,-1])];
     c2d.font="11px var(--font-mono,'Courier New',monospace)";
-    lbl("light intensity (lux)",(zF[0]+zB[0])/2,(zF[1]+zB[1])/2-4,"right","rgba(160,180,220,0.7)");
+    lbl("light intensity (lux)",(zF[0]+zB[0])/2,(zF[1]+zB[1])/2-4,"right", isLight ? "rgba(20,50,140,0.65)" : "rgba(160,180,220,0.7)");
 
     // Y axis: phase shift (scale positions by introEase to match surface animation)
     c2d.font="bold 12px var(--font-mono,'Courier New',monospace)";
@@ -219,7 +223,7 @@ export function LightDoseSurface() {
   const onUp = useCallback(() => { st.current.drag=false; }, []);
 
   return (
-    <div className="w-full rounded overflow-hidden" style={{ border:"1px solid var(--site-border)", background:"#010509" }}>
+    <div className="w-full rounded overflow-hidden" style={{ border:"1px solid var(--site-border)", background:"var(--site-bg)" }}>
       <motion.canvas
         ref={canvasRef}
         initial={{ opacity: 0, scale: 0.98 }}

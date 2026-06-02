@@ -86,19 +86,16 @@ export function Cyclops3D() {
     const sc = W * 0.24;
 
     const isLight = document.documentElement.getAttribute("data-theme") === "light";
-    ctx.fillStyle = isLight ? "#0b1728" : "#010408";
+    const labelBg = isLight ? "rgba(255,255,255,0.88)" : "rgba(1,4,10,0.85)";
+    ctx.fillStyle = isLight ? "#ffffff" : "#010408";
     ctx.fillRect(0, 0, W, H);
-    const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.52);
-    if (isLight) {
-      bg.addColorStop(0,   "rgba(20, 50, 110, 0.55)");
-      bg.addColorStop(0.5, "rgba(8, 20, 60, 0.30)");
-      bg.addColorStop(1,   "rgba(0,0,0,0)");
-    } else {
+    if (!isLight) {
+      const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.52);
       bg.addColorStop(0,   "rgba(8, 20, 55, 0.65)");
       bg.addColorStop(0.5, "rgba(18, 4, 40, 0.35)");
       bg.addColorStop(1,   "rgba(0,0,0,0)");
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
     }
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
 
     function ppt(v: V3): [number, number, number] {
       return proj3(rotX(rotY(v, ry), rx), cx, cy, sc);
@@ -118,7 +115,7 @@ export function Cyclops3D() {
       const [ax, ay] = pp2(a), [bx, by] = pp2(b);
       ctx.beginPath();
       ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
-      ctx.strokeStyle = "rgba(55, 75, 130, 0.14)";
+      ctx.strokeStyle = isLight ? "rgba(30,60,120,0.18)" : "rgba(55, 75, 130, 0.14)";
       ctx.lineWidth = 0.8;
       ctx.stroke();
     }
@@ -127,18 +124,18 @@ export function Cyclops3D() {
     // Each projection forms an ellipse — any 2D gene-pair slice always does.
     const shadows: { pts: [number,number][]; color: string; label: string }[] = [
       {
-        pts: rawRing.map(p => pp2([p[0], p[1], -1])),  // z=-1 back wall (Gene A × B)
-        color: "rgba(96, 165, 255, 0.28)",
+        pts: rawRing.map(p => pp2([p[0], p[1], -1])),
+        color: isLight ? "rgba(96, 165, 255, 0.55)" : "rgba(96, 165, 255, 0.28)",
         label: "A×B",
       },
       {
-        pts: rawRing.map(p => pp2([p[0], -1, p[2]])),  // y=-1 floor (Gene A × C)
-        color: "rgba(167, 139, 250, 0.28)",
+        pts: rawRing.map(p => pp2([p[0], -1, p[2]])),
+        color: isLight ? "rgba(167, 139, 250, 0.55)" : "rgba(167, 139, 250, 0.28)",
         label: "A×C",
       },
       {
-        pts: rawRing.map(p => pp2([-1, p[1], p[2]])),  // x=-1 left wall (Gene B × C)
-        color: "rgba(219, 112, 147, 0.28)",
+        pts: rawRing.map(p => pp2([-1, p[1], p[2]])),
+        color: isLight ? "rgba(219, 112, 147, 0.55)" : "rgba(219, 112, 147, 0.28)",
         label: "B×C",
       },
     ];
@@ -156,13 +153,15 @@ export function Cyclops3D() {
 
     // Shadow labels near the start of each ellipse
     ctx.font = "bold 10px var(--font-mono, monospace)";
-    const shadowColors = ["rgba(96,165,255,0.55)", "rgba(167,139,250,0.55)", "rgba(219,112,147,0.55)"];
+    const shadowColors = isLight
+      ? ["rgba(30,90,200,0.9)", "rgba(90,40,190,0.9)", "rgba(180,40,90,0.9)"]
+      : ["rgba(96,165,255,0.55)", "rgba(167,139,250,0.55)", "rgba(219,112,147,0.55)"];
     const shadowLabels = ["Gene A×B  ellipse", "Gene A×C  ellipse", "Gene B×C  ellipse"];
     for (let si = 0; si < 3; si++) {
       const p = shadows[si].pts[N_RING / 6 | 0];
       ctx.textAlign = "left";
       const m = ctx.measureText(shadowLabels[si]);
-      ctx.fillStyle = "rgba(1,4,10,0.7)";
+      ctx.fillStyle = labelBg;
       ctx.fillRect(p[0] + 4, p[1] - 11, m.width + 6, 14);
       ctx.fillStyle = shadowColors[si];
       ctx.fillText(shadowLabels[si], p[0] + 7, p[1]);
@@ -206,7 +205,7 @@ export function Cyclops3D() {
           if (tipV[0]) tick2[0] = val; else if (tipV[1]) tick2[1] = val; else tick2[2] = val;
           ctx.font = "10px var(--font-mono, monospace)";
           ctx.textAlign = "center";
-          ctx.fillStyle = color + "88";
+          ctx.fillStyle = color + (isLight ? "cc" : "88");
           ctx.fillText(val === 1 ? "+1" : "−1", tx2, ty2 - 8);
         }
         // Suppress unused var warning
@@ -218,7 +217,7 @@ export function Cyclops3D() {
       ctx.font = "bold 13px var(--font-mono, monospace)";
       ctx.textAlign = "center";
       const m = ctx.measureText(label);
-      ctx.fillStyle = "rgba(1,4,10,0.85)";
+      ctx.fillStyle = labelBg;
       ctx.fillRect(lx - m.width/2 - 5, ly - 13, m.width + 10, 17);
       ctx.fillStyle = color + "ee";
       ctx.fillText(label, lx, ly);
@@ -230,7 +229,7 @@ export function Cyclops3D() {
       const [r, g, b] = timeCol(i);
       ctx.beginPath();
       ctx.moveTo(O[0], O[1]); ctx.lineTo(px, py);
-      ctx.strokeStyle = `rgba(${r},${g},${b},0.07)`;
+      ctx.strokeStyle = `rgba(${r},${g},${b},${isLight ? 0.12 : 0.07})`;
       ctx.lineWidth = 0.7;
       ctx.stroke();
     }
@@ -241,7 +240,7 @@ export function Cyclops3D() {
     ctx.beginPath();
     ctx.moveTo(ringPts[0][0], ringPts[0][1]);
     for (let i = 1; i <= N_RING; i++) ctx.lineTo(ringPts[i][0], ringPts[i][1]);
-    ctx.strokeStyle = "rgba(93, 202, 165, 0.13)";
+    ctx.strokeStyle = isLight ? "rgba(93, 202, 165, 0.28)" : "rgba(93, 202, 165, 0.13)";
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
@@ -295,16 +294,16 @@ export function Cyclops3D() {
       const lb = Math.max(0.3, (-lz + 1.4) / 2.8);
       ctx.textAlign = "center";
       const m = ctx.measureText(text);
-      ctx.fillStyle = `rgba(1,4,10,${0.75*lb})`;
+      ctx.fillStyle = isLight ? `rgba(255,255,255,${0.85*lb})` : `rgba(1,4,10,${0.75*lb})`;
       ctx.fillRect(lx - m.width/2 - 4, ly - 12, m.width + 8, 16);
-      ctx.fillStyle = `rgba(220,230,255,${0.5 + lb * 0.45})`;
+      ctx.fillStyle = isLight ? `rgba(20,40,100,${0.6 + lb * 0.4})` : `rgba(220,230,255,${0.5 + lb * 0.45})`;
       ctx.fillText(text, lx, ly);
     }
 
     // ── 9. Footer ─────────────────────────────────────────────────────────────
     ctx.font = "10px var(--font-mono, monospace)";
     ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(100, 125, 170, 0.5)";
+    ctx.fillStyle = isLight ? "rgba(60,80,140,0.5)" : "rgba(100, 125, 170, 0.5)";
     ctx.fillText("dashed ellipses = 2D projections of the 3D circle · each encodes circadian order · drag to rotate", cx, H - 14);
 
   }, []);
@@ -339,7 +338,7 @@ export function Cyclops3D() {
 
   return (
     <div className="w-full rounded overflow-hidden"
-      style={{ border: "1px solid var(--site-border)", background: "#010408" }}>
+      style={{ border: "1px solid var(--site-border)", background: "var(--site-bg)" }}>
       <motion.canvas
         ref={canvasRef}
         initial={{ opacity: 0, scale: 0.98 }}

@@ -90,10 +90,14 @@ export function PhaseSpace3D() {
     const introEase = 1 - Math.pow(1 - intro, 3);
     const W=LW, H=LH, cx=W/2, cy=H*0.48, sc=W*0.27;
 
-    ctx.fillStyle="#010509"; ctx.fillRect(0,0,W,H);
-    const bg = ctx.createRadialGradient(cx,cy*0.8,0,cx,cy*0.8,W*0.5);
-    bg.addColorStop(0,"rgba(10,5,30,0.8)"); bg.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    const labelBg = isLight ? "rgba(255,255,255,0.88)" : "rgba(1,4,10,0.85)";
+    ctx.fillStyle = isLight ? "#ffffff" : "#010509"; ctx.fillRect(0,0,W,H);
+    if (!isLight) {
+      const bg = ctx.createRadialGradient(cx,cy*0.8,0,cx,cy*0.8,W*0.5);
+      bg.addColorStop(0,"rgba(10,5,30,0.8)"); bg.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    }
 
     function ppt(v: V3): [number,number,number] {
       return proj(rotX(rotY(v, rotYAng), rotXAng), cx, cy, sc);
@@ -105,7 +109,7 @@ export function PhaseSpace3D() {
     for (const [a, b] of CUBE_EDGES) {
       const pa=ppt(a), pb=ppt(b);
       ctx.beginPath(); ctx.moveTo(pa[0],pa[1]); ctx.lineTo(pb[0],pb[1]);
-      ctx.strokeStyle="rgba(60,80,120,0.18)"; ctx.stroke();
+      ctx.strokeStyle= isLight ? "rgba(30,50,100,0.15)" : "rgba(60,80,120,0.18)"; ctx.stroke();
     }
 
     // Project trajectory points
@@ -166,7 +170,7 @@ export function PhaseSpace3D() {
       c2d.textAlign=align;
       const m=c2d.measureText(text), pad=4;
       const bx=align==="center"?x-m.width/2-pad:align==="right"?x-m.width-pad:x-pad;
-      c2d.fillStyle="rgba(1,4,10,0.85)"; c2d.fillRect(bx,y-12,m.width+pad*2,16);
+      c2d.fillStyle=labelBg; c2d.fillRect(bx,y-12,m.width+pad*2,16);
       c2d.fillStyle=color; c2d.fillText(text,x,y);
     }
 
@@ -175,31 +179,31 @@ export function PhaseSpace3D() {
     // Z axis (time): bottom-to-top on the left edge
     for (const [val, label] of [[-1,"day 1"],[0,"day 2"],[1,"day 3"]] as [number,string][]) {
       const [px,py]=pp2([-1,-1,val]);
-      lbl(label,px-8,py,"right","rgba(160,180,220,0.85)");
+      lbl(label,px-8,py,"right", isLight ? "rgba(20,50,140,0.9)" : "rgba(160,180,220,0.85)");
     }
     const [zf,zb]=[pp2([-1,-1,-1]),pp2([-1,-1,1])];
     c2d.font="11px var(--font-mono,'Courier New',monospace)";
-    lbl("time",(zf[0]+zb[0])/2-14,(zf[1]+zb[1])/2-4,"right","rgba(130,155,200,0.65)");
+    lbl("time",(zf[0]+zb[0])/2-14,(zf[1]+zb[1])/2-4,"right", isLight ? "rgba(20,50,140,0.65)" : "rgba(130,155,200,0.65)");
 
     // X axis (circadian C): front-bottom edge
     c2d.font="bold 12px var(--font-mono,'Courier New',monospace)";
     for (const [val,label] of [[-1,"low"],[0,"mid"],[1,"high"]] as [number,string][]) {
       const [px,py]=pp2([val,-1,1]);
-      lbl(label,px,py+16,"center","rgba(93,202,165,0.85)");
+      lbl(label,px,py+16,"center", isLight ? "rgba(15,120,90,0.9)" : "rgba(93,202,165,0.85)");
     }
     const [xL,xR]=[pp2([-1,-1,1]),pp2([1,-1,1])];
     c2d.font="11px var(--font-mono,'Courier New',monospace)";
-    lbl("circadian signal C(t)",(xL[0]+xR[0])/2,(xL[1]+xR[1])/2+30,"center","rgba(93,202,165,0.65)");
+    lbl("circadian signal C(t)",(xL[0]+xR[0])/2,(xL[1]+xR[1])/2+30,"center", isLight ? "rgba(15,120,90,0.65)" : "rgba(93,202,165,0.65)");
 
     // Y axis (homeostatic): back-left
     c2d.font="bold 12px var(--font-mono,'Courier New',monospace)";
     for (const [val,label] of [[-1,"low"],[0,"mid"],[1,"high"]] as [number,string][]) {
       const [px,py]=pp2([-1,val,-1]);
-      lbl(label,px-8,py,"right","rgba(219,112,147,0.85)");
+      lbl(label,px-8,py,"right", isLight ? "rgba(170,40,80,0.9)" : "rgba(219,112,147,0.85)");
     }
     const [yb,yt]=[pp2([-1,-1,-1]),pp2([-1,1,-1])];
     c2d.font="11px var(--font-mono,'Courier New',monospace)";
-    lbl("sleep pressure S(t)",(yb[0]+yt[0])/2-14,(yb[1]+yt[1])/2,"right","rgba(219,112,147,0.65)");
+    lbl("sleep pressure S(t)",(yb[0]+yt[0])/2-14,(yb[1]+yt[1])/2,"right", isLight ? "rgba(170,40,80,0.65)" : "rgba(219,112,147,0.65)");
 
     // Legend
     c2d.font="bold 11px var(--font-mono,'Courier New',monospace)";
@@ -235,7 +239,7 @@ export function PhaseSpace3D() {
   const onUp = useCallback(() => { st.current.drag=false; }, []);
 
   return (
-    <div className="w-full rounded overflow-hidden" style={{ border:"1px solid var(--site-border)", background:"#010509" }}>
+    <div className="w-full rounded overflow-hidden" style={{ border:"1px solid var(--site-border)", background:"var(--site-bg)" }}>
       <motion.canvas
         ref={canvasRef}
         initial={{ opacity: 0, scale: 0.98 }}

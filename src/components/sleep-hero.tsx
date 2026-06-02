@@ -552,10 +552,11 @@ function MosaicGrid() {
           t.velocity *= DAMP;
           t.intensity = Math.max(0, Math.min(1, t.intensity + t.velocity));
 
-          // Exact color from source: rgb(60i, 100i, 180i)
-          const tr = Math.floor(60  * t.intensity);
-          const tg = Math.floor(100 * t.intensity);
-          const tb = Math.floor(180 * t.intensity);
+          // Light: pink (#db7093) → white; dark: navy → blue
+          const isLightMode = document.documentElement.getAttribute("data-theme") === "light";
+          const tr = isLightMode ? Math.round(219 + 36  * t.intensity) : Math.floor(60  * t.intensity);
+          const tg = isLightMode ? Math.round(112 + 143 * t.intensity) : Math.floor(100 * t.intensity);
+          const tb = isLightMode ? Math.round(147 + 108 * t.intensity) : Math.floor(180 * t.intensity);
 
           ctx.fillStyle = `rgb(${tr},${tg},${tb})`;
           fillRoundRect(ctx, c * TILE + GAP / 2, r * TILE + GAP / 2, TILE - GAP, TILE - GAP, CORNER);
