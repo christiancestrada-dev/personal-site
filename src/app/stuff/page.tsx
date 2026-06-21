@@ -32,6 +32,24 @@ export default function StuffPage() {
             </a>
           </p>
         </div>
+
+        <div className="space-y-4">
+          <video
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full rounded-lg"
+            style={{ border: "1px solid var(--site-border)" }}
+          >
+            <source src="/stuff/plash-demo.mp4" type="video/mp4" />
+          </video>
+
+          <p className="text-sm leading-6" style={{ color: "var(--site-text-secondary)" }}>
+            My live desktop background, built as a Plash widget — an ambient gradient with a
+            toolbar for a clock, study tools, focus timer, planner, notes, and a zen mode that
+            collapses everything down to a single button.
+          </p>
+        </div>
       </main>
     </div>
   );
