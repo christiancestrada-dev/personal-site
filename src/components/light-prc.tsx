@@ -141,6 +141,7 @@ export function LightPRC() {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only clock; current time is unknown during SSR
     setTime(new Date());
     const id = setInterval(() => setTime(new Date()), 30_000);
     return () => clearInterval(id);

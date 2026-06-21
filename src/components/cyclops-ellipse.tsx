@@ -286,45 +286,6 @@ function Step2({ w, h }: { w: number; h: number }) {
   );
 }
 
-// ─── Animated dot that traces the ellipse continuously ───────────────────────
-
-function TracerDot({ cx, cy, rx, ry }: { cx: number; cy: number; rx: number; ry: number }) {
-  const dotRef = useRef<SVGCircleElement>(null);
-  const ringRef = useRef<SVGCircleElement>(null);
-
-  useEffect(() => {
-    let frame: number;
-    let t = 0;
-    const speed = 0.0008;
-    const animate = () => {
-      t += speed;
-      const x = cx + Math.cos(t * 2 * Math.PI) * rx;
-      const y = cy - Math.sin(t * 2 * Math.PI) * ry;
-      if (dotRef.current) {
-        dotRef.current.setAttribute("cx", String(x));
-        dotRef.current.setAttribute("cy", String(y));
-      }
-      if (ringRef.current) {
-        ringRef.current.setAttribute("cx", String(x));
-        ringRef.current.setAttribute("cy", String(y));
-      }
-      frame = requestAnimationFrame(animate);
-    };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, [cx, cy, rx, ry]);
-
-  return (
-    <>
-      <circle ref={dotRef} r="5" fill={COL.highlight} opacity="0.9" />
-      <circle ref={ringRef} r="10" fill="none" stroke={COL.highlight} strokeWidth="0.8" opacity="0.4">
-        <animate attributeName="r" values="8;14;8" dur="2s" repeatCount="indefinite" />
-        <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
-      </circle>
-    </>
-  );
-}
-
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export function CyclopsEllipse() {

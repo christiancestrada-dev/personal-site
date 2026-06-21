@@ -78,6 +78,7 @@ export function CircadianClock() {
   const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only clock; current time is unknown during SSR
     setTime(new Date());
     const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
@@ -87,7 +88,6 @@ export function CircadianClock() {
 
   const h = time.getHours();
   const m = time.getMinutes();
-  const s = time.getSeconds();
   const state = getCircadianState(h, m);
 
   const timeStr = time.toLocaleTimeString("en-US", {
@@ -121,6 +121,7 @@ export function CircadianDetail() {
   const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only clock; current time is unknown during SSR
     setTime(new Date());
     const interval = setInterval(() => setTime(new Date()), 60000);
     return () => clearInterval(interval);

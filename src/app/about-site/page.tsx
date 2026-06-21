@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/ui/page-header";
+import { VisitorLog } from "@/components/visitor-log";
 
 export default function AboutSitePage() {
   return (
@@ -45,6 +46,8 @@ export default function AboutSitePage() {
             ))}
           </div>
         </section>
+
+        <VisitorLog />
       </main>
     </div>
   );

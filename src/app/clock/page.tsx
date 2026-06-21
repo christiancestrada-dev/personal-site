@@ -21,6 +21,7 @@ const fadeUp = {
 
 export default function ClockPage() {
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe mount gate
   useEffect(() => setMounted(true), []);
 
   return (

@@ -128,7 +128,6 @@ export function MelatoninGraph() {
 
   // Sleep zone x range
   const sleepX1 = (SLEEP_H / 24) * W;
-  const sleepX2 = W; // 23–24h
 
   return (
     <div className="space-y-3">

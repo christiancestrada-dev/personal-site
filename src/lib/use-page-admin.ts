@@ -11,6 +11,7 @@ export function usePageAdmin(pageName: string) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is unavailable during SSR; read once after mount
     if (localStorage.getItem(storageKey) === "true") setIsAdmin(true);
   }, [storageKey]);
 

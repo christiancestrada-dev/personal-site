@@ -7,7 +7,7 @@ import { BubbleText } from "@/components/ui/bubble-text";
 import { Signature } from "@/components/ui/signature";
 import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
-import { Pencil, Check, X, Plus, Trash2, GripVertical } from "lucide-react";
+import { Pencil, Check, X, Plus, Trash2 } from "lucide-react";
 import React from "react";
 import { GameOfLife } from "@/components/game-of-life";
 
@@ -82,6 +82,7 @@ export default function Home() {
   const loadedRef = useRef(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe mount gate + client-only random hero variant
     setMounted(true);
     setHeroVariant(Math.floor(Math.random() * 4));
     if (!loadedRef.current) {

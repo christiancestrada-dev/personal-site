@@ -34,6 +34,7 @@ export default function ReadingPage() {
         if (data) setExtraItems(data);
       });
       const savedView = localStorage.getItem("reading-view") as ViewMode | null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is unavailable during SSR; read once after mount
       if (savedView === "list" || savedView === "shelf") setView(savedView);
     }
   }, []);

@@ -132,6 +132,7 @@ export function Hypnogram() {
   const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only clock; current time is unknown during SSR
     setTime(new Date());
     const i = setInterval(() => setTime(new Date()), 60000);
     return () => clearInterval(i);

@@ -26,7 +26,10 @@ function LazyVideo({ src, className }: { src: string; className?: string }) {
     const v = ref.current;
     if (!v) return;
     const io = new IntersectionObserver(
-      ([e]) => { e.isIntersecting ? v.play().catch(() => {}) : v.pause(); },
+      ([e]) => {
+        if (e.isIntersecting) v.play().catch(() => {});
+        else v.pause();
+      },
       { threshold: 0.25 }
     );
     io.observe(v);
@@ -46,6 +49,7 @@ function GalleryImageCard({ item }: { item: GalleryItem }) {
       ) : (
         <div className="relative w-full" style={{ aspectRatio: aspect }}>
           {!loaded && <div className="absolute inset-0 img-shimmer" />}
+          {/* eslint-disable-next-line @next/next/no-img-element -- gallery uses a fixed aspect-ratio container, not next/image */}
           <img
             src={item.src}
             alt={item.caption}

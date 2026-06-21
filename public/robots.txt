@@ -1,1 +1,8 @@
-<!-- auto-deploy test -->
+# Crawling is allowed on purpose so engines can read the
+# `noindex` tag and drop the site from search results.
+# Do NOT add "Disallow: /" — that would block the crawl and
+# leave stale URLs indexed without a snippet.
+User-agent: *
+Allow: /
+
+# No sitemap is published — we don't want this discovered.

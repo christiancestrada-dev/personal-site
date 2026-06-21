@@ -3,14 +3,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Home, Zap, Gift, Clock, Mail, Calendar, Menu, X, ChevronLeft, ChevronRight, Sun, Moon, Monitor, LinkIcon, Info } from "lucide-react";
-import { AnimatedText } from "@/components/ui/animated-text";
+import { Home, Zap, Gift, Clock, Mail, Calendar, Menu, X, ChevronLeft, ChevronRight, ChevronDown, Sun, Moon, Monitor, LinkIcon, Info } from "lucide-react";
 import { BGPattern } from "@/components/ui/bg-pattern";
 import { Signature } from "@/components/ui/signature";
 
 // ─── Nav links ───────────────────────────────────────────────────────────────
 
-const NAV_ITEMS = [
+type SubNavItem = { href: string; label: string; shortcut: string };
+type NavItem =
+  | { href: string; label: string; icon: typeof Home; shortcut: string; subItems?: undefined }
+  | { label: string; icon: typeof Home; shortcut: string; subItems: SubNavItem[] };
+
+const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: Home, shortcut: "1" },
   { href: "/now", label: "Now", icon: Zap, shortcut: "2" },
   // { href: "/reading", label: "Reading", icon: BookOpen, shortcut: "3" }, // archived
@@ -40,6 +44,7 @@ function ThemeToggle() {
   useEffect(() => {
     const saved = localStorage.getItem("theme") as ThemeMode | null;
     const initial = saved || "dark";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- theme lives in localStorage, unavailable during SSR
     setMode(initial);
     applyTheme(initial);
 
@@ -94,6 +99,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("sidebar-collapsed");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- collapsed state lives in localStorage, unavailable during SSR
     if (saved === "true") setCollapsed(true);
     setHydrated(true);
   }, []);
@@ -121,14 +127,23 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
 function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollapsed: (fn: (prev: boolean) => boolean) => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navHovered, setNavHovered] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const chordTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => setMounted(true), []);
+  // Auto-expand the group containing the current page
+  useEffect(() => {
+    const group = NAV_ITEMS.find((n) => n.subItems?.some((s) => s.href === pathname));
+    if (group) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reflects current route into expand state
+      setExpandedGroup(group.label);
+    }
+  }, [pathname]);
 
   // Close mobile drawer on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- close drawer in response to route change
     setMobileOpen(false);
   }, [pathname]);
 
@@ -140,11 +155,32 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
     });
   }, [setCollapsed]);
 
-  // Keyboard shortcuts: 1-9=nav, 0=contact, /=schedule
+  // Keyboard shortcuts: 1-9=nav, 0=contact, /=schedule, 4 also arms a short chord
+  // window (t/l/s) to jump straight into a Things subtab.
   useEffect(() => {
+    const clearChord = () => {
+      if (chordTimeoutRef.current) {
+        clearTimeout(chordTimeoutRef.current);
+        chordTimeoutRef.current = null;
+      }
+    };
+
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return;
+
+      // Mid-chord: a subtab letter was pressed after "4"
+      if (chordTimeoutRef.current) {
+        const group = NAV_ITEMS.find((n) => n.subItems);
+        const sub = group?.subItems?.find((s) => s.shortcut === e.key);
+        clearChord();
+        if (sub) {
+          router.push(sub.href);
+          return;
+        }
+        // not a chord key — fall through to normal handling below
+      }
+
       if (e.key === "0") {
         router.push("/contact");
         return;
@@ -154,11 +190,26 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
         router.push("/schedule");
         return;
       }
+
       const item = NAV_ITEMS.find((n) => n.shortcut === e.key);
-      if (item) router.push(item.href);
+      if (!item) return;
+
+      if (item.subItems) {
+        setExpandedGroup(item.label);
+        chordTimeoutRef.current = setTimeout(() => {
+          chordTimeoutRef.current = null;
+          router.push(item.subItems[0].href);
+        }, 1500);
+        return;
+      }
+
+      router.push(item.href);
     };
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    return () => {
+      window.removeEventListener("keydown", handler);
+      clearChord();
+    };
   }, [router]);
 
   const desktopWidth = collapsed ? 64 : 260;
@@ -174,7 +225,100 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
 
       {/* Middle: nav links */}
       <nav className="space-y-1">
-        {NAV_ITEMS.map(({ href, label, icon: Icon, shortcut }) => {
+        {NAV_ITEMS.map((item) => {
+          const { label, icon: Icon, shortcut } = item;
+
+          if (item.subItems) {
+            const isGroupActive = item.subItems.some((s) => s.href === pathname);
+            const isExpanded = expandedGroup === label;
+            return (
+              <div key={label}>
+                <button
+                  type="button"
+                  title={collapsed && !isMobile ? `${label} (${shortcut})` : undefined}
+                  onClick={() => setExpandedGroup(isExpanded ? null : label)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors duration-150"
+                  style={{
+                    backgroundColor: isGroupActive ? "var(--site-nav-active)" : "transparent",
+                    color: "var(--site-text-bright)",
+                    justifyContent: (!isMobile && collapsed) ? "center" : "flex-start",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isGroupActive) e.currentTarget.style.backgroundColor = "var(--site-nav-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isGroupActive) e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                >
+                  <Icon size={16} />
+                  {(isMobile || !collapsed) && (
+                    <>
+                      <span className="text-xs font-medium flex-1 text-left">{label}</span>
+                      <ChevronDown
+                        size={14}
+                        style={{ transform: isExpanded ? "rotate(180deg)" : "none", transition: "transform 150ms" }}
+                      />
+                      <span
+                        className="text-[11px] font-mono font-medium inline-flex items-center justify-center rounded"
+                        style={{
+                          color: "var(--site-text-bright)",
+                          backgroundColor: "var(--site-nav-active)",
+                          border: "1px solid var(--site-border)",
+                          minWidth: 22,
+                          height: 22,
+                          padding: "0 5px",
+                        }}
+                      >
+                        {shortcut}
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                {isExpanded && (isMobile || !collapsed) && (
+                  <div className="mt-1 ml-4 space-y-1 pl-3" style={{ borderLeft: "1px solid var(--site-border)" }}>
+                    {item.subItems.map((sub) => {
+                      const isActive = pathname === sub.href;
+                      return (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors duration-150"
+                          style={{
+                            backgroundColor: isActive ? "var(--site-nav-active)" : "transparent",
+                            color: "var(--site-text-bright)",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActive) e.currentTarget.style.backgroundColor = "var(--site-nav-hover)";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
+                          }}
+                        >
+                          <span className="text-xs font-medium flex-1">{sub.label}</span>
+                          <span
+                            className="text-[11px] font-mono font-medium inline-flex items-center justify-center rounded uppercase"
+                            style={{
+                              color: "var(--site-text-bright)",
+                              backgroundColor: "var(--site-nav-active)",
+                              border: "1px solid var(--site-border)",
+                              minWidth: 22,
+                              height: 22,
+                              padding: "0 5px",
+                            }}
+                          >
+                            {sub.shortcut}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          const href = item.href;
           const isActive = pathname === href;
           return (
             <Link

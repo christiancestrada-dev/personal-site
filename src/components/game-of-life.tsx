@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useLayoutEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Matches kdrag0n.dev's constants exactly
 const CELL = 8;       // cell size px

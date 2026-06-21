@@ -18,17 +18,15 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
 const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
   ({ className, tabs, activeTab, onTabChange, ...props }, ref) => {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-    const [activeIndex, setActiveIndex] = useState(0)
+    const [internalIndex, setInternalIndex] = useState(0)
     const [hoverStyle, setHoverStyle] = useState({})
     const [activeStyle, setActiveStyle] = useState({ left: "0px", width: "0px" })
     const tabRefs = useRef<(HTMLDivElement | null)[]>([])
 
-    useEffect(() => {
-      if (activeTab) {
-        const idx = tabs.findIndex(t => t.id === activeTab)
-        if (idx >= 0) setActiveIndex(idx)
-      }
-    }, [activeTab, tabs])
+    // When `activeTab` is provided the component is controlled; derive the
+    // active index during render instead of syncing it through an effect.
+    const controlledIndex = activeTab ? tabs.findIndex(t => t.id === activeTab) : -1
+    const activeIndex = controlledIndex >= 0 ? controlledIndex : internalIndex
 
     useEffect(() => {
       if (hoveredIndex !== null) {
@@ -105,7 +103,7 @@ const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 onClick={() => {
-                  setActiveIndex(index)
+                  setInternalIndex(index)
                   onTabChange?.(tab.id)
                 }}
               >

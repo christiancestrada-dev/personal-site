@@ -206,6 +206,7 @@ export default function ImageLoader({
           ))}
         </div>
       )}
+      {/* eslint-disable-next-line @next/next/no-img-element -- needs a raw element with crossOrigin + ref for canvas pixel sampling */}
       <img
         ref={imageRef}
         src={src}

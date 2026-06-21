@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { AdminBar } from "@/components/ui/admin-bar";
 import { usePageAdmin } from "@/lib/use-page-admin";
 import { Tabs } from "@/components/ui/vercel-tabs";
-import { Plus, X, ExternalLink, Trash2, Pencil } from "lucide-react";
+import { ExternalLink, Trash2, Pencil } from "lucide-react";
 
 interface LinkItem {
   title: string;

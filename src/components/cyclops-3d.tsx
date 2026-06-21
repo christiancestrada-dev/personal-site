@@ -308,20 +308,20 @@ export function Cyclops3D() {
 
   }, []);
 
-  const animate = useCallback(() => {
-    if (introStarted.current) st.current.intro = Math.min(1, st.current.intro + 1/100);
-    if (!st.current.drag) {
-      st.current.ry += 0.005;
-      st.current.t   = (st.current.t + 0.025) % N_SMPL;
-    }
-    draw();
-    st.current.raf = requestAnimationFrame(animate);
-  }, [draw]);
-
   useEffect(() => {
-    st.current.raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(st.current.raf);
-  }, [animate]);
+    let raf = 0;
+    const animate = () => {
+      if (introStarted.current) st.current.intro = Math.min(1, st.current.intro + 1/100);
+      if (!st.current.drag) {
+        st.current.ry += 0.005;
+        st.current.t   = (st.current.t + 0.025) % N_SMPL;
+      }
+      draw();
+      raf = requestAnimationFrame(animate);
+    };
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, [draw]);
 
   const onDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const p = "touches" in e ? e.touches[0] : e;

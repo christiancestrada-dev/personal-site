@@ -213,17 +213,17 @@ export function PhaseSpace3D() {
 
   }, []);
 
-  const animate = useCallback(() => {
-    if (introStarted.current) st.current.intro = Math.min(1, st.current.intro + 1/120);
-    if (!st.current.drag) st.current.ry += 0.004;
-    st.current.tracer = (st.current.tracer + 0.002) % 1;
-    draw(); st.current.raf = requestAnimationFrame(animate);
-  }, [draw]);
-
   useEffect(() => {
-    st.current.raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(st.current.raf);
-  }, [animate]);
+    let raf = 0;
+    const animate = () => {
+      if (introStarted.current) st.current.intro = Math.min(1, st.current.intro + 1/120);
+      if (!st.current.drag) st.current.ry += 0.004;
+      st.current.tracer = (st.current.tracer + 0.002) % 1;
+      draw(); raf = requestAnimationFrame(animate);
+    };
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, [draw]);
 
   const onDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const p="touches" in e ? e.touches[0] : e;

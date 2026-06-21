@@ -254,6 +254,7 @@ export default function ThingsPage() {
   const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe mount gate
     setMounted(true);
     loadContent<ThingItem[]>(THINGS_KEY).then((data) => {
       if (data) setItems(data);

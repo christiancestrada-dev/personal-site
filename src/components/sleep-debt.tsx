@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Info } from "lucide-react";
 
@@ -351,7 +351,6 @@ export function SleepDebt() {
             const d = hoveredDay;
             const x = LEFT_PAD + d * (BAR_W + GAP) + BAR_W / 2;
             const y = debtToY(cumulative[d]);
-            const slept = scenario.nights[d];
             const debtChange = daily[d];
             const ttY = Math.max(y - 32, 8);
             return (

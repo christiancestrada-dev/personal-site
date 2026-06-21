@@ -1,60 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { CircadianClock } from "@/components/circadian-clock";
-
-// ─── Annotated clock with arrow pointing to phase text ──────────────────────
-function AnnotatedClock() {
-  return (
-    <div className="relative">
-      {/* Label + arrow from the left */}
-      <div
-        className="absolute text-xs italic whitespace-nowrap"
-        style={{
-          color: "#ff6b60",
-          right: "100%",
-          top: "50%",
-          transform: "translateY(-50%)",
-          marginRight: 8,
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-        }}
-      >
-        <motion.span
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 2, duration: 0.8 }}
-        >
-          my live sleep phase!
-        </motion.span>
-        <motion.svg
-          width="28" height="16" viewBox="0 0 28 16" fill="none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.3, duration: 0.5 }}
-        >
-          <motion.path
-            d="M2 8 C10 8, 18 6, 24 8"
-            stroke="#ff6b60" strokeWidth="1.5" fill="none" strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ delay: 2.5, duration: 0.6, ease: "easeOut" }}
-          />
-          <motion.path
-            d="M21 4 L25 8 L21 12"
-            stroke="#ff6b60" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ delay: 3, duration: 0.3 }}
-          />
-        </motion.svg>
-      </div>
-      <CircadianClock />
-    </div>
-  );
-}
+import { useEffect, useRef, useState } from "react";
 
 // ─── Orbital arcs ────────────────────────────────────────────────────────────
 function OrbitalArcs({ isDark }: { isDark: boolean }) {
@@ -141,8 +88,8 @@ function OrbitalArcs({ isDark }: { isDark: boolean }) {
 
 // ─── Twinkling stars for variant 1 (no moon) ─────────────────────────────────
 function StarField({ isDark }: { isDark: boolean }) {
-  const stars = useMemo(
-    () =>
+  // Random star field generated once on mount (stable across renders).
+  const [stars] = useState(() =>
       Array.from({ length: 90 }, () => {
         const r = 0.7 + Math.random() * 1.8;
         return {
@@ -157,8 +104,7 @@ function StarField({ isDark }: { isDark: boolean }) {
           pinkBegin: `${Math.random() * 3}s`,
           pinkR: r * 2.4,
         };
-      }),
-    []
+      })
   );
 
   const starFill = isDark ? "white" : "#243244";
@@ -423,8 +369,10 @@ function fillRoundRect(
 function MosaicGrid() {
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const videoRef   = useRef<HTMLVideoElement>(null);
-  const idxRef     = useRef(Math.floor(Math.random() * MOSAIC_VIDEOS.length));
-  const [videoSrc, setVideoSrc] = useState(() => MOSAIC_VIDEOS[idxRef.current]);
+  // Pick a random starting video once on mount (stable across renders).
+  const [startIdx] = useState(() => Math.floor(Math.random() * MOSAIC_VIDEOS.length));
+  const idxRef     = useRef(startIdx);
+  const [videoSrc, setVideoSrc] = useState(MOSAIC_VIDEOS[startIdx]);
 
   // Advance to next video when current one ends
   useEffect(() => {
@@ -510,7 +458,7 @@ function MosaicGrid() {
           offCtx.clearRect(0, 0, off.width, off.height);
           offCtx.drawImage(v, (off.width - dw) / 2, (off.height - dh) / 2, dw, dh);
           pixels = offCtx.getImageData(0, 0, off.width, off.height).data;
-        } catch (_) { /* frame not ready */ }
+        } catch { /* frame not ready */ }
       }
 
       for (let r = 0; r < rows; r++) {
@@ -636,24 +584,6 @@ function getCircadianColor(): string {
   if (t >= 15 && t < 18) return "#d4d4d4";
   if (t >= 18 && t < 20) return "#7a9fc4";
   return "#525252";
-}
-
-function hexToRgb(hex: string) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return { r, g, b };
-}
-
-function darken(hex: string, amount: number): string {
-  const { r, g, b } = hexToRgb(hex);
-  const f = 1 - amount;
-  return `rgb(${Math.round(r * f)}, ${Math.round(g * f)}, ${Math.round(b * f)})`;
-}
-
-function withOpacity(hex: string, opacity: number): string {
-  const { r, g, b } = hexToRgb(hex);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 
 // ─── Sheep ────────────────────────────────────────────────────────────────────

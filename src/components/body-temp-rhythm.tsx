@@ -73,6 +73,7 @@ export function BodyTempRhythm() {
   const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only clock; current time is unknown during SSR
     setTime(new Date());
     const i = setInterval(() => setTime(new Date()), 60000);
     return () => clearInterval(i);
@@ -99,9 +100,6 @@ export function BodyTempRhythm() {
   const peakX = (peakH / 24) * W;
   const peakY = H - cbtNorm(peakH) * H * 0.75 - H * 0.08;
 
-  // Descending slope indicator (sleep onset window ~21:00–23:00)
-  const isDescending = t >= 18.5 && t <= 24;
-  const isNearNadir = (t >= 2 && t <= 7);
 
   let phaseLabel: string;
   let phaseColor: string;
