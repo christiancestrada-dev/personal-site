@@ -9,7 +9,7 @@ import { Signature } from "@/components/ui/signature";
 
 // ─── Nav links ───────────────────────────────────────────────────────────────
 
-type SubNavItem = { href: string; label: string; shortcut: string };
+type SubNavItem = { href: string; label: string; shortcut: string; icon: typeof Home };
 type NavItem =
   | { href: string; label: string; icon: typeof Home; shortcut: string; subItems?: undefined }
   | { label: string; icon: typeof Home; shortcut: string; subItems: SubNavItem[] };
@@ -279,11 +279,12 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
                   <div className="mt-1 ml-4 space-y-1 pl-3" style={{ borderLeft: "1px solid var(--site-border)" }}>
                     {item.subItems.map((sub) => {
                       const isActive = pathname === sub.href;
+                      const SubIcon = sub.icon;
                       return (
                         <Link
                           key={sub.href}
                           href={sub.href}
-                          className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors duration-150"
+                          className="flex items-center gap-2.5 pl-3 pr-1 py-2 rounded-md transition-colors duration-150"
                           style={{
                             backgroundColor: isActive ? "var(--site-nav-active)" : "transparent",
                             color: "var(--site-text-bright)",
@@ -295,16 +296,18 @@ function SidebarNav({ collapsed, setCollapsed }: { collapsed: boolean; setCollap
                             if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
                           }}
                         >
+                          <SubIcon size={14} style={{ opacity: 0.8 }} />
                           <span className="text-xs font-medium flex-1">{sub.label}</span>
                           <span
-                            className="text-[11px] font-mono font-medium inline-flex items-center justify-center rounded uppercase"
+                            className="text-[10px] font-mono inline-flex items-center justify-center rounded-full uppercase"
                             style={{
-                              color: "var(--site-text-bright)",
-                              backgroundColor: "var(--site-nav-active)",
-                              border: "1px solid var(--site-border)",
-                              minWidth: 22,
-                              height: 22,
-                              padding: "0 5px",
+                              color: "var(--site-text-dim)",
+                              backgroundColor: "transparent",
+                              border: "1px dashed var(--site-border)",
+                              minWidth: 18,
+                              height: 18,
+                              padding: "0 4px",
+                              marginRight: 10,
                             }}
                           >
                             {sub.shortcut}
