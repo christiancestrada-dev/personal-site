@@ -50,6 +50,38 @@ export default function StuffPage() {
             collapses everything down to a single button.
           </p>
         </div>
+
+        <div className="space-y-4">
+          <p className="text-sm leading-6" style={{ color: "var(--site-text-secondary)" }}>
+            A surveillance-style motion + face tracker off your webcam, built with MediaPipe —
+            scattered edge-detection boxes across the frame, a bracket-locked face box, and a
+            zoomed-in target panel.{" "}
+            <a
+              href="https://blob-tracker-three.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "var(--site-accent)" }}
+            >
+              Try it yourself →
+            </a>
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <p className="text-sm leading-6" style={{ color: "var(--site-text-secondary)" }}>
+            A drowsiness tracker off your webcam — tracks eye closure in real time and flags
+            microsleeps using a PERCLOS-style rolling average, same HUD look as the face tracker
+            above.{" "}
+            <a
+              href="https://drowsiness-tracker.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "var(--site-accent)" }}
+            >
+              Try it yourself →
+            </a>
+          </p>
+        </div>
       </main>
     </div>
   );

@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Home, Zap, Gift, Clock, Mail, Calendar, Menu, X, ChevronLeft, ChevronRight, ChevronDown, Sun, Moon, Monitor, LinkIcon, Info } from "lucide-react";
+import { Home, Zap, Gift, Clock, Mail, Calendar, Menu, X, ChevronLeft, ChevronRight, ChevronDown, Sun, Moon, Monitor, LinkIcon, Info, Video } from "lucide-react";
 import { BGPattern } from "@/components/ui/bg-pattern";
 import { Signature } from "@/components/ui/signature";
 
@@ -20,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   // { href: "/reading", label: "Reading", icon: BookOpen, shortcut: "3" }, // archived
   { href: "/links", label: "Links", icon: LinkIcon, shortcut: "4" },
   // { href: "/things", label: "Things", icon: Gift, shortcut: "5" },
+  { href: "/stuff", label: "Stuff", icon: Video, shortcut: "5" },
   { href: "/clock", label: "Visualizations", icon: Clock, shortcut: "6" },
   { href: "/about-site", label: "About This Site", icon: Info, shortcut: "7" },
 ];
