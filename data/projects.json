@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "title": "blob tracker",
+    "description": "Surveillance-style motion + face tracking off your webcam, built with MediaPipe.",
+    "url": "/blob-tracker",
+    "tag": "demo",
+    "date": "2026-07-02"
+  },
+  {
+    "title": "drowsiness tracker",
+    "description": "Real-time eye-closure and PERCLOS-based drowsiness/microsleep detection off your webcam.",
+    "url": "/drowsiness-tracker",
+    "tag": "demo",
+    "date": "2026-07-02"
+  }
+]
+
